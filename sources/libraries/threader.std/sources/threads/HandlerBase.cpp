@@ -1,0 +1,191 @@
+#include "HandlerBase.h"
+
+#ifdef linux
+#include <fcntl.h>
+#include <unistd.h>
+#endif
+
+namespace Threader::Threads {
+
+HandlerBase::HandlerBase(const std::string &deviceName,
+                         const Descriptor descriptor)
+#ifdef _WIN32
+    : PollerBase()
+    #endif
+    #ifdef linux
+    : PollerBase(descriptor)
+    #endif
+    , _deviceName(deviceName)
+    , _connectionState(ConnectionState::Disconnected)
+    , _needsToWrite(false)
+    #ifdef _WIN32
+    , _descriptor(descriptor)
+    #endif
+{
+    setConnectionState((INVALID_DESCRIPTOR == this->descriptor())
+            ? ConnectionState::Disconnected
+            : ConnectionState::Connected);
+}
+
+#ifdef _WIN32
+
+Descriptor HandlerBase::descriptor() const
+{
+    return _descriptor;
+}
+
+#endif
+
+void HandlerBase::setDescriptor(const Descriptor &value)
+{
+#ifdef _WIN32
+    _descriptor = value;
+#endif
+
+#ifdef linux
+    PollerBase::setDescriptor(value);
+#endif
+
+    if (INVALID_DESCRIPTOR == descriptor())
+    {
+        setConnectionState(ConnectionState::Disconnected);
+    }
+    else if (ConnectionState::Connecting != _connectionState)
+    {
+        setConnectionState(ConnectionState::Connected);
+    }
+}
+
+HandlerBase::ConnectionState HandlerBase::connectionState()
+{
+    return _connectionState;
+}
+
+bool HandlerBase::isConnected()
+{
+    return ConnectionState::Connected == _connectionState;
+}
+
+std::string HandlerBase::deviceName() const
+{
+    return _deviceName;
+}
+
+void HandlerBase::setDeviceName(const std::string &deviceName)
+{
+    if (ConnectionState::Disconnected != _connectionState)
+        close();
+    _deviceName = deviceName;
+}
+
+bool HandlerBase::needsToWrite() const
+{
+    return _needsToWrite;
+}
+
+void HandlerBase::setNeedsToWrite(const bool needsToWrite)
+{
+    _needsToWrite = needsToWrite;
+}
+
+#ifdef linux
+
+bool isValidDescriptor(int fd)
+{
+    return fcntl(fd, F_GETFL) != -1 || errno != EBADF;
+}
+
+int HandlerBase::read(char *data, int count)
+{
+    if (ConnectionState::Connected == _connectionState && isValidDescriptor(descriptor()))
+        return int(::read(descriptor(), data, count));
+    return 0;
+}
+
+int HandlerBase::write(const char *data, int count)
+{
+    if (ConnectionState::Connected == _connectionState && isValidDescriptor(descriptor()))
+        return int(::write(descriptor(), data, count));
+    return 0;
+}
+
+#endif
+
+std::string HandlerBase::readString()
+{
+    std::string result;
+    auto bufferSize = inputBytesAvailable();
+    if (bufferSize > 0)
+    {
+        auto data = new char[bufferSize + 1];
+        auto readCount = read(data, bufferSize);
+        if (readCount)
+        {
+            data[readCount] = 0;
+            result = std::string(data);
+        }
+        delete[] data;
+    }
+    return result;
+}
+
+int HandlerBase::writeString(const std::string &data)
+{
+    return int(write(data.c_str(), data.length()));
+}
+
+MemoryBlock::Ptr HandlerBase::readBytes()
+{
+    MemoryBlock::Ptr result = nullptr;
+
+    auto bufferSize = inputBytesAvailable();
+    if (bufferSize > 0)
+    {
+        auto data = new char[bufferSize];
+        auto readCount = read(data, bufferSize);
+        if (readCount)
+        {
+            result = std::make_shared<MemoryBlock>(data, readCount);
+            // result.push_back(data, readCount);
+        }
+        delete[] data;
+    }
+    return result;
+}
+
+int HandlerBase::writeBytes(const MemoryBlock::Ptr &data)
+{
+    return write((char*)data->data(), data->size());
+}
+
+void HandlerBase::setConnectionState(HandlerBase::ConnectionState value)
+{
+    if (ConnectionState::Disconnected == value && descriptor() != INVALID_DESCRIPTOR)
+    {
+        close();
+    }
+
+    if (value != _connectionState)
+    {
+        auto oldState = _connectionState;
+        _connectionState = value;
+        // emit signalOnConnectionStateChanged(this, oldState,  _connectionState);
+    }
+}
+
+void HandlerBase::doReadyRead()
+{
+    // emit signalOnReadyRead(this);
+}
+
+void HandlerBase::doReadyWrite()
+{
+    // emit signalOnReadyWrite(this);
+}
+
+void HandlerBase::doError(int errorCode, std::string errorDescription)
+{
+    // emit signalOnError(this, errorCode, errorDescription);
+}
+
+}

@@ -1,0 +1,44 @@
+#pragma once
+
+#include <stdlib.h>
+
+#include <memory>
+
+namespace Threader::Utils {
+
+class MemoryBlock
+{
+public:
+    using Ptr = std::shared_ptr<MemoryBlock>;
+
+public:
+    MemoryBlock();
+    MemoryBlock(size_t capacity);
+    MemoryBlock(void* data, size_t size);
+    MemoryBlock(MemoryBlock &other);
+
+    virtual ~MemoryBlock();
+
+    size_t capacity() const;
+    void setCapacity(size_t capacity);
+
+    size_t size() const;
+
+    void *data() const;
+
+    void clear();
+
+    void append(void *data, size_t size);
+
+    size_t remove(size_t count, size_t from = 0);
+
+protected:
+    void setSize(size_t size);
+
+private:
+    size_t _capacity;
+    size_t _size;
+    void* _data;
+};
+
+}
