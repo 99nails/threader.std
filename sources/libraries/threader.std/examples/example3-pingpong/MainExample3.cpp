@@ -4,8 +4,6 @@
 #include "ThreadPing.h"
 #include "ThreadPong.h"
 
-#include "Logger.h"
-
 #include <iostream>
 
 using namespace Threader::Threads;
@@ -18,32 +16,11 @@ void readStr()
 
 int main(int argc, char *argv[])
 {
-    std::cout << "Press Enter to terminate program...\r\n";
-
-    // Logger logger(true,
-    //               // ".",
-    //               // "logfile",
-    //               argv[0],
-    //               9,
-    //               0xFF);
-
-    // for (int i = 0; i < 20; i++)
-    // {
-    //     logger.write(DateTimeUtils::msecsSinceEpochLocal(),
-    //                  0,
-    //                  9,
-    //                  MessageType::Message,
-    //                  "Common subsystem",
-    //                  -1,
-    //                  "Test message " + std::to_string(i));
-    //     logger.flush();
-    //     DateTimeUtils::sleepMilliseconds(50);
-    // }
+    std::cout << "Нажмите Enter для завершения программы...\r\n";
 
     auto threadLog = new ThreadLog(argv[0]);
     threadLog->start();
 
-    // ThreadLog::writeLog("Starting threads...");
     ThreadBase::writeLog(Message10);
 
     auto threadPing = new ThreadPing();
@@ -87,6 +64,4 @@ int main(int argc, char *argv[])
     delete threadPing;
     delete threadPong;
     delete threadLog;
-
-    // readStr();
 }

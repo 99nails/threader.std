@@ -4,12 +4,14 @@
 #include <cstdio>
 #include <cstdarg>
 #include <cstdlib>
+#include <list>
 // #include <utility>
 
 namespace Threader {
 
 namespace Utils {
 
+using StdStringList = std::list<std::string>;
 
 class StdStringUtils
 {

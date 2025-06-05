@@ -14,7 +14,9 @@ public:
 public:
     MemoryBlock();
     MemoryBlock(size_t capacity);
-    MemoryBlock(void* data, size_t size);
+    MemoryBlock(const void* data,
+                const size_t size);
+
     MemoryBlock(MemoryBlock &other);
 
     virtual ~MemoryBlock();
@@ -26,11 +28,12 @@ public:
 
     void *data() const;
 
-    void clear();
+    void clear(bool release = false);
 
-    void append(void *data, size_t size);
+    void append(const void *data,
+                const size_t size);
 
-    size_t remove(size_t count, size_t from = 0);
+    size_t remove(size_t from, size_t count);
 
 protected:
     void setSize(size_t size);

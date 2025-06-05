@@ -3,7 +3,7 @@
 namespace Threader {
 namespace Utils {
 
-Threader::Utils::StdThreadWrapper::StdThreadWrapper()
+StdThreadWrapper::StdThreadWrapper()
     : _isRunning(false)
     , _mutexIsRunning(new std::mutex())
     , _isTerminated(false)

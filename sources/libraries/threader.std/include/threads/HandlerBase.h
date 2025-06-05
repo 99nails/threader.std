@@ -16,13 +16,15 @@
 // #include <QObject>
 // #include <QtGlobal>
 
+#include <string>
 #include <vector>
 
 namespace Threader::Threads {
 
 using namespace Threader::Utils;
 
-// using ByteVector = std::vector<uint8_t>;
+class HandlerDataConsumer;
+
 
 class HandlerBase : public PollerBase
 {
@@ -42,7 +44,8 @@ public:
      * @brief HandlerBase Конструктор с именем устройства
      * @param deviceName Имя устройства в системе
      */
-    explicit HandlerBase(const std::string &deviceName = "",
+    explicit HandlerBase(HandlerDataConsumer *consumer = nullptr,
+                         const std::string &deviceName = "",
                          const Descriptor descriptor = INVALID_DESCRIPTOR);
 
 #ifdef _WIN32
@@ -53,6 +56,9 @@ public:
 #ifdef linux
     void setDescriptor(const Descriptor &descriptor) override;
 #endif
+
+    HandlerDataConsumer *consumer() const;
+    bool setConsumer(HandlerDataConsumer *consumer);
 
     ConnectionState connectionState();
     virtual bool isConnected();
@@ -86,7 +92,7 @@ public:
      */
 #ifdef linux
     virtual int read(char *data, int count);
-    virtual int write(const char *data, int count);
+    virtual int write(const void *data, int count);
 #endif
 #ifdef _WIN32
     virtual int read(char *data, int count) = 0;
@@ -107,6 +113,7 @@ protected:
     void doError(int errorCode, std::string errorDescription = std::string());
 
 private:
+    HandlerDataConsumer *_consumer;
     std::string _deviceName;
     ConnectionState _connectionState;
     bool _needsToWrite;
@@ -114,20 +121,28 @@ private:
 #ifdef _WIN32
     Descriptor _descriptor;
 #endif
-
-// signals:
-//     void signalOnConnectionStateChanged(Threader::Threads::HandlerBase *sender,
-//                                         Threader::Threads::HandlerBase::ConnectionState oldState,
-//                                         Threader::Threads::HandlerBase::ConnectionState newState);
-
-//     void signalOnReadyRead(Threader::Threads::HandlerBase *sender);
-
-//     void signalOnReadyWrite(Threader::Threads::HandlerBase *sender);
-
-//     void signalOnError(Threader::Threads::HandlerBase *sender, int errorCode, QString errorDescription = QString(""));
 };
 
 
 using HandlerVector = std::vector<HandlerBase*>;
 
+class HandlerDataConsumer
+{
+public:
+    virtual void onConnectionStateChanged(HandlerBase *sender,
+                                          const HandlerBase::ConnectionState oldState,
+                                          const HandlerBase::ConnectionState newState)
+        = 0;
+
+    virtual void onReadyRead(HandlerBase *sender) = 0;
+
+    virtual void onReadyWrite(HandlerBase *sender) = 0;
+
+    virtual void onError(HandlerBase *sender,
+                         const int errorCode,
+                         const std::string &errorDescription = std::string())
+        = 0;
+};
+
 }
+
