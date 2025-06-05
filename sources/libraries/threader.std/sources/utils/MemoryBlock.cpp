@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include <iostream>
 
 namespace Threader::Utils {
 
@@ -15,10 +16,10 @@ MemoryBlock::MemoryBlock()
 MemoryBlock::MemoryBlock(size_t capacity)
     : _size(0)
 {
-    setCapacity(capacity);
+    clear(true);
 }
 
-MemoryBlock::MemoryBlock(void *data, size_t size)
+MemoryBlock::MemoryBlock(const void *data, const size_t size)
     : _size(size)
 {
     setCapacity(size);
@@ -45,7 +46,7 @@ void MemoryBlock::setCapacity(size_t capacity)
 {
     if (0 == capacity)
     {
-        clear();
+        clear(false);
         return;
     }
 
@@ -60,6 +61,8 @@ void MemoryBlock::setCapacity(size_t capacity)
         _size = capacity;
 
     _capacity = capacity;
+
+    std::cout << "Capacity " << _capacity << std::endl;
 }
 
 size_t MemoryBlock::size() const
@@ -72,23 +75,31 @@ void *MemoryBlock::data() const
     return _data;
 }
 
-void MemoryBlock::clear()
+void MemoryBlock::clear(bool release)
 {
     if (!_data)
         return;
 
-    free(_data);
-    _data = nullptr;
+    if (release)
+    {
+        free(_data);
+        _data = nullptr;
+        _capacity = 0;
+    }
+
+    _size = 0;
 }
 
-void MemoryBlock::append(void *data, size_t size)
+void MemoryBlock::append(const void *data,
+                         const size_t size)
 {
     auto previousSize = _size;
     setSize(previousSize + size);
     memcpy((uint8_t*)_data + previousSize, data, size);
 }
 
-size_t MemoryBlock::remove(size_t count, size_t from)
+size_t MemoryBlock::remove(size_t from,
+                           size_t count)
 {
     if (from > _size)
         return 0;
@@ -99,6 +110,8 @@ size_t MemoryBlock::remove(size_t count, size_t from)
     memcpy((uint8_t*)_data + from,
            (uint8_t*)_data + from + count,
            _size - from - count);
+
+    _size -= count;
 
     return _size;
 }

@@ -7,14 +7,16 @@
 
 namespace Threader::Threads {
 
-HandlerBase::HandlerBase(const std::string &deviceName,
+HandlerBase::HandlerBase(HandlerDataConsumer *consumer,
+                         const std::string &deviceName,
                          const Descriptor descriptor)
 #ifdef _WIN32
     : PollerBase()
-    #endif
-    #ifdef linux
-    : PollerBase(descriptor)
-    #endif
+#endif
+#ifdef linux
+    : PollerBase(descriptor, 0)
+#endif
+    , _consumer(consumer)
     , _deviceName(deviceName)
     , _connectionState(ConnectionState::Disconnected)
     , _needsToWrite(false)
@@ -54,6 +56,20 @@ void HandlerBase::setDescriptor(const Descriptor &value)
     {
         setConnectionState(ConnectionState::Connected);
     }
+}
+
+HandlerDataConsumer *HandlerBase::consumer() const
+{
+    return _consumer;
+}
+
+bool HandlerBase::setConsumer(HandlerDataConsumer *consumer)
+{
+    if (INVALID_DESCRIPTOR != descriptor() || _consumer)
+        return false;
+
+    _consumer = consumer;
+    return true;
 }
 
 HandlerBase::ConnectionState HandlerBase::connectionState()
@@ -102,7 +118,7 @@ int HandlerBase::read(char *data, int count)
     return 0;
 }
 
-int HandlerBase::write(const char *data, int count)
+int HandlerBase::write(const void *data, int count)
 {
     if (ConnectionState::Connected == _connectionState && isValidDescriptor(descriptor()))
         return int(::write(descriptor(), data, count));
@@ -169,23 +185,27 @@ void HandlerBase::setConnectionState(HandlerBase::ConnectionState value)
     {
         auto oldState = _connectionState;
         _connectionState = value;
-        // emit signalOnConnectionStateChanged(this, oldState,  _connectionState);
+        if (consumer())
+            consumer()->onConnectionStateChanged(this, oldState,  _connectionState);
     }
 }
 
 void HandlerBase::doReadyRead()
 {
-    // emit signalOnReadyRead(this);
+    if (consumer())
+        consumer()->onReadyRead(this);
 }
 
 void HandlerBase::doReadyWrite()
 {
-    // emit signalOnReadyWrite(this);
+    if (consumer())
+        consumer()->onReadyWrite(this);
 }
 
 void HandlerBase::doError(int errorCode, std::string errorDescription)
 {
-    // emit signalOnError(this, errorCode, errorDescription);
+    if (consumer())
+        consumer()->onError(this, errorCode, errorDescription);
 }
 
 }

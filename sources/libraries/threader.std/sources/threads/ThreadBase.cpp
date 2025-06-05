@@ -1,4 +1,5 @@
 #include "ThreadBase.h"
+
 #include "ListThreads.h"
 #include "MessageLog.h"
 #include "ThreadTimer.h"
@@ -41,7 +42,9 @@ ThreadBase::ThreadBase(MessageConsumer *parent,
                        const std::string &threadName,
                        const ThreadRunMode &threadRunMode)
     // : QThread(nullptr)
-    : _parentThread(parent)
+    : StdThreadWrapper()
+    , MessageConsumer()
+    , _parentThread(parent)
     , _threadName(threadName)
     , _thisThreadId(0)
     , _aliveCheckedUtc(DateTimeUtils::msecsSinceEpochLocal())
@@ -49,7 +52,7 @@ ThreadBase::ThreadBase(MessageConsumer *parent,
     , _nextDestroyTerminatedThreadsTickCount(
           DateTimeUtils::getNextTickCount(TIMEOUT_COLLECT_TERMINATED_THREADS_MILLISECONDS))
     , _nextAccumulateStatisticTickCount(DateTimeUtils::getTickCount())
-    // , _nextCallIdle(0)
+    , _nextCallIdle(0)
 
     , _threadRunMode(threadRunMode)
     // , _eventLoop(nullptr)
@@ -69,11 +72,20 @@ ThreadBase::~ThreadBase()
         delete _mutex;
 }
 
-MessageConsumer *ThreadBase::parentThread() const { return _parentThread; }
+MessageConsumer *ThreadBase::parentThread() const
+{
+    return _parentThread;
+}
 
-long ThreadBase::thisThreadId() const { return _thisThreadId; }
+long ThreadBase::thisThreadId() const
+{
+    return _thisThreadId;
+}
 
-std::string ThreadBase::threadName() const { return _threadName; }
+std::string ThreadBase::threadName() const
+{
+    return _threadName;
+}
 
 void ThreadBase::setThreadName(const std::string &threadName)
 {
@@ -415,7 +427,7 @@ std::string ThreadBase::errorString(int errorNo)
 {
     if (0 == errorNo)
         errorNo = ThreadBase::errorNo();
-#ifdef Q_OS_WIN
+#ifdef _WIN32
     LPSTR messageBuffer = nullptr;
     FormatMessageA(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -429,9 +441,8 @@ std::string ThreadBase::errorString(int errorNo)
     return result;
 #endif
 
-#ifdef Q_OS_LINUX
-    QString result = QString(strerror(errorNo));
-    return result;
+#ifdef linux
+    return std::string(strerror(errorNo));
 #endif
 
     return "";
@@ -459,11 +470,20 @@ void ThreadBase::setLogThread(ThreadBase *thread, int level)
     _logLevel  = level;
 }
 
-int ThreadBase::logLevel() { return _logLevel; }
+int ThreadBase::logLevel()
+{
+    return _logLevel;
+}
 
-void ThreadBase::setLogLevel(int level) { _logLevel = level; }
+void ThreadBase::setLogLevel(int level)
+{
+    _logLevel = level;
+}
 
-ThreadBase *ThreadBase::logThread() { return _logThread; }
+ThreadBase *ThreadBase::logThread()
+{
+    return _logThread;
+}
 
 void ThreadBase::writeLog(MessageLog::Ptr message, MessageConsumer *receiver)
 {
@@ -701,12 +721,16 @@ void ThreadBase::slotTerminateChildThreads()
 
 void ThreadBase::slotWakeUpThread()
 {
-    if (threadRunMode() == ThreadRunMode::EventLoop) {
+    if (threadRunMode() == ThreadRunMode::EventLoop)
+    {
         DateTimeUtils::sleepMilliseconds(0);
     }
     processMessages();
 }
 
-void ThreadBase::slotTimerEventLoop() { onAfterWaitEvents(); }
+void ThreadBase::slotTimerEventLoop()
+{
+    onAfterWaitEvents();
+}
 
 }

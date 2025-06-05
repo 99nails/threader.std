@@ -5,9 +5,11 @@
 
 ThreadLog *ThreadLog::_instance = nullptr;
 
-ThreadLog::ThreadLog(const std::string &pathToBin)
+ThreadLog::ThreadLog(const std::string &pathToBin,
+                     MessageConsumer *consumer)
     : ThreadBase(nullptr, "Thread.Log")
     , _logger(nullptr)
+    , _consumer(consumer)
 {
     _instance = this;
     _logger = new Logger(true, pathToBin, 9, logDetailsAll);
@@ -77,5 +79,9 @@ void ThreadLog::processMessage(const MessageBase::Ptr &message)
                        messageLog->subSystem(),
                        messageLog->threadId(),
                        messageLog->value());
+
+        if (_consumer && _logger->level() >= messageLog->level())
+            _consumer->postMessage(messageLog);
+
     }
 }

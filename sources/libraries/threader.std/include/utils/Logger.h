@@ -149,7 +149,8 @@ private:
 
 private:
     bool _doConsoleOutput;
-    std::filesystem::path _pathToLog;
+//    std::filesystem::path _pathToLog;
+    std::string _pathToLog;
     int _level;
 
     Descriptor _descriptor;

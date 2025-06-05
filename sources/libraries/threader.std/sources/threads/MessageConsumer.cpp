@@ -6,7 +6,6 @@ namespace Threads {
 
 MessageConsumer::MessageConsumer()
 {
-
 }
 
 void MessageConsumer::postMessage(const MessageBase::Ptr &message)

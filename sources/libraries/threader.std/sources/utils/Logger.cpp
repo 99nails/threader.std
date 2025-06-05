@@ -24,19 +24,34 @@ Logger::Logger(bool doConsoleOutput, const std::string &pathToBin, int level, in
     , _descriptor(INVALID_DESCRIPTOR)
     , _logDetails(logDetails)
 {
-    _logFilePrefix = std::filesystem::path(pathToBin).replace_extension("").filename();
+    auto slashIndex = pathToBin.rfind("/");
+    _logFilePrefix = (slashIndex == std::string::npos)
+            ? pathToBin
+            : (slashIndex < pathToBin.length() - 1)
+              ? pathToBin.substr(slashIndex + 1)
+              : "LogFile";
 
-    std::filesystem::path p = pathToBin;
-    if (p.has_parent_path() && p.parent_path().has_parent_path()) {
-        p = p.parent_path().parent_path();
-    } else
-        p = "..";
+    auto path = (slashIndex == 0) ? ""
+                                  : pathToBin.substr(0, slashIndex);
 
-    std::filesystem::path a = p.native() + "/log/";
+    std::filesystem::current_path(path);
 
-    _pathToLog = std::filesystem::absolute(a);
+    _pathToLog = std::filesystem::absolute("../log/");
+//    _logFilePrefix = std::filesystem::path(pathToBin).replace_extension("").filename();
 
-    _currentLogFileDate = currentDate();
+//    std::filesystem::path p = pathToBin;
+//    if (p.has_parent_path() && p.parent_path().has_parent_path()) {
+//        p = p.parent_path().parent_path();
+//    } else
+//        p = "..";
+
+//    std::filesystem::path a = p.native() + "/log/";
+
+//    _pathToLog = std::filesystem::absolute(a);
+
+//    _currentLogFileDate = currentDate();
+
+    _pathToLog = "../log/";
 
     prepareFilePath();
 }
@@ -64,7 +79,10 @@ bool Logger::collectMessage(UnuxTimeMSecs created,
 
     auto newCurrentDate = currentDate();
     if (_currentLogFileDate != newCurrentDate)
+    {
         closeFile();
+        _currentLogFileDate = newCurrentDate;
+    }
 
     if (INVALID_DESCRIPTOR == _descriptor) {
         if (!prepareFilePath())
@@ -73,12 +91,6 @@ bool Logger::collectMessage(UnuxTimeMSecs created,
         if (!openFile())
             return false;
     }
-
-    // std::string data = format("[%s]\t%s:\t%.5d\t%s\r\n",
-    //                           DateTimeUtils::msecsSinceEpochToStdString(created, true, false, "%T").c_str(),
-    //                           MessagesTypesNames[messageType].c_str(),
-    //                           number,
-    //                           text.c_str());
 
     auto appendTab = [](std::string &s, std::string tab = "\t") {
         if (s.empty())
@@ -113,7 +125,8 @@ bool Logger::collectMessage(UnuxTimeMSecs created,
 
     if (LogDetails::Subsystem & _logDetails) {
         appendTab(data);
-        data += '#' + subSystem + '#';
+        // data += '#' + subSystem + '#';
+        data += subSystem;
     }
 
     if (LogDetails::ThreadId & _logDetails) {
@@ -127,7 +140,8 @@ bool Logger::collectMessage(UnuxTimeMSecs created,
     _buffer.push_back(data);
 
     if (_doConsoleOutput)
-        std::cout << data.c_str();
+        printLine(data, messageType);
+        // std::cout << data.c_str();
 
     return true;
 }
@@ -202,7 +216,7 @@ void Logger::printLine(const std::string &line, MessageType messageType)
         std::cout << ANSI_COLOR_RED;
         break;
     case Debug:
-        std::cout << ANSI_COLOR_BLUE;
+        std::cout << ANSI_COLOR_CYAN;
         break;
     default:
         std::cout << ANSI_COLOR_RESET;

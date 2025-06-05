@@ -11,7 +11,7 @@
 #include "PollingPosix.h"
 #endif
 
-#ifdef _WIN
+#ifdef _WIN32
 #include "PollingsWindows.h"
 #endif
 
@@ -21,19 +21,6 @@
 #include <map>
 #include <mutex>
 #include <vector>
-
-// #include <QDateTime>
-// #include <QEventLoop>
-// #include <QList>
-// #include <QString>
-// #include <QThread>
-// #include <QTimer>
-// #include <QVector>
-// #include <QMutex>
-
-#ifdef Q_OS_LINUX
-#include <poll.h>
-#endif
 
 namespace Threader::Threads {
 
@@ -52,22 +39,17 @@ using VectorThreadBase = std::vector<ThreadBase *>;
  * - отправки и обработки полученных классов сообщений,
  * - ожидания, отправки и обработки внешних событий от потоков и устройств на механизме poll-инга
  */
-class ThreadBase : public StdThreadWrapper, public MessageConsumer, public ISignalHandler
+class ThreadBase : public StdThreadWrapper,
+                   public MessageConsumer,
+                   public ISignalHandler
 {
     // Q_OBJECT
 public:
-    // enum class ThreadSignals : char
-    // {
-    //     EVENT_THREAD_TERMINATE        = 0,
-    //     EVENT_THREAD_WAKEUP           = 1,
-    //     EVENT_CHILD_THREAD_TERMINATED = 2
-    // };
-
     /**
      * @brief режим ожидания событий потока
      */
     enum class ThreadRunMode {
-        Polling, // на основе системных функций получения событий дексрипторов
+        Polling, // на основе системных функций получения событий дескрипторов
         EventLoop // на основе QEventLoop
     };
 
@@ -223,6 +205,15 @@ public:
     void signalProcess(Signal signal) override;
 
 protected:
+    /***********************************************************************************************
+    * ПОДСИСТЕМА ОБРАБОТКИ СООБЩЕНИЙ
+    ***********************************************************************************************/
+
+    /**
+     * @brief processMessage - Заглушка обработчика сообщений
+     */
+    void processMessage(const MessageBase::Ptr &) override {};
+
     /***********************************************************************************************
     * ПОДСИСТЕМА ВЫПОЛНЕНИЯ
     ***********************************************************************************************/
