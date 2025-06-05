@@ -2,6 +2,7 @@
 
 #include "DateTimeUtils.h"
 #include "ThreadLog.h"
+#include "SignalHandler.h"
 
 #include "ThreadPing.h"
 #include "ThreadPong.h"
@@ -18,7 +19,12 @@ void readStr()
 
 int main(int argc, char *argv[])
 {
+#ifdef linux
+    setSignalHandler(argv[0]);
+#endif
+
     std::cout << "Press Enter to terminate program...\r\n";
+
 
     auto threadLog = new ThreadLog(argv[0]);
     threadLog->start();

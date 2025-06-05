@@ -53,6 +53,8 @@ void ThreadPing::processMessage(const MessageBase::Ptr &message)
             }
         }
     }
+
+    writeLog(Message101);
 }
 
 void ThreadPing::onConnecting()

@@ -30,6 +30,7 @@ add_library(threader-std SHARED
     include/utils/Logger.h sources/utils/Logger.cpp
     include/utils/MemoryBlock.h sources/utils/MemoryBlock.cpp
     include/utils/SerialUtils.h sources/utils/SerialUtils.cpp
+    include/utils/SignalHandler.h sources/utils/SignalHandler.cpp
     include/utils/StdStringUtils.h sources/utils/StdStringUtils.cpp
     include/utils/StdThreadWrapper.h sources/utils/StdThreadWrapper.cpp
     include/utils/TrafficCounter.h sources/utils/TrafficCounter.cpp

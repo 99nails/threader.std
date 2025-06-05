@@ -26,6 +26,12 @@ ThreadLog::~ThreadLog()
     }
 }
 
+void Threader::Threads::ThreadLog::flush()
+{
+    if (_logger)
+        _logger->flush();
+}
+
 void ThreadLog::onThreadStarted()
 {
     _logger->collectMessage(DateTimeUtils::msecsSinceEpochLocal(),

@@ -24,6 +24,7 @@ public:
                        MessageConsumer *consumer = nullptr);
     virtual ~ThreadLog();
 
+    void flush();
 protected:
     void onThreadStarted() override;
     void onThreadFinishing() override;
