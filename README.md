@@ -11,6 +11,13 @@ mkdir build
 cd build
 cmake ..
 make -j`nproc`
+cpack -D DEB
+```
+
+## Deploying
+
+```bash
+sudo dpkg -i *.deb
 ```
 
 ## Examples

@@ -90,7 +90,6 @@ target_link_libraries(example3-pingpong
     -lpthread
     -lstdc++fs
     threader-std
-    -lstdc++fs
 )
 
 # example4-serial
@@ -106,6 +105,6 @@ target_compile_features(example4-serial PUBLIC cxx_std_17)
 target_link_libraries(example4-serial
     -lpthread
     -lstdc++fs
-    -lthreader-std
+    threader-std
 )
 
