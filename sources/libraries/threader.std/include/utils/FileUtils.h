@@ -11,7 +11,8 @@ namespace Utils {
 class FileUtils
 {
 public:
-    static Descriptor fileOpenOrCreate(std::string fileName);
+    static Descriptor fileOpenOrCreate(const std::string &fileName);
+    static bool isPathExists(const std::string &path);
 };
 
 }

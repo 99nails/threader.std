@@ -180,12 +180,12 @@ uint64_t ThreadHandler::connectedTickCount() const
     return _connectedTickCount;
 }
 
-const uint64_t ThreadHandler::openDateTime() const
+uint64_t ThreadHandler::openDateTime() const
 {
     return _openDateTime;
 }
 
-const uint64_t ThreadHandler::closedDateTime() const
+uint64_t ThreadHandler::closedDateTime() const
 {
     return _closedDateTime;
 }
@@ -308,7 +308,7 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
                 }
                 else
                 {
-                    int result = _packetFactory->lastResult();
+//                    int result = _packetFactory->lastResult();
                     // QByteArray code(1, char(result & 0xFF));
                     // auto message(std::make_shared<MessageBinary>(MESSAGE_NAME_DEVICE_ERROR, code));
                     // postMessage(message);

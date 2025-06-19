@@ -19,6 +19,7 @@ void readStr()
 
 int main(int argc, char *argv[])
 {
+    (void)argc;
 #ifdef linux
     setSignalHandler(argv[0]);
 #endif

@@ -5,6 +5,9 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 
 namespace Threader::Utils {
 
@@ -12,8 +15,8 @@ namespace Threader::Utils {
 constexpr char ANSI_COLOR_RED[] = "\x1b[31m";
 constexpr char ANSI_COLOR_GREEN[] = "\x1b[32m";
 constexpr char ANSI_COLOR_YELLOW[] = "\x1b[33m";
-constexpr char ANSI_COLOR_BLUE[] = "\x1b[34m";
-constexpr char ANSI_COLOR_MAGENTA[] = "\x1b[35m";
+//constexpr char ANSI_COLOR_BLUE[] = "\x1b[34m";
+//constexpr char ANSI_COLOR_MAGENTA[] = "\x1b[35m";
 constexpr char ANSI_COLOR_CYAN[] = "\x1b[36m";
 constexpr char ANSI_COLOR_RESET[] = "\x1b[0m";
 #endif
@@ -34,24 +37,11 @@ Logger::Logger(bool doConsoleOutput, const std::string &pathToBin, int level, in
     auto path = (slashIndex == 0) ? ""
                                   : pathToBin.substr(0, slashIndex);
 
-    std::filesystem::current_path(path);
+    chdir(path.c_str());
 
-    _pathToLog = std::filesystem::absolute("../log/");
-//    _logFilePrefix = std::filesystem::path(pathToBin).replace_extension("").filename();
-
-//    std::filesystem::path p = pathToBin;
-//    if (p.has_parent_path() && p.parent_path().has_parent_path()) {
-//        p = p.parent_path().parent_path();
-//    } else
-//        p = "..";
-
-//    std::filesystem::path a = p.native() + "/log/";
-
-//    _pathToLog = std::filesystem::absolute(a);
-
-//    _currentLogFileDate = currentDate();
-
-    _pathToLog = "../log/";
+    char pathToLog[PATH_MAX];
+    realpath("../log/", pathToLog);
+    _pathToLog = pathToLog;
 
     prepareFilePath();
 }
@@ -168,8 +158,8 @@ UnuxTimeMSecs Logger::currentDate()
 
 bool Logger::prepareFilePath()
 {
-    if (!std::filesystem::exists(_pathToLog))
-        return std::filesystem::create_directory(_pathToLog);
+    if (FileUtils::isPathExists(_pathToLog))
+        mkdir(_pathToLog.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
     return true;
 }

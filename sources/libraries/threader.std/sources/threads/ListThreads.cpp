@@ -56,7 +56,7 @@ ThreadBase *ThreadsStaticticCollector::threadByClassName(const std::string &thre
 
     std::lock_guard<std::mutex> lock(*_mutex);
 
-    for (int i = 0; i < _threads.size();i++)
+    for (size_t i = 0; i < _threads.size(); i++)
     {
         auto thread = _threads.at(i);
         auto name = typeid(*thread).name();
@@ -99,7 +99,7 @@ ListStatistic ThreadsStaticticCollector::statistic()
     std::lock_guard<std::mutex> lock(*_mutex);
 
     ListStatistic result;
-    for (int i = 0; i < _threads.size(); i++)
+    for (size_t i = 0; i < _threads.size(); i++)
     {
         ThreadBase *thread = _threads.at(i);
 
