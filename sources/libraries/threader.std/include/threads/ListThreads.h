@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ThreadsCommon.h"
 #include "ThreadBase.h"
 // #include "../threader_global.h"
 
@@ -18,7 +19,7 @@ namespace Threads {
 
 typedef struct ThreadStatistic
 {
-    long ThreadId;
+    THREAD_ID ThreadId;
     std::string ThreadName;
     uint64_t StartedMsecsSinceEpoch;
     uint64_t AliveMsecsSinceEpoch;
@@ -68,7 +69,7 @@ public:
      * @return - Статистика добавлена
      */
     bool accumulateStatistic(ThreadBase *thread,
-                             const long threadId,
+                             const THREAD_ID threadId,
                              const std::string &threadName,
                              const uint64_t &startedMsecsSinceEpoch,
                              const uint64_t &aliveMsecsSinceEpoch,

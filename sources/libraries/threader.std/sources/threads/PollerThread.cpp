@@ -7,14 +7,10 @@ namespace Threader {
 namespace Threads {
 
 PollerThread::PollerThread(
-#ifdef linux
     ISignalHandler *signalHandler
-#endif
     )
     : PollerBase()
-#ifdef linux
     , _signalHandler(signalHandler)
-#endif
 {
 #ifdef linux
     memset(_pipeDescriptors, 0, sizeof (_pipeDescriptors));
@@ -66,14 +62,14 @@ bool PollerThread::process(Descriptor eventToProcess)
 
         if (eventToProcess == _eventTerminate)
         {
-            emit signalTerminateThread();
+            _signalHandler->signalProcess((Signal)ThreadSignals::SignalTerminate);
         }
         else if (eventToProcess == _eventTerminateChildThreads)
         {
-            emit signalTerminateChildThreads();
+            _signalHandler->signalProcess((Signal)ThreadSignals::SignalTerminateChildThreads);
         }
         else if (eventToProcess == _eventWakeUp) {
-            emit signalWakeUpThread();
+            _signalHandler->signalProcess((Signal)ThreadSignals::SignalWakeUp);
         }
     }
     return result;

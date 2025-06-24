@@ -19,7 +19,7 @@ const std::string ThreadHandler::MESSAGE_NAME_DEVICE_DATA_OUTPUT = "Device.Data.
 
 ThreadHandler::ThreadHandler(MessageConsumer *parent,
                              HandlerBase *handler,
-                             const uint &reconnectTimeout,
+                             const uint32_t &reconnectTimeout,
                              PacketFactoryBase *packetFactory,
                              const std::string &threadName,
                              const bool &portionedIO)
@@ -94,7 +94,7 @@ void ThreadHandler::setHandler(HandlerBase *handler)
     polling()->registerPoller(_handler);
 }
 
-uint ThreadHandler::reconnectTimeout()
+uint32_t ThreadHandler::reconnectTimeout()
 {
     return _reconnectTimeout;
 }
@@ -239,7 +239,7 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
     // чтение данных из входного буфера
     char buffer[65536];
     int readCount;
-    uint totalReadCount = 0;
+    uint32_t totalReadCount = 0;
 
     // MemoryBlock _localInputBuffer;
     // _localInputBuffer.setCapacity(1024);
@@ -263,7 +263,7 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
             {
                 // сохранение прочитанных данных при успешном чтении
                 _localInputBuffer.append(buffer, readCount);
-                totalReadCount += uint(readCount);
+                totalReadCount += uint32_t(readCount);
             }
         }
     } while (readCount > 0);
@@ -331,7 +331,7 @@ void ThreadHandler::onReadyWrite(HandlerBase *sender)
         return;
 
     // непосредственно отправка данных
-    int written = sender->write(_outputBuffer->data(), _outputBuffer->size());
+    int written = sender->write((char*)_outputBuffer->data(), _outputBuffer->size());
 
     // если хоть что-то ушло в устройство
     if (written > 0) {

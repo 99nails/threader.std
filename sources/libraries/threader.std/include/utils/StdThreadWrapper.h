@@ -13,6 +13,7 @@ public:
     StdThreadWrapper();
     virtual ~StdThreadWrapper();
 
+    bool wasStarted() const;
     bool isRunning() const;
     bool isTerminated() const;
     bool isFinished() const;

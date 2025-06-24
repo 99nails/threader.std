@@ -8,7 +8,7 @@
 #endif
 
 #ifdef _WIN32
-#include "PollingsWindows.h"
+#include "PollingWindows.h"
 #endif
 
 // #include "../threader_global.h"

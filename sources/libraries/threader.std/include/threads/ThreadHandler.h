@@ -27,7 +27,7 @@ public:
 
     explicit ThreadHandler(MessageConsumer *parent,
                            HandlerBase *handler,
-                           const uint &reconnectTimeout = 0,
+                           const uint32_t &reconnectTimeout = 0,
                            PacketFactoryBase *packetFactory = nullptr,
                            const std::string &threadName = std::string(),
                            const bool &portionedIO = false);
@@ -43,7 +43,7 @@ protected:
     HandlerBase *handler();
     void setHandler(HandlerBase *handler);
 
-    uint reconnectTimeout();
+    uint32_t reconnectTimeout();
 
     uint64_t nextTryToConnect();
 
@@ -90,7 +90,7 @@ protected:
     //              std::string errorDescription) override;
 private:
     HandlerBase *_handler;
-    uint _reconnectTimeout;
+    uint32_t _reconnectTimeout;
     uint64_t _nextTryToConnect;
 
     MemoryBlock::Ptr _inputBuffer;

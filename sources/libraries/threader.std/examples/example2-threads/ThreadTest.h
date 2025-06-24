@@ -2,7 +2,7 @@
 
 #include <ThreadBase.h>
 
-using namespace Threader::Threads;;
+using namespace Threader::Threads;
 
 class ThreadTest : public ThreadBase
 {
@@ -17,6 +17,6 @@ private:
 
     // MessageConsumer interface
 protected:
-    void onProcessMessagesStarted(const int count) override;
+    void onProcessMessagesStarted(const int32_t count) override;
     void onProcessMessagesFinished() override;
 };

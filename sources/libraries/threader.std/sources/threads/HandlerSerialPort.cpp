@@ -118,7 +118,7 @@ DescriptorsVector *HandlerSerialPort::events()
     auto eventsVector = HandlerBase::events();
 
     // проверка дискриптора
-    if (descriptor() == INVALID_DESCRIPTOR || eventsVector->count() < 1)
+    if (descriptor() == INVALID_DESCRIPTOR || eventsVector->size() < 1)
         return eventsVector;
 
     // установка маски ожидаемых событий
@@ -143,7 +143,7 @@ DescriptorsVector *HandlerSerialPort::events()
         {
             // привязка к событию
             eventsVector->clear();
-            eventsVector->append(_overlapped.hEvent);
+            eventsVector->push_back(_overlapped.hEvent);
         }
         else
         {
@@ -180,7 +180,7 @@ int HandlerSerialPort::read(char *data, int count)
     if (!_useOverlappedIO)
     {
         auto bytesAvalable = SerialUtils::inputBytesAvailable(descriptor());
-        count = qMin(count, bytesAvalable);
+        count = std::min(count, bytesAvalable);
         if (count <= 0)
             return 0;
     }
@@ -307,12 +307,12 @@ bool HandlerSerialPort::process(const pollfd &event)
 }
 #endif
 
-uint HandlerSerialPort::baudRate() const
+uint32_t HandlerSerialPort::baudRate() const
 {
     return _baudRate;
 }
 
-void HandlerSerialPort::setBaudRate(const uint &baudRate)
+void HandlerSerialPort::setBaudRate(const uint32_t &baudRate)
 {
     _baudRate = baudRate;
 }
@@ -337,12 +337,12 @@ void HandlerSerialPort::setTwoStopBits(bool twoStopBits)
     _twoStopBits = twoStopBits;
 }
 
-uint HandlerSerialPort::dataSize() const
+uint32_t HandlerSerialPort::dataSize() const
 {
     return _dataSize;
 }
 
-void HandlerSerialPort::setDataSize(const uint &dataSize)
+void HandlerSerialPort::setDataSize(const uint32_t &dataSize)
 {
 #ifdef linux
     if (dataSize == CS5 || dataSize == CS6 || dataSize == CS7 || dataSize == CS8)

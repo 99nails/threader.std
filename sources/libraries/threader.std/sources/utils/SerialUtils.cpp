@@ -17,7 +17,7 @@ namespace Threader::Utils {
 
 #ifdef _WIN32
 
-const QString SERIAL_PORT_PREFFIX = "\\\\.\\";
+const std::string SERIAL_PORT_PREFFIX = "\\\\.\\";
 
 const DWORD SERIAL_EVENTS_MASK_READ =
     EV_RXCHAR | EV_RXFLAG | EV_CTS | EV_DSR | EV_RLSD | EV_BREAK | EV_ERR | EV_RING | EV_RX80FULL;
@@ -28,10 +28,10 @@ const DWORD SERIAL_EVENTS_MASK_READ_WRITE = EV_RXCHAR | EV_RXFLAG | EV_TXEMPTY |
 #endif
 
 Descriptor SerialUtils::openSerial(const std::string &deviceName,
-                                   const uint &baudRate,
+                                   const uint32_t &baudRate,
                                    const bool &enableParity,
                                    const bool &twoStopBits,
-                                   const uint &dataSize)
+                                   const uint32_t &dataSize)
 {
     Descriptor serialPortDescriptor = INVALID_DESCRIPTOR;
 
@@ -80,12 +80,12 @@ Descriptor SerialUtils::openSerial(const std::string &deviceName,
 #ifdef _WIN32
     // дополнение имени порта
     auto localDeviceName = deviceName;
-    if (!deviceName.startsWith(SERIAL_PORT_PREFFIX))
+    if (!deviceName.compare(0, SERIAL_PORT_PREFFIX.length(), SERIAL_PORT_PREFFIX))
         localDeviceName = SERIAL_PORT_PREFFIX + deviceName;
 
     // открытие порта
     serialPortDescriptor =
-        CreateFileA((LPCSTR)localDeviceName.toStdString().c_str(), GENERIC_READ | GENERIC_WRITE, 0,
+        CreateFileA((LPCSTR)localDeviceName.c_str(), GENERIC_READ | GENERIC_WRITE, 0,
                     nullptr, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
 
     if (serialPortDescriptor == INVALID_DESCRIPTOR)

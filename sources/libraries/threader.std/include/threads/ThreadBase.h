@@ -12,11 +12,10 @@
 #endif
 
 #ifdef _WIN32
-#include "PollingsWindows.h"
+#include "PollingWindows.h"
 #endif
 
-// #include "../threader_global.h"
-
+#include <cstdint>
 #include <list>
 #include <map>
 #include <mutex>
@@ -82,7 +81,7 @@ public:
      * @brief thisThreadId - Получение собственного идентификатора потока
      * @return - Собственный идентификатор потока
      */
-    long thisThreadId() const;
+    THREAD_ID thisThreadId() const;
 
     /**
      * @brief threadClassName - Получение имени класса потока
@@ -94,7 +93,7 @@ public:
      * @brief threadId - Получение идентификатора потока
      * @return - Идентификатор потока
      */
-    static long threadId();
+    static THREAD_ID threadId();
 
     /**
      * @brief startedTickCount - Получение счетчика системы на момент запуска потока
@@ -152,13 +151,13 @@ public:
      * @brief timeout - Получение времени ожидания событий голосования
      * @return - время ожидания событий голосования в миллисекундах
      */
-    uint timeout() const;
+    uint32_t timeout() const;
 
     /**
      * @brief setTimeout - Установка времени ожидания событий голосования
      * @param timeout - время ожидания событий голосования в миллисекундах
      */
-    void setTimeout(uint timeout);
+    void setTimeout(uint32_t timeout);
 
     /**
      * @brief logThread - Получение зарегистрированного потока приема и обработки сообщений
@@ -359,7 +358,7 @@ protected:
      * @brief waitEvents - ожидание событий
      * @param timeout - таймаут ожидания событий
      */
-    virtual void waitEvents(uint timeout);
+    virtual void waitEvents(uint32_t timeout);
 
     /***********************************************************************************************
      * ПОДСИСТЕМА ПРОТОКОЛИРОВАНИЯ
@@ -472,7 +471,7 @@ private:
     /**
      * @brief _thisThreadId - Id экземпляра потока
      */
-    Descriptor _thisThreadId;
+    THREAD_ID _thisThreadId;
 
     /**
      * @brief _startedTickCount - счетчик системы при запуске потока
@@ -522,7 +521,7 @@ private:
     /**
      * @brief _timeout - таймаут ожидания событий
      */
-    uint _timeout = WAIT_EVENTS_TIMEOUT;
+    uint32_t _timeout = WAIT_EVENTS_TIMEOUT;
 
     /**
      * @brief _nextCallIdle - Время следующего вызова Idle

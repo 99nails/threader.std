@@ -46,15 +46,15 @@ public:
     bool process(const pollfd &event) override;
 #endif
 
-    uint baudRate() const;
+    uint32_t baudRate() const;
     bool enableParity() const;
     bool twoStopBits() const;
-    uint dataSize() const;
+    uint32_t dataSize() const;
 
-    void setBaudRate(const uint &baudRate);
+    void setBaudRate(const uint32_t &baudRate);
     void setEnableParity(bool enableParity);
     void setTwoStopBits(bool twoStopBits);
-    void setDataSize(const uint &dataSize);
+    void setDataSize(const uint32_t &dataSize);
 
 #ifdef _WIN32
     bool useOverlappedIO() const;
@@ -62,10 +62,10 @@ public:
 #endif
 
 private:
-    uint _baudRate;
+    uint32_t _baudRate;
     bool _enableParity;
     bool _twoStopBits;
-    uint _dataSize;
+    uint32_t _dataSize;
 
 #ifdef _WIN32
     bool _useOverlappedIO;

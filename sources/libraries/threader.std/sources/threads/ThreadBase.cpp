@@ -5,6 +5,7 @@
 #include "ThreadTimer.h"
 
 #include "DateTimeUtils.h"
+#include "ThreadUtils.h"
 
 // #include <QTextCodec>
 
@@ -77,7 +78,7 @@ MessageConsumer *ThreadBase::parentThread() const
     return _parentThread;
 }
 
-long ThreadBase::thisThreadId() const
+THREAD_ID ThreadBase::thisThreadId() const
 {
     return _thisThreadId;
 }
@@ -114,14 +115,9 @@ void ThreadBase::setThreadRunMode(const ThreadRunMode &threadRunMode)
 //     return typeid(*this);
 // }
 
-long ThreadBase::threadId()
+THREAD_ID ThreadBase::threadId()
 {
-#ifdef linux
-    return syscall(SYS_gettid);
-#endif
-#ifdef _WIN32
-    return GetCurrentThreadId();
-#endif
+    ThreadUtils::currentThreadId();
 }
 
 uint64_t ThreadBase::startedTickCount() const
@@ -160,28 +156,15 @@ void ThreadBase::postEventChildThreadTerminated()
 
 void ThreadBase::initializeThread()
 {
-// #if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
-//     qsrand(uint(clock()));
-// #endif
-
     if (ThreadsStaticticCollector::instance())
         ThreadsStaticticCollector::instance()->registerThread(this);
 
-    _thisThreadId = -1;
+    _thisThreadId = 0;
 
     switch (_threadRunMode) {
         case ThreadRunMode::Polling:
-
-            // connect(&_pollerThread, &PollerThread::signalTerminateThread, this,
-            //         &ThreadBase::slotTerminateThread, Qt::DirectConnection);
-            // connect(&_pollerThread, &PollerThread::signalTerminateChildThreads, this,
-            //         &ThreadBase::slotTerminateChildThreads, Qt::DirectConnection);
-            // connect(&_pollerThread, &PollerThread::signalWakeUpThread, this,
-            //         &ThreadBase::slotWakeUpThread, Qt::DirectConnection);
-
             _pollerThread.setSignalHandler(this);
             _polling.registerPoller(&_pollerThread);
-
             break;
         case ThreadRunMode::EventLoop:
             // _eventLoop = new QEventLoop();
@@ -399,7 +382,7 @@ void ThreadBase::destroyTerminatedChildThreads(bool rightNow)
 
 void ThreadBase::waitEvents() { waitEvents(timeout()); }
 
-void ThreadBase::waitEvents(uint timeout)
+void ThreadBase::waitEvents(uint32_t timeout)
 {
     if (isTerminated())
         return;
@@ -433,12 +416,7 @@ std::string ThreadBase::errorString(int errorNo)
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL, errorNo, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
 
-    QTextCodec *codec = QTextCodec::codecForName("CP1251");
-    QString result    = codec->toUnicode(messageBuffer).trimmed();
-
-    LocalFree(messageBuffer);
-
-    return result;
+    return std::string(messageBuffer);
 #endif
 
 #ifdef linux
@@ -692,13 +670,13 @@ void ThreadBase::signalEventChildThreadTerminated()
     }
 }
 
-uint ThreadBase::timeout() const
+uint32_t ThreadBase::timeout() const
 {
     std::lock_guard<std::mutex> lock(*_mutex);
     return _timeout;
 }
 
-void ThreadBase::setTimeout(uint timeout)
+void ThreadBase::setTimeout(uint32_t timeout)
 {
     std::lock_guard<std::mutex> lock(*_mutex);
     _timeout = timeout;

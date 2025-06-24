@@ -76,7 +76,7 @@ protected:
         while (!_isTerminated.load())
         {
             processMessages();
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+//            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         processMessages();
     }
@@ -99,8 +99,12 @@ int main (int argc, char *argv[])
     thread.start();
 
     for (int i = 0; i < 8192; i++)
+    {
         thread.postMessage(std::make_shared<MessageString>("Message.String",
                                                            "Some text"));
+        if (i % 1000 == 0)
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
 
     thread.stop();
 

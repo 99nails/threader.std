@@ -1,4 +1,6 @@
 #include "DateTimeUtils.h"
+#include "StdStringUtils.h"
+
 #include "Example3Common.h"
 #include "ThreadLog.h"
 #include "ThreadPing.h"
@@ -16,7 +18,15 @@ void readStr()
 
 int main(int argc, char *argv[])
 {
+#ifdef WIN32
+    setlocale(LC_ALL, "russian_Russia.1251");
+    auto line = StdStringUtils::ConvertUTF8ToCP1251("Нажмите Enter для завершения программы...\r\n");
+#else
+    setlocale(LC_ALL, "ru_RU.UTF-8");
     std::cout << "Нажмите Enter для завершения программы...\r\n";
+#endif
+
+    std::cout << line;
 
     auto threadLog = new ThreadLog(argv[0]);
     threadLog->start();
@@ -43,22 +53,31 @@ int main(int argc, char *argv[])
 
     DateTimeUtils::sleepMilliseconds(1);
 
-    while (!threadPing->isFinished())
+    if (threadPing->wasStarted())
     {
-        DateTimeUtils::sleepMilliseconds(1000);
+        while (!threadPing->isFinished())
+        {
+            DateTimeUtils::sleepMilliseconds(1000);
+        }
     }
 
-    while (!threadPong->isFinished())
+    if (threadPong->wasStarted())
     {
-        DateTimeUtils::sleepMilliseconds(1000);
+        while (!threadPong->isFinished())
+        {
+            DateTimeUtils::sleepMilliseconds(1000);
+        }
     }
 
     ThreadBase::writeLog(Message13);
 
-    threadLog->postTerminateEvent();
-    while (!threadLog->isFinished())
+    if (threadLog->wasStarted())
     {
-        DateTimeUtils::sleepMilliseconds(100);
+        threadLog->postTerminateEvent();
+        while (!threadLog->isFinished())
+        {
+            DateTimeUtils::sleepMilliseconds(100);
+        }
     }
 
     delete threadPing;

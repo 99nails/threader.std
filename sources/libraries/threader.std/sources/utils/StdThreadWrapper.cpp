@@ -22,6 +22,11 @@ StdThreadWrapper::~StdThreadWrapper()
     }
 }
 
+bool StdThreadWrapper::wasStarted() const
+{
+    return _thread;
+}
+
 bool StdThreadWrapper::isRunning() const
 {
     std::lock_guard<std::mutex> lock(*_mutexIsRunning);

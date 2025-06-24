@@ -10,7 +10,7 @@ namespace Threader {
 
 namespace Utils {
 
-Descriptor ThreadUtils::currentThreadId()
+THREAD_ID ThreadUtils::currentThreadId()
 {
 #ifdef _WIN32
     return GetCurrentThreadId();

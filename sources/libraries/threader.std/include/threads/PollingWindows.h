@@ -1,26 +1,20 @@
 #pragma once
 
-#include <QtGlobal>
-#include "../threader_global.h"
-
-#ifdef Q_OS_WIN
+#ifdef _WIN32
 
 #include "ThreadsCommon.h"
 
-#include <QObject>
-#include <QVector>
-
+#include <list>
+#include <vector>
+#include <string>
 #include <windows.h>
 
-namespace Threader {
+namespace Threader::Threads {
 
-namespace Threads {
+using DescriptorsVector = std::vector<Descriptor>;
 
-using DescriptorsVector = QVector<Descriptor>;
-
-class THREADERSHARED_EXPORT PollerBase : public QObject
+class PollerBase
 {
-    Q_OBJECT
 public:
     explicit PollerBase(const DescriptorsVector &events = {});
     virtual ~PollerBase();
@@ -32,23 +26,20 @@ public:
 
 private:
     DescriptorsVector _events;
-
-signals:
-    void signalOnPollEvent(PollerBase *sender);
 };
 
-using PollersList = QList<PollerBase*>;
+using PollersList = std::list<PollerBase*>;
 
 /**
  * @brief Polling - Класс-обертка функционала polling-а
  */
-class THREADERSHARED_EXPORT Polling
+class Polling
 {
 public:
     /**
      * @brief Polling - Конструктор
      */
-    explicit Polling(QString threadName = QString());
+    explicit Polling(const std::string &threadName = std::string());
 
     /**
      * @brief pollersCount - Получение количества зарегистрированных голосующих
@@ -81,19 +72,19 @@ public:
      * @brief waitCount - Получение времени режиме ожидания голосования в миллисекундах
      * @return - Время в режиме ожидания голосования в миллисекундах
      */
-    qint64 waitCount() const;
+    int64_t waitCount() const;
 
     /**
      * @brief threadName - Получение имени потока-владельца
      * @return
      */
-    const QString &threadName() const;
+    const std::string &threadName() const;
 
     /**
      * @brief setThreadName - Установка имени потока-владельца
      * @param newThreadName
      */
-    void setThreadName(const QString &threadName);
+    void setThreadName(const std::string &threadName);
 
 private:
     /**
@@ -104,14 +95,14 @@ private:
     /**
      * @brief _waitCount - Время в миллисекундах, проведеное в ожидании
      */
-    qint64 _waitCount;
+    int64_t _waitCount;
 
     /**
      * @brief _threadName - имя потока-владельца
      */
-    QString _threadName;
+    std::string _threadName;
 };
 
-}}
+}
 
 #endif

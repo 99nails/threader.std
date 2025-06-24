@@ -3,7 +3,7 @@
 #include "Example3Common.h"
 
 ThreadPong::ThreadPong()
-    : ThreadBase(nullptr, "Thread.Ping")
+    : ThreadBase(nullptr, "Thread.Pong")
     , _threadPing(nullptr)
 {
 }

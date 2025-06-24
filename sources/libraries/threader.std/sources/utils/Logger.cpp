@@ -6,6 +6,7 @@
 #include <iostream>
 #include <unistd.h>
 
+
 namespace Threader::Utils {
 
 #ifdef linux
@@ -18,40 +19,57 @@ constexpr char ANSI_COLOR_CYAN[] = "\x1b[36m";
 constexpr char ANSI_COLOR_RESET[] = "\x1b[0m";
 #endif
 
-Logger::Logger(bool doConsoleOutput, const std::string &pathToBin, int level, int logDetails)
+Logger::Logger(bool doConsoleOutput,
+               const std::string &pathToBin,
+               int level,
+               int logDetails)
     : _doConsoleOutput(doConsoleOutput)
     , _level(level)
     , _descriptor(INVALID_DESCRIPTOR)
     , _logDetails(logDetails)
 {
-    auto slashIndex = pathToBin.rfind("/");
+#ifdef linux
+    auto slash = '/';
+#endif
+
+#ifdef _WIN32
+    auto slash = '\\';
+#endif
+    auto slashIndex = pathToBin.rfind(slash);
+
     _logFilePrefix = (slashIndex == std::string::npos)
             ? pathToBin
             : (slashIndex < pathToBin.length() - 1)
               ? pathToBin.substr(slashIndex + 1)
               : "LogFile";
 
+#ifdef _WIN32
+    if (StdStringUtils::endsWith(StdStringUtils::toUpper(_logFilePrefix), ".EXE"))
+    {
+        _logFilePrefix.erase(_logFilePrefix.length() - 4, 4);
+    }
+#endif
+
+
     auto path = (slashIndex == 0) ? ""
                                   : pathToBin.substr(0, slashIndex);
 
-    std::filesystem::current_path(path);
+    chdir(path.c_str());
 
-    _pathToLog = std::filesystem::absolute("../log/");
-//    _logFilePrefix = std::filesystem::path(pathToBin).replace_extension("").filename();
+    char pathToLog[PATH_MAX] = "../log";
 
-//    std::filesystem::path p = pathToBin;
-//    if (p.has_parent_path() && p.parent_path().has_parent_path()) {
-//        p = p.parent_path().parent_path();
-//    } else
-//        p = "..";
-
-//    std::filesystem::path a = p.native() + "/log/";
-
-//    _pathToLog = std::filesystem::absolute(a);
-
-//    _currentLogFileDate = currentDate();
-
-    _pathToLog = "../log/";
+#ifdef linux
+    realpath("../log/", pathToLog);
+#endif
+#ifdef _WIN32
+    char pathFrom[] = "../log";
+    GetFullPathName(pathFrom,
+                    strlen(pathFrom),
+                    pathToLog,
+                    nullptr);
+    _consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
+    _pathToLog = pathToLog;
 
     prepareFilePath();
 }
@@ -59,6 +77,11 @@ Logger::Logger(bool doConsoleOutput, const std::string &pathToBin, int level, in
 Logger::~Logger()
 {
     closeFile();
+}
+
+std::string Logger::pathToLog() const
+{
+    return _pathToLog;
 }
 
 int Logger::level() const
@@ -71,7 +94,7 @@ bool Logger::collectMessage(UnuxTimeMSecs created,
                             int level,
                             MessageType messageType,
                             std::string subSystem,
-                            Descriptor threadId,
+                            THREAD_ID threadId,
                             std::string text)
 {
     if (level > _level)
@@ -86,10 +109,14 @@ bool Logger::collectMessage(UnuxTimeMSecs created,
 
     if (INVALID_DESCRIPTOR == _descriptor) {
         if (!prepareFilePath())
+        {
             return false;
+        }
 
         if (!openFile())
+        {
             return false;
+        }
     }
 
     auto appendTab = [](std::string &s, std::string tab = "\t") {
@@ -102,12 +129,12 @@ bool Logger::collectMessage(UnuxTimeMSecs created,
 
     if (LogDetails::Date & _logDetails) {
         // format = "dd.MM.yyyy";
-        data += DateTimeUtils::msecsSinceEpochToStdString(created, false, true, "%F");
+        data += DateTimeUtils::msecsSinceEpochToStdString(created, false, true,  "%Y-%m-%d");
     }
 
     if (LogDetails::Time & _logDetails) {
         appendTab(data, " ");
-        data += DateTimeUtils::msecsSinceEpochToStdString(created, true, true, "%T");
+        data += DateTimeUtils::msecsSinceEpochToStdString(created, true, true,  "%H-%M-%S");
     }
 
     if (!data.empty())
@@ -151,8 +178,15 @@ bool Logger::flush()
     if (INVALID_DESCRIPTOR == _descriptor)
         return false;
 
-    for (auto iterator = _buffer.cbegin(); iterator != _buffer.cend(); iterator++) {
+    for (auto iterator = _buffer.cbegin(); iterator != _buffer.cend(); iterator++)
+    {
+#ifdef linux
         ::write(_descriptor, iterator->c_str(), iterator->length());
+#endif
+#ifdef _WIN32
+        DWORD writtenCount;
+        WriteFile(_descriptor, iterator->c_str(), iterator->length(), &writtenCount, nullptr);
+#endif
     }
     _buffer.clear();
 
@@ -168,8 +202,18 @@ UnuxTimeMSecs Logger::currentDate()
 
 bool Logger::prepareFilePath()
 {
-    if (!std::filesystem::exists(_pathToLog))
-        return std::filesystem::create_directory(_pathToLog);
+    if (!FileUtils::isPathExists(_pathToLog))
+    {
+        auto result = mkdir(_pathToLog.c_str()
+                    #ifdef linux
+                            , S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
+                    #endif
+                            ) == 0;
+        if (!result)
+            std::cout << "Ошибка создания каталога " << _pathToLog.c_str() << std::endl;
+        return result;
+
+    }
 
     return true;
 }
@@ -180,13 +224,18 @@ bool Logger::openFile()
                            + DateTimeUtils::msecsSinceEpochToStdString(currentDate(),
                                                                        false,
                                                                        false,
-                                                                       "%F")
+                                                                       "%Y-%m-%d")
                            + ".log";
     _descriptor = FileUtils::fileOpenOrCreate(fileName);
     if (INVALID_DESCRIPTOR == _descriptor)
         return false;
 
+#ifdef linux
     lseek(_descriptor, 0, SEEK_END);
+#endif
+#ifdef _WIN32
+    SetFilePointer(_descriptor, 0, 0, FILE_END);
+#endif
     return true;
 }
 
@@ -197,7 +246,7 @@ void Logger::closeFile()
     if (INVALID_DESCRIPTOR == _descriptor)
         return;
 
-    close(_descriptor);
+    FileUtils::fileClose(_descriptor);
     _descriptor = INVALID_DESCRIPTOR;
 }
 
@@ -221,37 +270,37 @@ void Logger::printLine(const std::string &line, MessageType messageType)
     default:
         std::cout << ANSI_COLOR_RESET;
         break;
+        std::cout << line;
     }
     std::cout << line;
 #endif
-#ifdef _WIN
+#ifdef _WIN32
     uint8_t color;
-    switch (message) {
-        //    case Message:
-        //        color = 8;
-        //        break;
+    switch (messageType) {
     case Attention:
-        color = 2;
+        color = 10;
         break;
     case Warning:
-        color = 6;
+        color = 14;
         break;
     case Error:
-        color = 4;
+        color = 12;
         break;
     case Debug:
-        color = 1;
+        color = 11;
         break;
     default:
-        color = 15;
+        color = 7;
     }
     if (INVALID_HANDLE_VALUE != _consoleHandle)
         SetConsoleTextAttribute(_consoleHandle, color);
 
-    if (_codec) {
-        QByteArray dosString = _codec->fromUnicode(messageString.toUtf8());
-        std::cout << dosString.constData();
-    }
+//    if (_codec) {
+//        QByteArray dosString = _codec->fromUnicode(messageString.toUtf8());
+//        std::cout << dosString.constData();
+//    }
+    std::cout << StdStringUtils::ConvertUTF8ToCP1251(line);
+//    std::cout << line;
 #endif
 }
 

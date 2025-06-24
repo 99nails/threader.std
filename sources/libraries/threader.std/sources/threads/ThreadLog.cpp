@@ -2,6 +2,11 @@
 
 // #include "DateTimeUtils.h"
 #include "MessageLog.h"
+#include "StdStringUtils.h"
+
+namespace Threader::Threads {
+
+using namespace Threader::Utils;
 
 ThreadLog *ThreadLog::_instance = nullptr;
 
@@ -40,7 +45,9 @@ void ThreadLog::onThreadStarted()
                             Message0.messageType,
                             Message0.subSystem,
                             thisThreadId(),
-                            Message0.text);
+                            format(Message0.text.c_str(),
+                                   _logger->level(),
+                                   _logger->pathToLog().c_str()));
 }
 
 void ThreadLog::onThreadFinishing()
@@ -90,4 +97,6 @@ void ThreadLog::processMessage(const MessageBase::Ptr &message)
             _consumer->postMessage(messageLog);
 
     }
+}
+
 }

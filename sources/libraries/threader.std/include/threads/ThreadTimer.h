@@ -30,7 +30,7 @@ public:
      */
     explicit ThreadTimer(MessageConsumer *parent,
                          const std::string &timerName,
-                         const uint &delayMsecs,
+                         const uint32_t &delayMsecs,
                          const bool multiShot);
 
     /**

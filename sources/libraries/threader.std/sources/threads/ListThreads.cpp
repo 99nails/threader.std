@@ -67,7 +67,7 @@ ThreadBase *ThreadsStaticticCollector::threadByClassName(const std::string &thre
 }
 
 bool ThreadsStaticticCollector::accumulateStatistic(ThreadBase *thread,
-                                                    const long threadId,
+                                                    const THREAD_ID threadId,
                                                     const std::string &threadName,
                                                     const uint64_t &startedMsecsSinceEpoch,
                                                     const uint64_t &aliveMsecsSinceEpoch,

@@ -12,7 +12,7 @@ class ThreadUtils {
 
 public:
 
-    static Descriptor currentThreadId();
+    static THREAD_ID currentThreadId();
 
 };
 

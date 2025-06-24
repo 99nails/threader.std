@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ThreadsCommon.h"
+
 #include <ctime>
 #include <list>
 #include <memory>
@@ -24,7 +26,7 @@ public:
 
     std::string name() const;
     uint64_t created() const;
-    int threadId() const;
+    THREAD_ID threadId() const;
 
 protected:
     void initialize();
@@ -34,7 +36,7 @@ protected:
 private:
     std::string _name;
     uint64_t _created;
-    int _threadId;
+    THREAD_ID _threadId;
 };
 
 
@@ -106,9 +108,9 @@ using MessageBoolean = MessageValue<bool>;
 
 using MessageString = MessageValue<std::string>;
 
-using MessageInt = MessageValue<int>;
+using MessageInt = MessageValue<int32_t>;
 
-using MessageUInt = MessageValue<uint>;
+using MessageUInt = MessageValue<uint32_t>;
 
 using MessageFloat = MessageValue<float>;
 

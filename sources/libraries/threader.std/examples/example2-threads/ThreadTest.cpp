@@ -4,6 +4,7 @@
 
 ThreadTest::ThreadTest()
     : ThreadBase(nullptr, "Thread.Test")
+    , _count(0)
 {
     setTimeout(10000);
 }
@@ -20,7 +21,7 @@ void ThreadTest::processMessage(const MessageBase::Ptr &message)
 }
 
 
-void ThreadTest::onProcessMessagesStarted(const int count)
+void ThreadTest::onProcessMessagesStarted(const int32_t count)
 {
     std::cout << "Processing " << count << " messages" << std::endl;
 }

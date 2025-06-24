@@ -10,10 +10,10 @@ class SerialUtils
 {
 public:
     static Descriptor openSerial(const std::string &deviceName,
-                                 const uint &baudRate,
+                                 const uint32_t &baudRate,
                                  const bool &enableParity,
                                  const bool &twoStopBits,
-                                 const uint &dataSize);
+                                 const uint32_t &dataSize);
 
     static void closeSerial(Descriptor descriptor);
 

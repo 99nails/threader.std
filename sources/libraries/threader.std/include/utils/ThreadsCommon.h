@@ -25,6 +25,8 @@ const Descriptor INVALID_DESCRIPTOR = INVALID_HANDLE_VALUE;
 
 #endif
 
+using THREAD_ID = long;
+
 enum class TcpSocketType
 {
     Server,

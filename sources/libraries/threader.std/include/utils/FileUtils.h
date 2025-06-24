@@ -4,15 +4,14 @@
 
 #include <string>
 
-namespace Threader {
-
-namespace Utils {
+namespace Threader::Utils {
 
 class FileUtils
 {
 public:
-    static Descriptor fileOpenOrCreate(std::string fileName);
+    static Descriptor fileOpenOrCreate(const std::string &fileName);
+    static void fileClose(Descriptor descriptor);
+    static bool isPathExists(const std::string &path);
 };
 
 }
-} // namespace Threader

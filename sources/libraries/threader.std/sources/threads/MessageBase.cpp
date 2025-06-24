@@ -45,7 +45,7 @@ uint64_t MessageBase::created() const
     return _created;
 }
 
-int MessageBase::threadId() const
+THREAD_ID MessageBase::threadId() const
 {
     return _threadId;
 }

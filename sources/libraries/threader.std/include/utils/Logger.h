@@ -3,7 +3,6 @@
 #include "DateTimeUtils.h"
 #include "ThreadsCommon.h"
 
-#include <filesystem>
 #include <list>
 #include <string>
 
@@ -125,6 +124,7 @@ public:
                                            LogDetails::Text);
     virtual ~Logger();
 
+    std::string pathToLog() const;
     int level() const;
 
     bool collectMessage(UnuxTimeMSecs created,
@@ -132,7 +132,7 @@ public:
                int level,
                MessageType messageType,
                std::string subSystem,
-               Descriptor threadId,
+               THREAD_ID threadId,
                std::string text);
 
     bool flush();
@@ -149,7 +149,6 @@ private:
 
 private:
     bool _doConsoleOutput;
-//    std::filesystem::path _pathToLog;
     std::string _pathToLog;
     int _level;
 
@@ -160,6 +159,10 @@ private:
     UnuxTimeMSecs _currentLogFileDate;
 
     int _logDetails;
+
+#ifdef _WIN32
+    Descriptor _consoleHandle;
+#endif
 };
 
 } // namespace Utils

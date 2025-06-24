@@ -1,3 +1,6 @@
+
+#ifdef linux
+
 #include <csignal>
 #include <execinfo.h>
 #include <unistd.h>
@@ -147,3 +150,5 @@ std::string get_signal_string(int signum)
     tmp +=  std::to_string(signum);
     return tmp;
 }
+
+#endif

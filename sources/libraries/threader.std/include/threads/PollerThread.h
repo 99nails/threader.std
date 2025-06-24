@@ -8,8 +8,9 @@
 #include <unistd.h>
 #endif
 
-#ifdef _WIN32
-#include "PollingsWindows.h"
+#ifdef WIN32
+#include "PollingWindows.h"
+#include <stdint.h>
 #endif
 
 namespace Threader {
@@ -25,13 +26,11 @@ enum class ThreadSignals : Signal
     SignalTerminateChildThreads = 3
 };
 
-#ifdef linux
 class ISignalHandler
 {
 public:
     virtual void signalProcess(Signal signal) = 0;
 };
-#endif
 
 class PollerThread : public PollerBase
 {

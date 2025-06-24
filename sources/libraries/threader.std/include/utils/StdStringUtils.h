@@ -16,8 +16,15 @@ using StdStringList = std::list<std::string>;
 class StdStringUtils
 {
 public:
+    static std::string toUpper(std::string s);
 
+    static std::string toLower(std::string s);
 
+    static bool endsWith(const std::string &s, const std::string &end);
+
+    static std::string ConvertCP1251ToUTF8(const std::string &str);
+
+    static std::string ConvertUTF8ToCP1251(const std::string &str);
 };
 
 }}
@@ -45,7 +52,7 @@ static std::string format(const char * format, ...)
 
     if (chars_that_would_be_printed >= STACK_BUFFER_SIZE)
     {
-        uint heap_buffer_size = chars_that_would_be_printed + 1;
+        uint32_t heap_buffer_size = chars_that_would_be_printed + 1;
         heap_buffer = new char[heap_buffer_size];
         vsnprintf(heap_buffer, heap_buffer_size, format, vl_working_2);
         choosen_buffer = heap_buffer;

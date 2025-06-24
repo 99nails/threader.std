@@ -8,7 +8,7 @@ using namespace Threader::Threads;
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Log"
 
-MESSAGE_TEMPLATE(0, 0, MessageType::Message, "Запуск подсистемы прокотоколирования...")
+MESSAGE_TEMPLATE(0, 0, MessageType::Message, "Запуск подсистемы прокотоколирования. Подробность [%d], хранение [%s]")
 MESSAGE_TEMPLATE(1, 0, MessageType::Message, "Завершение подсистемы протоколирования...")
 MESSAGE_TEMPLATE(2, 0, MessageType::Message, "Подсистема протоколирования завершена")
 

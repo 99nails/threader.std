@@ -1,30 +1,29 @@
-#include "PollingsWindows.h"
+#include "PollingWindows.h"
 
-#ifdef Q_OS_WIN
+#ifdef _WIN32
 
-#include "../Utils/DateUtils.h"
+#include "DateTimeUtils.h"
 
-namespace Threader {
+#include <algorithm>
 
-namespace Threads {
+namespace Threader::Threads {
 
 using namespace Threader::Utils;
 
 PollerBase::PollerBase(const DescriptorsVector &events)
-    : QObject(nullptr)
-    , _events(events)
+    : _events(events)
 {
 }
 
 PollerBase::~PollerBase()
 {
-    for (const auto descriptor : qAsConst(_events))
+    for (const auto descriptor : _events)
         CloseHandle(descriptor);
 }
 
 bool PollerBase::hasEvent(Descriptor event)
 {
-    for (const auto descriptor : qAsConst(_events))
+    for (const auto descriptor : _events)
         if (descriptor == event)
             return true;
     return false;
@@ -37,20 +36,19 @@ DescriptorsVector *PollerBase::events()
 
 void PollerBase::assign(const DescriptorsVector &events)
 {
-    _events.clear();
-    _events.append(events);
+    _events = events;
+//    _events.clear();
+//    _events.push_back(events);
 }
 
 bool PollerBase::process(Descriptor eventToProcess)
 {
     bool result = hasEvent(eventToProcess);
-    if (result)
-        emit signalOnPollEvent(this);
     return result;
 }
 
 
-Polling::Polling(QString threadName)
+Polling::Polling(const std::string &threadName)
     : _waitCount(0)
     , _threadName(threadName)
 {    
@@ -58,23 +56,23 @@ Polling::Polling(QString threadName)
 
 int Polling::pollersCount()
 {
-    return _pollers.count();
+    return _pollers.size();
 }
 
 int Polling::registerPoller(PollerBase *poller)
 {
     // проверка существования голосующего с добавляемым дескриптором
-    int index = _pollers.indexOf(poller);
+    auto found {std::find(begin(_pollers), end(_pollers), poller)};
 
-    // если голосующий найден
-    if (index < 1)
+    // если голосующий не найден
+    if (found == end(_pollers))
     {
         // добавление нового голосущего
-        _pollers.append(poller);
+        _pollers.push_back(poller);
     }
 
     // получение количества голосующих
-    int count = _pollers.count();
+    int count = _pollers.size();
 
     return count;
 }
@@ -82,10 +80,11 @@ int Polling::registerPoller(PollerBase *poller)
 int Polling::unregisterPoller(PollerBase *poller)
 {
     // удаление голосующего
-    _pollers.removeAll(poller);
+    for (auto iterator = _pollers.end(); iterator != _pollers.begin(); iterator--)
+        _pollers.erase(iterator);
 
     // получение количества голосующих
-    int count = _pollers.count();
+    int count = _pollers.size();
 
     return count;
 }
@@ -94,21 +93,28 @@ int Polling::poll(const uint32_t &timeout)
 {
     // заполнение массива с данными голосующих
     DescriptorsVector pollArray;
-    for (auto poller: _pollers)
-        pollArray.append(*poller->events());
-    auto pollArrayCount = static_cast<uint32_t>(pollArray.count());
+    for (auto poller : _pollers)
+    {
+        DescriptorsVector events = *poller->events();
+        for (auto event : events)
+        {
+            pollArray.push_back(event);
+        }
+    }
+
+    auto pollArrayCount = static_cast<uint32_t>(pollArray.size());
 
     // запоминание начала ожидания событий
-    auto waitStarted = DateUtils::getTickCount();
+    auto waitStarted = DateTimeUtils::getTickCount();
 
     // ожидание голосования
     auto waitResult = WaitForMultipleObjects(pollArrayCount,
-                                             pollArray.constData(),
+                                             pollArray.data(),
                                              false,
                                              timeout);
 
     // фиксация общего времени ожидания событий
-    waitStarted = DateUtils::getTickCount() - waitStarted;
+    waitStarted = DateTimeUtils::getTickCount() - waitStarted;
     _waitCount = _waitCount + waitStarted;
 
     // выход по таймауту
@@ -138,21 +144,21 @@ int Polling::poll(const uint32_t &timeout)
     return 1;
 }
 
-qint64 Polling::waitCount() const
+int64_t Polling::waitCount() const
 {
     return _waitCount;
 }
 
-const QString &Polling::threadName() const
+const std::string &Polling::threadName() const
 {
     return _threadName;
 }
 
-void Polling::setThreadName(const QString &threadName)
+void Polling::setThreadName(const std::string &threadName)
 {
     _threadName = threadName;
 }
 
-}}
+}
 
 #endif

@@ -11,7 +11,7 @@ const std::string ThreadTimer::THREAD_NAME_PREFFIX = "ThreadTimer.";
 
 ThreadTimer::ThreadTimer(MessageConsumer *parent,
                          const std::string &timerName,
-                         const uint &delayMsecs,
+                         const uint32_t &delayMsecs,
                          const bool multiShot)
     : ThreadBase(parent, THREAD_NAME_PREFFIX + timerName, ThreadRunMode::Polling)
     , _timerName(timerName)

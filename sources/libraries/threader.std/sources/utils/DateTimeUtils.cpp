@@ -3,13 +3,13 @@
 #include <chrono>
 #include <iomanip>
 
-namespace Threader {
-
-namespace Utils {
+namespace Threader::Utils {
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::system_clock;
+
+GetTickCount64Prototype* DateTimeUtils::_getTickCount = nullptr;
 
 UnuxTimeMSecs DateTimeUtils::msecsSinceEpochLocal()
 {
@@ -36,7 +36,8 @@ std::string DateTimeUtils::msecsSinceEpochToStdString(const UnuxTimeMSecs &msecs
             msecsString = '0' + msecsString;
         ss << '.' << msecsString;
     }
-    return ss.str();
+    auto result = ss.str();
+    return result;
 }
 
 void DateTimeUtils::sleepMilliseconds(int milliseconds)
@@ -85,7 +86,7 @@ uint64_t DateTimeUtils::getTickCount()
 
 }
 
-uint64_t DateTimeUtils::getNextTickCount(uint milliseconds)
+uint64_t DateTimeUtils::getNextTickCount(uint64_t milliseconds)
 {
     auto result = getTickCount();
     if (result > 0)
@@ -93,4 +94,4 @@ uint64_t DateTimeUtils::getNextTickCount(uint milliseconds)
     return result;
 }
 
-}}
+}
