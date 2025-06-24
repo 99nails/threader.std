@@ -6,6 +6,12 @@
 #include <iostream>
 #include <unistd.h>
 
+#ifdef linux
+#include <fcntl.h>
+#include <linux/limits.h>
+#include <sys/stat.h>
+#endif
+
 
 namespace Threader::Utils {
 

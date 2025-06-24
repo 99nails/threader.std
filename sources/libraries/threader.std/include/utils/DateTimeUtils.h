@@ -15,7 +15,7 @@ namespace Utils {
 
 using UnuxTimeMSecs = uint64_t;
 
-#ifdef _WIN32
+#ifdef WIN32
 typedef ULONGLONG (WINAPI GetTickCount64Prototype)(VOID);
 #endif
 
@@ -36,7 +36,7 @@ public:
     static uint64_t getNextTickCount(uint64_t milliseconds);
 
 private:
-#ifdef _WIN32
+#ifdef WIN32
     static GetTickCount64Prototype* _getTickCount;
 #endif
 };

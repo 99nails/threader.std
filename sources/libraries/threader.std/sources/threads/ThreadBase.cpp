@@ -117,7 +117,7 @@ void ThreadBase::setThreadRunMode(const ThreadRunMode &threadRunMode)
 
 THREAD_ID ThreadBase::threadId()
 {
-    ThreadUtils::currentThreadId();
+    return ThreadUtils::currentThreadId();
 }
 
 uint64_t ThreadBase::startedTickCount() const

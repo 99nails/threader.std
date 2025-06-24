@@ -28,6 +28,8 @@ bool StdStringUtils::endsWith(const std::string &s, const std::string &end)
     return s.compare(endIndex, end.length(), end) == 0;
 }
 
+#ifdef WIN32
+
 std::string StdStringUtils::ConvertCP1251ToUTF8(const std::string &str)
 {
     int len = MultiByteToWideChar(1251, 0, str.c_str(), -1, NULL, 0);
@@ -61,5 +63,7 @@ std::string StdStringUtils::ConvertUTF8ToCP1251(const std::string &str)
 
     return result;
 }
+
+#endif
 
 }}

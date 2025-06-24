@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     auto line = StdStringUtils::ConvertUTF8ToCP1251("Нажмите Enter для завершения программы...\r\n");
 #else
     setlocale(LC_ALL, "ru_RU.UTF-8");
-    std::cout << "Нажмите Enter для завершения программы...\r\n";
+    auto line = "Нажмите Enter для завершения программы...\r\n";
 #endif
 
     std::cout << line;

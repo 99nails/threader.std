@@ -22,9 +22,11 @@ public:
 
     static bool endsWith(const std::string &s, const std::string &end);
 
+#ifdef WIN32
     static std::string ConvertCP1251ToUTF8(const std::string &str);
 
     static std::string ConvertUTF8ToCP1251(const std::string &str);
+#endif
 };
 
 }}

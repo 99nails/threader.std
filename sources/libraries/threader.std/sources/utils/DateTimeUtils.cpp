@@ -9,7 +9,9 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::system_clock;
 
+#ifdef WIN32
 GetTickCount64Prototype* DateTimeUtils::_getTickCount = nullptr;
+#endif
 
 UnuxTimeMSecs DateTimeUtils::msecsSinceEpochLocal()
 {
