@@ -619,7 +619,7 @@ bool ThreadBase::stopTimer(const std::string &timerName)
 {
     bool result = false;
 
-    for (int i = 0; i < _childThreadsList.size(); i++) {
+    for (size_t i = 0; i < _childThreadsList.size(); i++) {
         auto thread = dynamic_cast<ThreadTimer *>(_childThreadsList.at(i));
         if (!thread)
             continue;
@@ -636,7 +636,7 @@ int ThreadBase::stopAllTimers()
 {
     int result = 0;
 
-    for (int i = 0; i < _childThreadsList.size(); i++) {
+    for (size_t i = 0; i < _childThreadsList.size(); i++) {
         auto thread = dynamic_cast<ThreadTimer *>(_childThreadsList.at(i));
         if (!thread)
             continue;

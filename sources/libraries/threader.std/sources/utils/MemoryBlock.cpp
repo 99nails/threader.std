@@ -17,6 +17,7 @@ MemoryBlock::MemoryBlock(size_t capacity)
     : _size(0)
 {
     clear(true);
+    (void)capacity;
 }
 
 MemoryBlock::MemoryBlock(const void *data, const size_t size)

@@ -106,6 +106,8 @@ int Polling::unregisterPoller(PollerBase *poller)
     // поддержание размерности массива структур с данными голосующих
     _pollStructArray.resize(count);
 
+    (void)poller;
+
     return count;
 }
 
@@ -161,7 +163,7 @@ int64_t Polling::waitCount() const
 
 int Polling::indexOfDescriptor(const int &descriptor)
 {
-    for (int i = 0; i < _pollers.size(); i++)
+    for (size_t i = 0; i < _pollers.size(); i++)
         if (_pollers.at(i)->descriptor() == descriptor)
             return i;
     return -1;

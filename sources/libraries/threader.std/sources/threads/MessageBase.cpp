@@ -52,7 +52,7 @@ int MessageBase::threadId() const
 
 void MessageBase::initialize()
 {
-    const auto now = std::chrono::system_clock::now();
+//    const auto now = std::chrono::system_clock::now();
     _created = DateTimeUtils::msecsSinceEpochLocal();
     // _created = std::chrono::system_clock::to_time_t(now);
     // auto clock = std::chrono::steady_clock::now();

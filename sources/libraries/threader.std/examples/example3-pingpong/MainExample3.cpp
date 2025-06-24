@@ -16,6 +16,8 @@ void readStr()
 
 int main(int argc, char *argv[])
 {
+    (void)argc;
+
     std::cout << "Нажмите Enter для завершения программы...\r\n";
 
     auto threadLog = new ThreadLog(argv[0]);
