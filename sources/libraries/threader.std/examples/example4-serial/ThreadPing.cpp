@@ -101,6 +101,7 @@ void ThreadPing::onError(HandlerBase *handler,
     writeLog(Message112,
              handler->deviceName().c_str(),
              errorString(errorCode).c_str());
+    (void)errorDescription;
 }
 
 bool ThreadPing::onPacketReceived(const PacketBase::Ptr &packet)

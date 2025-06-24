@@ -5,6 +5,9 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 
 #ifdef linux
 #include <fcntl.h>
@@ -19,8 +22,8 @@ namespace Threader::Utils {
 constexpr char ANSI_COLOR_RED[] = "\x1b[31m";
 constexpr char ANSI_COLOR_GREEN[] = "\x1b[32m";
 constexpr char ANSI_COLOR_YELLOW[] = "\x1b[33m";
-constexpr char ANSI_COLOR_BLUE[] = "\x1b[34m";
-constexpr char ANSI_COLOR_MAGENTA[] = "\x1b[35m";
+//constexpr char ANSI_COLOR_BLUE[] = "\x1b[34m";
+//constexpr char ANSI_COLOR_MAGENTA[] = "\x1b[35m";
 constexpr char ANSI_COLOR_CYAN[] = "\x1b[36m";
 constexpr char ANSI_COLOR_RESET[] = "\x1b[0m";
 #endif
@@ -55,12 +58,6 @@ Logger::Logger(bool doConsoleOutput,
         _logFilePrefix.erase(_logFilePrefix.length() - 4, 4);
     }
 #endif
-
-
-    auto path = (slashIndex == 0) ? ""
-                                  : pathToBin.substr(0, slashIndex);
-
-    chdir(path.c_str());
 
     char pathToLog[PATH_MAX] = "../log";
 
@@ -220,7 +217,6 @@ bool Logger::prepareFilePath()
         return result;
 
     }
-
     return true;
 }
 

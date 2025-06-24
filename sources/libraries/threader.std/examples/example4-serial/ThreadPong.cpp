@@ -73,6 +73,7 @@ void ThreadPong::onError(HandlerBase *handler,
              handler->deviceName().c_str(),
              errorString(errorCode).c_str());
 
+    (void)errorDescription;
 }
 
 bool ThreadPong::onPacketReceived(const PacketBase::Ptr &packet)

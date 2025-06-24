@@ -10,6 +10,9 @@
 #include <io.h>
 #endif
 
+#include <stdio.h>
+#include <sys/stat.h>
+
 namespace Threader::Utils {
 
 Descriptor FileUtils::fileOpenOrCreate(const std::string &fileName)

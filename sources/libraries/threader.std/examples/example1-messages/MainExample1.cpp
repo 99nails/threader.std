@@ -95,6 +95,9 @@ public:
 
 int main (int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     MessageConsumerThread thread;
     thread.start();
 

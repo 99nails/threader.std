@@ -33,9 +33,9 @@ public:
                            const bool &portionedIO = false);
     ~ThreadHandler() override;
 
-    const uint64_t openDateTime() const;
+    uint64_t openDateTime() const;
 
-    const uint64_t closedDateTime() const;
+    uint64_t closedDateTime() const;
 
 protected:
     void initializeThread() override;

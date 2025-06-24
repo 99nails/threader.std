@@ -49,7 +49,6 @@ uint64_t TrafficCounter::actualize()
 {
     uint64_t limit = DateTimeUtils::msecsSinceEpochLocal() - _secondsToStore * 1000;
 
-    int removeCount = 0;
     uint64_t trafficCount = 0;
 
     auto iterator = _historyList.begin();
