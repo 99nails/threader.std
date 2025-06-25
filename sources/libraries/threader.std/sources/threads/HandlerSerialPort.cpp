@@ -37,7 +37,7 @@ HandlerSerialPort::HandlerSerialPort(HandlerDataConsumer *consumer,
     _dataSize = CS8;
     _enableParity = false;
     _twoStopBits = false;
-#elif defined(_WIN32)
+#elif defined(WIN32)
     _baudRate = CBR_115200;
     _dataSize = 8;
 
@@ -71,7 +71,7 @@ bool HandlerSerialPort::open()
     {
         setConnectionState(ConnectionState::Connected);
 
-#ifdef _WIN32
+#ifdef WIN32
         initializeEvent();
         registerEvent();
 #endif
@@ -84,7 +84,7 @@ void HandlerSerialPort::close()
     Descriptor _descriptor = descriptor();
     if (INVALID_DESCRIPTOR != _descriptor)
     {
-#ifdef _WIN32
+#ifdef WIN32
         unregisterEvent();
 #endif
         SerialUtils::closeSerial(_descriptor);
@@ -110,7 +110,7 @@ int HandlerSerialPort::outputBytesAvailable()
     return SerialUtils::outputBytesAvailable(descriptor());
 }
 
-#ifdef _WIN32
+#ifdef WIN32
 
 DescriptorsVector *HandlerSerialPort::events()
 {
@@ -348,12 +348,12 @@ void HandlerSerialPort::setDataSize(const uint32_t &dataSize)
     if (dataSize == CS5 || dataSize == CS6 || dataSize == CS7 || dataSize == CS8)
         _dataSize = dataSize;
 #endif
-#ifdef _WIN32
+#ifdef WIN32
     _dataSize = dataSize;
 #endif
 }
 
-#ifdef _WIN32
+#ifdef WIN32
 
 bool HandlerSerialPort::useOverlappedIO() const
 {

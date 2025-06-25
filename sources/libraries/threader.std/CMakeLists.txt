@@ -48,7 +48,6 @@ add_library(threader-std SHARED
 )
 
 target_compile_features(threader-std PUBLIC cxx_std_17)
-# target_compile_definitions(threader-std PRIVATE DDSLIB_LIBRARY)
 
 set_target_properties(threader-std PROPERTIES VERSION ${VERSION} SOVERSION ${VER_MAJ})
 
@@ -103,17 +102,17 @@ target_link_libraries(example3-pingpong
 
 # example4-serial
 
-#add_executable(example4-serial
-#    examples/example4-serial/Example4Common.h
-#    examples/example4-serial/MainExample4.cpp
-#    examples/example4-serial/ThreadPing.h examples/example4-serial/ThreadPing.cpp
-#    examples/example4-serial/ThreadPong.h examples/example4-serial/ThreadPong.cpp
-#)
-#target_compile_features(example4-serial PUBLIC cxx_std_17)
+add_executable(example4-serial
+   examples/example4-serial/Example4Common.h
+   examples/example4-serial/MainExample4.cpp
+   examples/example4-serial/ThreadPing.h examples/example4-serial/ThreadPing.cpp
+   examples/example4-serial/ThreadPong.h examples/example4-serial/ThreadPong.cpp
+)
+target_compile_features(example4-serial PUBLIC cxx_std_17)
 
-#target_link_libraries(example4-serial
-#    -lpthread
-#    -lstdc++fs
-#    threader-std
-#)
+target_link_libraries(example4-serial
+   -lpthread
+   -lstdc++fs
+   threader-std
+)
 

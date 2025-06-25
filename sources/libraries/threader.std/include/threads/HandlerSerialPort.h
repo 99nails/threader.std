@@ -30,7 +30,7 @@ public:
 
     int outputBytesAvailable() override;
 
-#ifdef _WIN32
+#ifdef WIN32
     DescriptorsVector *events() override;
 
     bool process(Descriptor eventToProcess) override;
@@ -56,7 +56,7 @@ public:
     void setTwoStopBits(bool twoStopBits);
     void setDataSize(const uint32_t &dataSize);
 
-#ifdef _WIN32
+#ifdef WIN32
     bool useOverlappedIO() const;
     void setUseOverlappedIO(bool useOverlappedIO);
 #endif
@@ -67,7 +67,7 @@ private:
     bool _twoStopBits;
     uint32_t _dataSize;
 
-#ifdef _WIN32
+#ifdef WIN32
     bool _useOverlappedIO;
     OVERLAPPED _overlapped;
     DWORD _mask;
