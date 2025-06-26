@@ -7,7 +7,7 @@ using namespace Threader::Threads;
 class ThreadPing : public ThreadHandler
 {
 public:
-    explicit ThreadPing();
+    explicit ThreadPing(const std::string &deviceName);
 
 protected:
     void onThreadStarted() override;

@@ -25,7 +25,7 @@ HandlerSerialPort::HandlerSerialPort(HandlerDataConsumer *consumer,
     : HandlerBase(consumer, deviceName)
     , _enableParity(false)
     , _twoStopBits(false)
-    #ifdef _WIN32
+    #ifdef WIN32
     , _useOverlappedIO(false)
     #endif
 {

@@ -1,9 +1,11 @@
 // socat -d -d pty,rawer,echo=0 pty,rawer,echo=0 &
+// NullModem Emulator
 
 #include "DateTimeUtils.h"
-#include "ThreadLog.h"
+#include "StdStringUtils.h"
 #include "SignalHandler.h"
 
+#include "ThreadLog.h"
 #include "ThreadPing.h"
 #include "ThreadPong.h"
 
@@ -24,16 +26,35 @@ int main(int argc, char *argv[])
     setSignalHandler(argv[0]);
 #endif
 
+#ifdef WIN32
+    setlocale(LC_ALL, "russian_Russia.1251");
+    auto line = StdStringUtils::ConvertUTF8ToCP1251("Press Enter to terminate program...\r\n");
+#else
+    setlocale(LC_ALL, "ru_RU.UTF-8");
     std::cout << "Press Enter to terminate program...\r\n";
+#endif
+
 
 
     auto threadLog = new ThreadLog(argv[0]);
     threadLog->start();
 
-    auto threadPing = new ThreadPing();
+    auto threadPing = new ThreadPing(
+            #ifdef WIN32
+                "COM4"
+            #else
+                "/dev/pts/1"
+            #endif
+                );
     threadPing->start();
 
-    auto threadPong = new ThreadPong();
+    auto threadPong = new ThreadPong(
+            #ifdef WIN32
+                "COM5"
+            #else
+                "/dev/pts/2"
+            #endif
+                );
     threadPong->start();
 
     readStr();

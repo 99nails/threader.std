@@ -5,9 +5,9 @@
 #include "HandlerSerialPort.h"
 #include "PacketFactoryAsciiLines.h"
 
-ThreadPing::ThreadPing()
+ThreadPing::ThreadPing(const std::string &deviceName)
     : ThreadHandler(nullptr,
-                    new HandlerSerialPort(nullptr, "/dev/pts/1"),
+                    new HandlerSerialPort(nullptr, deviceName),
                     1000,
                     new PacketFactoryAsciiLines(),
                     "Thread.Ping")
@@ -17,8 +17,6 @@ ThreadPing::ThreadPing()
 void ThreadPing::onThreadStarted()
 {
     writeLog(Message100);
-
-    startThreadTimer(MESSAGE_NAME_SEND_PING, 100, true);
 }
 
 void ThreadPing::onThreadFinishing()
@@ -53,8 +51,6 @@ void ThreadPing::processMessage(const MessageBase::Ptr &message)
             }
         }
     }
-
-    writeLog(Message101);
 }
 
 void ThreadPing::onConnecting()
@@ -69,6 +65,8 @@ void ThreadPing::onConnected()
     if (!handler())
         return;
     writeLog(Message111, handler()->deviceName().c_str());
+
+    startThreadTimer(MESSAGE_NAME_SEND_PING, 5000, true);
 }
 
 void ThreadPing::onDisconnected()
@@ -76,6 +74,8 @@ void ThreadPing::onDisconnected()
     if (!handler())
         return;
     writeLog(Message113, handler()->deviceName().c_str());
+
+    stopTimer(MESSAGE_NAME_SEND_PING);
 }
 
 void ThreadPing::onReadData(const void *, const int &count)

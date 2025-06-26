@@ -46,7 +46,7 @@ protected:
     /**
      * @brief onProcessMessagesStarted - событие начала шага цикла обработки сообщений
      */
-    virtual void onProcessMessagesStarted(const int count) {}
+    virtual void onProcessMessagesStarted(const int) {}
 
     /**
      * @brief onProcessMessagesFinished - событие завершения шага цикла обработки сообщений

@@ -7,7 +7,7 @@
     #include <unistd.h>
 #endif
 
-#ifdef _WIN32
+#ifdef WIN32
     #include <windows.h>
 #endif
 
@@ -15,7 +15,7 @@
 
 namespace Threader::Utils {
 
-#ifdef _WIN32
+#ifdef WIN32
 
 const std::string SERIAL_PORT_PREFFIX = "\\\\.\\";
 
@@ -77,7 +77,7 @@ Descriptor SerialUtils::openSerial(const std::string &deviceName,
 
 #endif
 
-#ifdef _WIN32
+#ifdef WIN32
     // дополнение имени порта
     auto localDeviceName = deviceName;
     if (!deviceName.compare(0, SERIAL_PORT_PREFFIX.length(), SERIAL_PORT_PREFFIX))
@@ -168,7 +168,7 @@ int SerialUtils::inputBytesAvailable(Descriptor descriptor)
         return 0;
 #endif
 
-#ifdef _WIN32
+#ifdef WIN32
     COMSTAT comStat;
     DWORD errors;
     if (ClearCommError(descriptor, &errors, &comStat))
@@ -198,7 +198,7 @@ int SerialUtils::outputBytesAvailable(Descriptor descriptor)
     return bytesAvailable;
 }
 
-#ifdef _WIN32
+#ifdef WIN32
 
 bool SerialUtils::setWaitMask(Descriptor descriptor, bool needsToWrite)
 {

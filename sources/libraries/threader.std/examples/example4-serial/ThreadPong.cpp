@@ -3,9 +3,9 @@
 #include "HandlerSerialPort.h"
 #include "PacketFactoryAsciiLines.h"
 
-ThreadPong::ThreadPong()
+ThreadPong::ThreadPong(const std::string &deviceName)
     : ThreadHandler(nullptr,
-                    new HandlerSerialPort(nullptr, "/dev/pts/2"),
+                    new HandlerSerialPort(nullptr, deviceName),
                     1000,
                     new PacketFactoryAsciiLines(),
                     "Thread.Pong")
@@ -84,7 +84,7 @@ bool ThreadPong::onPacketReceived(const PacketBase::Ptr &packet)
     auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLines>(packet);
     writeLog(Message216, packetAscii->lines().front().c_str(), handler()->deviceName().c_str());
 
-    // sendPacket(packet);
+     sendPacket(packet);
     return true;
 }
 

@@ -7,7 +7,7 @@ using namespace Threader::Threads;
 class ThreadPong : public ThreadHandler
 {
 public:
-    explicit ThreadPong();
+    explicit ThreadPong(const std::string &deviceName);
 
 protected:
     void onThreadStarted() override;
