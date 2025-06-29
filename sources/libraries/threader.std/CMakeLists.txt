@@ -10,6 +10,7 @@ include_directories(
 set(THREADER_SOURCES
     include/threads/HandlerBase.h sources/threads/HandlerBase.cpp
     include/threads/HandlerSerialPort.h sources/threads/HandlerSerialPort.cpp
+    include/threads/HandlerTcpSocket.h sources/threads/HandlerTcpSocket.cpp
     include/threads/ListThreads.h sources/threads/ListThreads.cpp
     include/threads/MessageBase.h sources/threads/MessageBase.cpp
     include/threads/MessageBinary.h sources/threads/MessageBinary.cpp
@@ -18,11 +19,13 @@ set(THREADER_SOURCES
     include/threads/MessageConsumer.h sources/threads/MessageConsumer.cpp
     include/threads/PacketFactoryAsciiLines.h sources/threads/PacketFactoryAsciiLines.cpp
     include/threads/PacketFactoryBase.h sources/threads/PacketFactoryBase.cpp
+    include/threads/PollerListenSocket.h sources/threads/PollerListenSocket.cpp
     include/threads/PollerThread.h sources/threads/PollerThread.cpp
     include/threads/PollingPosix.h sources/threads/PollingPosix.cpp
     include/threads/QueueMessages.h sources/threads/QueueMessages.cpp
     include/threads/ThreadBase.h sources/threads/ThreadBase.cpp
     include/threads/ThreadHandler.h sources/threads/ThreadHandler.cpp
+    include/threads/ThreadListenSocket.h sources/threads/ThreadListenSocket.cpp
     include/threads/ThreadLog.h sources/threads/ThreadLog.cpp
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
@@ -31,6 +34,7 @@ set(THREADER_SOURCES
     include/utils/MemoryBlock.h sources/utils/MemoryBlock.cpp
     include/utils/SerialUtils.h sources/utils/SerialUtils.cpp
     include/utils/SignalHandler.h sources/utils/SignalHandler.cpp
+    include/utils/SocketUtils.h sources/utils/SocketUtils.cpp
     include/utils/StdStringUtils.h sources/utils/StdStringUtils.cpp
     include/utils/StdThreadWrapper.h sources/utils/StdThreadWrapper.cpp
     include/utils/TrafficCounter.h sources/utils/TrafficCounter.cpp
@@ -53,7 +57,7 @@ set_target_properties(threader-std PROPERTIES VERSION ${VERSION} SOVERSION ${VER
 
 target_link_libraries(threader-std PRIVATE
     -lpthread
-    -lstdc++fs
+#    -lstdc++fs
 )
 
 # example1-messages
@@ -65,7 +69,7 @@ target_compile_features(example1-messages PUBLIC cxx_std_17)
 
 target_link_libraries(example1-messages
     -lpthread
-    -lstdc++fs
+#    -lstdc++fs
     threader-std
 )
 
@@ -79,7 +83,7 @@ target_compile_features(example2-threads PUBLIC cxx_std_17)
 
 target_link_libraries(example2-threads
     -lpthread
-    -lstdc++fs
+#    -lstdc++fs
     threader-std
 )
 
@@ -96,7 +100,7 @@ target_compile_features(example3-pingpong PUBLIC cxx_std_17)
 
 target_link_libraries(example3-pingpong
     -lpthread
-    -lstdc++fs
+#    -lstdc++fs
     threader-std
 )
 
@@ -112,7 +116,20 @@ target_compile_features(example4-serial PUBLIC cxx_std_17)
 
 target_link_libraries(example4-serial
    -lpthread
-   -lstdc++fs
+#   -lstdc++fs
    threader-std
 )
 
+# example5-simpleserver
+
+add_executable(example5-simpleserver
+   examples/example5-simpleserver/Example5Common.h
+   examples/example5-simpleserver/MainExample5.cpp
+)
+target_compile_features(example5-simpleserver PUBLIC cxx_std_17)
+
+target_link_libraries(example5-simpleserver
+   -lpthread
+   -lstdc++fs
+   threader-std
+)

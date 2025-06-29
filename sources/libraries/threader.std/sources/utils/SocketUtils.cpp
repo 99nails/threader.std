@@ -1,18 +1,17 @@
 #include "SocketUtils.h"
 
-#include <QString>
-
 namespace Threader {
 
 namespace Utils {
 
+#include <string.h>
 
 bool SocketUtils::_isSocketsInitialized = false;
 
 
 bool SocketUtils::initializeSockets()
 {
-#ifdef Q_OS_WIN
+#ifdef WIN
     if (_isSocketsInitialized)
         return true;
 
@@ -22,7 +21,7 @@ bool SocketUtils::initializeSockets()
     _isSocketsInitialized = (0 == result);
 #endif
 
-#ifdef Q_OS_LINUX
+#ifdef linux
     _isSocketsInitialized = true;
 #endif
     return _isSocketsInitialized;
@@ -30,7 +29,7 @@ bool SocketUtils::initializeSockets()
 
 void SocketUtils::finalizeSockets()
 {
-#ifdef Q_OS_WIN
+#ifdef WIN
    if (_isSocketsInitialized)
        WSACleanup();
 #endif
@@ -43,38 +42,38 @@ bool SocketUtils::checkSocketsInitialization()
     return initializeSockets();
 }
 
-bool SocketUtils::isIpAddressString(const QString &ipAddressString)
+bool SocketUtils::isIpAddressString(const std::string &ipAddressString)
 {
     if (!checkSocketsInitialization())
         return false;
 
-    auto addr = inet_addr(ipAddressString.toLocal8Bit().constData());
+    auto addr = inet_addr(ipAddressString.c_str());
     return (addr != INADDR_NONE && addr != INADDR_ANY);
 }
 
-QString SocketUtils::sockAddrToString(const sockaddr_in &addr)
+std::string SocketUtils::sockAddrToString(const sockaddr_in &addr)
 {
-    return QString(inet_ntoa(addr.sin_addr));
+    return std::string(inet_ntoa(addr.sin_addr));
 }
 
-sockaddr_in SocketUtils::ipAddressStringToAddress(const QString &ipAddress,
+sockaddr_in SocketUtils::ipAddressStringToAddress(const std::string &ipAddress,
                                                   const uint16_t &port)
 {
     sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr(ipAddress.toLocal8Bit().constData());
+    addr.sin_addr.s_addr = inet_addr(ipAddress.c_str());
     addr.sin_port = htons(port);
     return addr;
 }
 
-QString SocketUtils::hostToIpAddressString(const QString &host)
+std::string SocketUtils::hostToIpAddressString(const std::string &host)
 {
-    QString result = host;
+    std::string result = host;
     if (!checkSocketsInitialization())
         return result;
 
-#ifdef Q_OS_WIN
+#ifdef WIN
 
     auto entry = gethostbyname(host.toLocal8Bit().constData());
     if (!entry)
@@ -93,7 +92,7 @@ QString SocketUtils::hostToIpAddressString(const QString &host)
 
 #endif
 
-#ifdef Q_OS_LINUX
+#ifdef linux
     struct addrinfo hints, *res;
 
     memset(&hints, 0, sizeof(hints));
@@ -101,12 +100,12 @@ QString SocketUtils::hostToIpAddressString(const QString &host)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags |= AI_CANONNAME;
 
-    int errcode = getaddrinfo(host.toLocal8Bit().constData(), nullptr, &hints, &res);
+    int errcode = getaddrinfo(host.c_str(), nullptr, &hints, &res);
     if (errcode != 0)
         return result;
 
     auto ptr = (reinterpret_cast<struct sockaddr_in*>(res->ai_addr))->sin_addr;
-    result = QString(inet_ntoa(ptr));
+    result = std::string(inet_ntoa(ptr));
     freeaddrinfo(res);
 
 #endif
@@ -115,10 +114,10 @@ QString SocketUtils::hostToIpAddressString(const QString &host)
 
 int SocketUtils::lastError()
 {
-#ifdef Q_OS_WIN
+#ifdef WIN
     return WSAGetLastError();
 #endif
-#ifdef Q_OS_LINUX
+#ifdef linux
     return errno;
 #endif
     return 0;
@@ -126,18 +125,18 @@ int SocketUtils::lastError()
 
 void SocketUtils::closeSocket(Descriptor socket)
 {
-#ifdef Q_OS_WIN
+#ifdef WIN
     shutdown((SOCKET)socket, SD_BOTH);
     closesocket((SOCKET)socket);
 #endif
 
-#ifdef Q_OS_LINUX
+#ifdef linux
     shutdown(socket, SHUT_RDWR);
     close(socket);
 #endif
 }
 
-#ifdef Q_OS_WIN
+#ifdef WIN
 
 Descriptor SocketUtils::createTcpServerSocket(uint16_t port,
                                               bool isBlocking,
@@ -273,7 +272,7 @@ int SocketUtils::inputBytesAvalable(const Descriptor descriptor)
 
 #endif
 
-#ifdef Q_OS_UNIX
+#ifdef linux
 
 Descriptor SocketUtils::createTcpServerSocket(uint16_t port,
                                               bool isBlocking,
@@ -341,7 +340,7 @@ Descriptor SocketUtils::createTcpServerSocket(uint16_t port,
     return result;
 }
 
-Descriptor SocketUtils::openTcpClientSocket(const QString &ipAddress,
+Descriptor SocketUtils::openTcpClientSocket(const std::string &ipAddress,
                                             const uint16_t port,
                                             int &errorCode,
                                             const int)
@@ -353,9 +352,10 @@ Descriptor SocketUtils::openTcpClientSocket(const QString &ipAddress,
     hints.ai_flags = AI_NUMERICHOST;
 
     // получение информации об удаленном хосте
-    int callResult = getaddrinfo(ipAddress.toLocal8Bit().constData(),
-                                 QString::number(port).toLocal8Bit().constData(),
-                                 &hints, &addr_result);
+    int callResult = getaddrinfo(ipAddress.c_str(),
+                                 std::to_string(port).c_str(),
+                                 &hints,
+                                 &addr_result);
     if (callResult != 0)
     {
         errorCode = lastError();
@@ -439,7 +439,7 @@ Descriptor SocketUtils::createUdpSocket(const uint16_t &port,
                                         int &errorCode)
 {
     errorCode= 0;
-#ifdef Q_OS_WIN
+#ifdef WIN
     if (!checkSocketsInitialization())
         return (Descriptor)INVALID_SOCKET;
 #endif
@@ -449,10 +449,10 @@ Descriptor SocketUtils::createUdpSocket(const uint16_t &port,
 //    addr.sin_addr.s_addr = INADDR_ANY;
 //    addr.sin_port = htons(port);
 
-#ifdef Q_OS_WIN
+#ifdef WIN
     Descriptor result = (Descriptor)socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 #endif
-#ifdef Q_OS_LINUX
+#ifdef linux
     Descriptor result = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 #endif
 
@@ -463,11 +463,12 @@ Descriptor SocketUtils::createUdpSocket(const uint16_t &port,
         return result;
     }
 
-#ifdef Q_OS_WIN
+#ifdef WIN
     auto callResult = bind((SOCKET)result, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
 #endif
-#ifdef Q_OS_LINUX
+#ifdef linux
     auto callResult = bind(result, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+    (void)port;
 #endif
     if (callResult < 0)
     {
@@ -477,11 +478,9 @@ Descriptor SocketUtils::createUdpSocket(const uint16_t &port,
     }
 
     return result;
-
-    Q_UNUSED(port)
 }
 
-#ifdef Q_OS_LINUX
+#ifdef linux
 
 int SocketUtils::inputBytesAvalable(const Descriptor descriptor)
 {
@@ -500,12 +499,12 @@ int SocketUtils::inputBytesAvalable(const Descriptor descriptor)
 bool SocketUtils::setBlockingMode(Descriptor socket, bool isBlocking)
 {
 
-#ifdef Q_OS_WIN
+#ifdef WIN
     u_long arg = (isBlocking) ? 0 : 1;
     return ioctlsocket((SOCKET)socket, FIONBIO, &arg) == 0;
 #endif
 
-#ifdef Q_OS_LINUX
+#ifdef linux
     int arg = fcntl(socket, F_GETFL, 0);
     arg =(isBlocking)
             ? arg & ~O_NONBLOCK
