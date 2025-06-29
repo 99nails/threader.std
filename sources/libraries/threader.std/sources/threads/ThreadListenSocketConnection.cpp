@@ -1,9 +1,7 @@
-#include "ThreadListenSocket.h"
+#include "ThreadListenSocketConnection.h"
 
 #include "DateTimeUtils.h"
 #include "SocketUtils.h"
-
-//#include "../Utils/BackwardCompatibility.h"
 
 namespace Threader {
 
@@ -13,21 +11,22 @@ namespace Threads {
 using namespace Threader::Utils;
 
 
-const uint ThreadListenSocket::TIMEOUT_REOPEN_LISTEN_SOCKET_MILLISECONDS = 30000;
+const uint ThreadListenSocketConnection::TIMEOUT_REOPEN_LISTEN_SOCKET_MILLISECONDS = 30000;
 
 
-ThreadListenSocket::ThreadListenSocket(uint16_t port,
-                                       MessageConsumer *parent)
-    : ThreadBase(parent)
+ThreadListenSocketConnection::ThreadListenSocketConnection(uint16_t port,
+                                                           MessageConsumer *parent)
+    : ThreadBase(parent, "Thread.Listen")
     , _ports({port})
     , _portsString(std::to_string(port))
     , _nextStartListening(DateTimeUtils::getTickCount())
 {
-    registerListener(new PollerListenSocket(this, port));
+    registerListener(new PollerListenSocketConnection(this, port));
 }
 
-ThreadListenSocket::ThreadListenSocket(const PortVector &ports, MessageConsumer *parent)
-    : ThreadBase(parent)
+ThreadListenSocketConnection::ThreadListenSocketConnection(const PortVector &ports,
+                                                           MessageConsumer *parent)
+    : ThreadBase(parent, "Thread.Listen")
     , _nextStartListening(DateTimeUtils::getTickCount())
 {
     for (auto port : ports)
@@ -37,46 +36,41 @@ ThreadListenSocket::ThreadListenSocket(const PortVector &ports, MessageConsumer 
 
         _ports.push_back(port);
 
-        registerListener(new PollerListenSocket(this, port));
+        registerListener(new PollerListenSocketConnection(this, port));
         if (!_portsString.empty())
             _portsString +=", ";
         _portsString += std::to_string(port);
     }
 }
 
-ThreadListenSocket::~ThreadListenSocket()
+ThreadListenSocketConnection::~ThreadListenSocketConnection()
 {
 }
 
-uint16_t ThreadListenSocket::port(int index) const
+uint16_t ThreadListenSocketConnection::port(int index) const
 {
     return _ports.at(index);
 }
 
-PollerListenSocket *ThreadListenSocket::listeners(int index) const
+PollerListenSocketConnection *ThreadListenSocketConnection::listeners(int index) const
 {
     return _listeners.at(index);
 }
 
-void ThreadListenSocket::registerListener(PollerListenSocket *listener)
+void ThreadListenSocketConnection::registerListener(PollerListenSocketConnection *listener)
 {
     if (!listener)
         return;
 
-//    listener->moveToThread(this);
-//    connect(listener, &PollerListenSocket::signalOnListenSocketError,
-//            this, &ThreadListenSocket::slotOnListenSocketError, Qt::DirectConnection);
-//    connect(listener, &PollerListenSocket::signalConnectionRequest,
-//            this, &ThreadListenSocket::slotOnConnectionRequest, Qt::DirectConnection);
     _listeners.push_back(listener);
 }
 
-std::string ThreadListenSocket::portString()
+std::string ThreadListenSocketConnection::portString()
 {
     return _portsString;
 }
 
-void ThreadListenSocket::onBeforeWaitEvents()
+void ThreadListenSocketConnection::onBeforeWaitEvents()
 {
     if (_nextStartListening > DateTimeUtils::getTickCount())
         return;
@@ -107,7 +101,7 @@ void ThreadListenSocket::onBeforeWaitEvents()
     }
 }
 
-void ThreadListenSocket::terminateChildThreads()
+void ThreadListenSocketConnection::terminateChildThreads()
 {
     for (auto listener: _listeners)
     {
@@ -122,19 +116,19 @@ void ThreadListenSocket::terminateChildThreads()
 
 //}
 
-void ThreadListenSocket::slotOnListenSocketError(PollerListenSocket *sender,
-                                                 int errorCode)
+void ThreadListenSocketConnection::slotOnListenSocketError(PollerListenSocketConnection *sender,
+                                                           int errorCode)
 {
     onListenSocketError(sender, errorCode);
 }
 
-void ThreadListenSocket::slotOnConnectionRequest(PollerListenSocket *sender,
-                                                 Descriptor socket,
-                                                 const sockaddr_in &addr,
-                                                 bool &accept)
+void ThreadListenSocketConnection::slotOnConnectionRequest(PollerListenSocketConnection *sender,
+                                                           Descriptor socket,
+                                                           const sockaddr_in &addr,
+                                                           bool &accept)
 {
-//    std::string ipAddress = SocketUtils::sockAddrToString(addr);
-//    onAcceptConnectionRequest(sender, socket, ipAddress, accept);
+    //    std::string ipAddress = SocketUtils::sockAddrToString(addr);
+    //    onAcceptConnectionRequest(sender, socket, ipAddress, accept);
 }
 
 }}

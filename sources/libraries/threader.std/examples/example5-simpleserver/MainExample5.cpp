@@ -1,3 +1,6 @@
+#include "Example5Common.h"
+#include "ThreadMain.h"
+
 #include "DateTimeUtils.h"
 #include "StdStringUtils.h"
 #include "SignalHandler.h"
@@ -32,12 +35,22 @@ int main(int argc, char *argv[])
     auto threadLog = new ThreadLog(argv[0]);
     threadLog->start();
 
+    auto threadMain = new ThreadMainExample5();
+    threadMain->start();
+
+    ThreadBase::writeLog(Message11);
+
     readStr();
+
+    threadMain->postTerminateEvent();
+    while (!threadMain->isFinished())
+    {
+        DateTimeUtils::sleepMilliseconds(100);
+    }
 
     threadLog->postTerminateEvent();
     while (!threadLog->isFinished())
     {
         DateTimeUtils::sleepMilliseconds(100);
     }
-
 }

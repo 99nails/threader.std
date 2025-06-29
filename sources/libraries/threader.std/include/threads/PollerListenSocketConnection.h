@@ -21,12 +21,12 @@ namespace Threader::Threads
 
 class ConsumerListenSocketEvents;
 
-class PollerListenSocket : public PollerBase
+class PollerListenSocketConnection : public PollerBase
 {
 public:
-    explicit PollerListenSocket(ConsumerListenSocketEvents *consumer,
+    explicit PollerListenSocketConnection(ConsumerListenSocketEvents *consumer,
                                 uint16_t port);
-    ~PollerListenSocket() override;
+    ~PollerListenSocketConnection() override;
 
     bool isInitialized() const;
 
@@ -64,17 +64,17 @@ private:
 };
 
 
-using PollerListenSocketVector = std::vector<PollerListenSocket*>;
+using PollerListenSocketVector = std::vector<PollerListenSocketConnection*>;
 
 
 class ConsumerListenSocketEvents
 {
 public:
 
-    virtual void onListenSocketError(PollerListenSocket *sender,
+    virtual void onListenSocketError(PollerListenSocketConnection *sender,
                                      int errorCode) = 0;
 
-    virtual void onConnectionRequest(PollerListenSocket *sender,
+    virtual void onConnectionRequest(PollerListenSocketConnection *sender,
                                      Descriptor socket,
                                      const sockaddr_in &addr,
                                      bool &accept) = 0;

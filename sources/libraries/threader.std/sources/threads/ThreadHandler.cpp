@@ -64,6 +64,9 @@ void ThreadHandler::initializeThread()
 {
     ThreadBase::initializeThread();
 
+//    if (!_handler)
+//        return;
+
     if (_handler->connectionState() != HandlerBase::ConnectionState::Disconnected)
         onConnectionStateChanged(_handler,
                                  HandlerBase::ConnectionState::Disconnected,
@@ -78,20 +81,23 @@ HandlerBase *ThreadHandler::handler()
 void ThreadHandler::setHandler(HandlerBase *handler)
 {
     _handler = handler;
-    if (_handler && !_handler->consumer())
-        _handler->setConsumer(this);
+    if (_handler)
+    {
+        if (!_handler->consumer())
+                _handler->setConsumer(this);
 
 #ifdef USE_QT
-    connect(_handler, &HandlerBase::signalOnConnectionStateChanged,
-            this, &ThreadHandler::slotOnConnectionStateChanged, Qt::DirectConnection);
-    connect(_handler, &HandlerBase::signalOnError,
-            this, &ThreadHandler::slotOnError, Qt::DirectConnection);
-    connect(_handler, &HandlerBase::signalOnReadyRead,
-            this, &ThreadHandler::slotOnReadyToRead, Qt::DirectConnection);
-    connect(_handler, &HandlerBase::signalOnReadyWrite,
-            this, &ThreadHandler::slotOnReadyToWrite, Qt::DirectConnection);
+        connect(_handler, &HandlerBase::signalOnConnectionStateChanged,
+                this, &ThreadHandler::slotOnConnectionStateChanged, Qt::DirectConnection);
+        connect(_handler, &HandlerBase::signalOnError,
+                this, &ThreadHandler::slotOnError, Qt::DirectConnection);
+        connect(_handler, &HandlerBase::signalOnReadyRead,
+                this, &ThreadHandler::slotOnReadyToRead, Qt::DirectConnection);
+        connect(_handler, &HandlerBase::signalOnReadyWrite,
+                this, &ThreadHandler::slotOnReadyToWrite, Qt::DirectConnection);
 #endif
-    polling()->registerPoller(_handler);
+        polling()->registerPoller(_handler);
+    }
 }
 
 uint32_t ThreadHandler::reconnectTimeout()

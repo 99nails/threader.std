@@ -19,13 +19,13 @@ set(THREADER_SOURCES
     include/threads/MessageConsumer.h sources/threads/MessageConsumer.cpp
     include/threads/PacketFactoryAsciiLines.h sources/threads/PacketFactoryAsciiLines.cpp
     include/threads/PacketFactoryBase.h sources/threads/PacketFactoryBase.cpp
-    include/threads/PollerListenSocket.h sources/threads/PollerListenSocket.cpp
+    include/threads/PollerListenSocketConnection.h sources/threads/PollerListenSocketConnection.cpp
     include/threads/PollerThread.h sources/threads/PollerThread.cpp
     include/threads/PollingPosix.h sources/threads/PollingPosix.cpp
     include/threads/QueueMessages.h sources/threads/QueueMessages.cpp
     include/threads/ThreadBase.h sources/threads/ThreadBase.cpp
     include/threads/ThreadHandler.h sources/threads/ThreadHandler.cpp
-    include/threads/ThreadListenSocket.h sources/threads/ThreadListenSocket.cpp
+    include/threads/ThreadListenSocketConnection.h sources/threads/ThreadListenSocketConnection.cpp
     include/threads/ThreadLog.h sources/threads/ThreadLog.cpp
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
@@ -125,6 +125,9 @@ target_link_libraries(example4-serial
 add_executable(example5-simpleserver
    examples/example5-simpleserver/Example5Common.h
    examples/example5-simpleserver/MainExample5.cpp
+   examples/example5-simpleserver/ThreadConnectionServer.h examples/example5-simpleserver/ThreadConnectionServer.cpp
+   examples/example5-simpleserver/ThreadListenConnections.h examples/example5-simpleserver/ThreadListenConnections.cpp
+   examples/example5-simpleserver/ThreadMain.h examples/example5-simpleserver/ThreadMain.cpp
 )
 target_compile_features(example5-simpleserver PUBLIC cxx_std_17)
 

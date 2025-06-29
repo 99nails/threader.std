@@ -1,4 +1,4 @@
-#include "PollerListenSocket.h"
+#include "PollerListenSocketConnection.h"
 
 #include "SocketUtils.h"
 
@@ -9,7 +9,7 @@ namespace Threader::Threads
 using namespace Threader::Utils;
 
 
-PollerListenSocket::PollerListenSocket(ConsumerListenSocketEvents *consumer,
+PollerListenSocketConnection::PollerListenSocketConnection(ConsumerListenSocketEvents *consumer,
                                        uint16_t port)
     : PollerBase()
     , _isInitialized(false)
@@ -22,22 +22,22 @@ PollerListenSocket::PollerListenSocket(ConsumerListenSocketEvents *consumer,
 {
 }
 
-PollerListenSocket::~PollerListenSocket()
+PollerListenSocketConnection::~PollerListenSocketConnection()
 {
 
 }
 
-bool PollerListenSocket::isInitialized() const
+bool PollerListenSocketConnection::isInitialized() const
 {
     return _isInitialized;
 }
 
-uint16_t PollerListenSocket::port() const
+uint16_t PollerListenSocketConnection::port() const
 {
     return _port;
 }
 
-bool PollerListenSocket::initialize()
+bool PollerListenSocketConnection::initialize()
 {
     if (_isInitialized)
         return true;
@@ -76,7 +76,7 @@ bool PollerListenSocket::initialize()
     return result;
 }
 
-void PollerListenSocket::finalize()
+void PollerListenSocketConnection::finalize()
 {
 #ifdef WIN
     finalizeWindows();
@@ -143,7 +143,7 @@ bool PollerListenSocket::process(Descriptor eventToProcess)
 
 #ifdef linux
 
-void PollerListenSocket::finalizeLinux()
+void PollerListenSocketConnection::finalizeLinux()
 {
     if (descriptor() == INVALID_DESCRIPTOR)
         return;
@@ -152,7 +152,7 @@ void PollerListenSocket::finalizeLinux()
     setEvents(0);
 }
 
-bool PollerListenSocket::process(const pollfd &event)
+bool PollerListenSocketConnection::process(const pollfd &event)
 {
     if (descriptor() != event.fd)
         return false;
@@ -166,7 +166,7 @@ bool PollerListenSocket::process(const pollfd &event)
     return true;
 }
 
-int PollerListenSocket::processConnectionRequests()
+int PollerListenSocketConnection::processConnectionRequests()
 {
     int result = 0;
     Descriptor newSocket;
