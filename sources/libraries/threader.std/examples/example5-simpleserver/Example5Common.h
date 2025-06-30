@@ -63,3 +63,25 @@ MESSAGE_TEMPLATE(201, 0, MessageType::Message,
 
 MESSAGE_TEMPLATE(202, 0, MessageType::Message,
                  "Поток работы с подключением [%s] завершен")
+
+
+MESSAGE_TEMPLATE(210, 0, MessageType::Attention,
+                 "Подключение к [%s] установлено")
+
+MESSAGE_TEMPLATE(211, 0, MessageType::Attention,
+                 "Подключение к [%s] закрыто")
+
+MESSAGE_TEMPLATE(212, 0, MessageType::Message,
+                 "Получено [%d] байт от подключения к [%s]")
+
+MESSAGE_TEMPLATE(213, 0, MessageType::Message,
+                 "Передано [%d] байт на подключение к [%s]")
+
+MESSAGE_TEMPLATE(214, 0, MessageType::Message,
+                 "Получен пакет [%s] от подключения к [%s]")
+
+MESSAGE_TEMPLATE(215, 0, MessageType::Message,
+                 "Передан пакет [%s] на подключение к [%s]")
+
+MESSAGE_TEMPLATE(220, 0, MessageType::Error,
+                 "Ошибка работы с подключением к [%s] - [%d] %s")

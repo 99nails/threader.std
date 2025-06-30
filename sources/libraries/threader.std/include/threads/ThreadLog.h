@@ -29,6 +29,7 @@ protected:
     void onThreadStarted() override;
     void onThreadFinishing() override;
     void onThreadFinished() override;
+    void onIdle() override;
 
     void processMessage(const MessageBase::Ptr &message) override;
 

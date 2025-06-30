@@ -53,7 +53,7 @@ struct MessageLogTemplate
  * @param TEXT   - текст сообщения
  */
 #define MESSAGE_TEMPLATE(NUMBER, LEVEL, TYPE, TEXT) \
-const MessageLogTemplate Message##NUMBER = {NUMBER, LEVEL, LOG_SUBSYSTEM, TYPE, TEXT};
+    const MessageLogTemplate Message##NUMBER = {NUMBER, LEVEL, LOG_SUBSYSTEM, TYPE, TEXT};
 
 /**
  * Макрос для протоколирования идентификаторов
@@ -99,18 +99,28 @@ const MessageLogTemplate Message##NUMBER = {NUMBER, LEVEL, LOG_SUBSYSTEM, TYPE, 
  */
 #define DTLOG(DATETIME) DTFLOG(DATETIME, "dd.MM.yyyy HH:mm:ss.zzz")
 
-constexpr int logDetailsDefault = LogDetails::Time |
-                                  LogDetails::Type |
-                                  LogDetails::Number |
-                                  LogDetails::Text;
+constexpr int logDetailsDefault =
+        LogDetails::Time |
+        LogDetails::Type |
+        LogDetails::Number |
+        LogDetails::Text;
 
-constexpr int logDetailsAll = LogDetails::Date |
-                              LogDetails::Time |
-                              LogDetails::Type |
-                              LogDetails::Number |
-                              LogDetails::Subsystem |
-                              LogDetails::ThreadId |
-                              LogDetails::Text;
+constexpr int logDetailsAllWithotDate =
+        LogDetails::Time |
+        LogDetails::Type |
+        LogDetails::Number |
+        LogDetails::Subsystem |
+        LogDetails::ThreadId |
+        LogDetails::Text;
+
+constexpr int logDetailsAll =
+        LogDetails::Date |
+        LogDetails::Time |
+        LogDetails::Type |
+        LogDetails::Number |
+        LogDetails::Subsystem |
+        LogDetails::ThreadId |
+        LogDetails::Text;
 
 class Logger
 {
@@ -119,21 +129,21 @@ public:
                     const std::string &pathToBin,
                     int level,
                     const int logDetails = LogDetails::Time |
-                                           LogDetails::Type |
-                                           LogDetails::Number |
-                                           LogDetails::Text);
+            LogDetails::Type |
+            LogDetails::Number |
+            LogDetails::Text);
     virtual ~Logger();
 
     std::string pathToLog() const;
     int level() const;
 
     bool collectMessage(UnuxTimeMSecs created,
-               int number,
-               int level,
-               MessageType messageType,
-               std::string subSystem,
-               THREAD_ID threadId,
-               std::string text);
+                        int number,
+                        int level,
+                        MessageType messageType,
+                        std::string subSystem,
+                        THREAD_ID threadId,
+                        std::string text);
 
     bool flush();
 

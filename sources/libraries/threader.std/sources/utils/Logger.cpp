@@ -11,7 +11,7 @@
 
 #ifdef linux
 #include <fcntl.h>
-#include <linux/limits.h>
+//#include <linux/limits.h>
 #include <sys/stat.h>
 #endif
 
@@ -53,26 +53,21 @@ Logger::Logger(bool doConsoleOutput,
               : "LogFile";
 
 #ifdef _WIN32
+    _consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
     if (StdStringUtils::endsWith(StdStringUtils::toUpper(_logFilePrefix), ".EXE"))
     {
         _logFilePrefix.erase(_logFilePrefix.length() - 4, 4);
+    }    
+#endif
+
+    _pathToLog = FileUtils::absolutePath("../log/");
+    if (!_pathToLog.empty())
+    {
+        auto end = _pathToLog.back();
+        if (end != FileUtils::DELIMITER)
+            _pathToLog += FileUtils::DELIMITER;
     }
-#endif
-
-    char pathToLog[PATH_MAX] = "../log";
-
-#ifdef linux
-    realpath("../log/", pathToLog);
-#endif
-#ifdef _WIN32
-    char pathFrom[] = "../log";
-    GetFullPathName(pathFrom,
-                    strlen(pathFrom),
-                    pathToLog,
-                    nullptr);
-    _consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-#endif
-    _pathToLog = pathToLog;
 
     prepareFilePath();
 }
@@ -137,7 +132,7 @@ bool Logger::collectMessage(UnuxTimeMSecs created,
 
     if (LogDetails::Time & _logDetails) {
         appendTab(data, " ");
-        data += DateTimeUtils::msecsSinceEpochToStdString(created, true, true,  "%H-%M-%S");
+        data += DateTimeUtils::msecsSinceEpochToStdString(created, true, true,  "%H:%M:%S");
     }
 
     if (!data.empty())
@@ -171,7 +166,6 @@ bool Logger::collectMessage(UnuxTimeMSecs created,
 
     if (_doConsoleOutput)
         printLine(data, messageType);
-        // std::cout << data.c_str();
 
     return true;
 }
@@ -179,12 +173,17 @@ bool Logger::collectMessage(UnuxTimeMSecs created,
 bool Logger::flush()
 {
     if (INVALID_DESCRIPTOR == _descriptor)
+        openFile();
+
+    if (INVALID_DESCRIPTOR == _descriptor)
         return false;
 
     for (auto iterator = _buffer.cbegin(); iterator != _buffer.cend(); iterator++)
     {
 #ifdef linux
+
         ::write(_descriptor, iterator->c_str(), iterator->length());
+
 #endif
 #ifdef _WIN32
         DWORD writtenCount;

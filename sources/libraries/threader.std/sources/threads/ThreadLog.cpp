@@ -17,9 +17,11 @@ ThreadLog::ThreadLog(const std::string &pathToBin,
     , _consumer(consumer)
 {
     _instance = this;
-    _logger = new Logger(true, pathToBin, 9, logDetailsAll);
+    _logger = new Logger(true, pathToBin, 9, logDetailsAllWithotDate);
 
     ThreadBase::setLogThread(this, _logger->level());
+
+    setTimeout(2000);
 }
 
 ThreadLog::~ThreadLog()
@@ -31,7 +33,7 @@ ThreadLog::~ThreadLog()
     }
 }
 
-void Threader::Threads::ThreadLog::flush()
+void ThreadLog::flush()
 {
     if (_logger)
         _logger->flush();
@@ -70,6 +72,13 @@ void ThreadLog::onThreadFinished()
                             Message2.subSystem,
                             thisThreadId(),
                             Message2.text);
+
+    flush();
+}
+
+void ThreadLog::onIdle()
+{
+    flush();
 }
 
 void ThreadLog::processMessage(const MessageBase::Ptr &message)
@@ -95,7 +104,6 @@ void ThreadLog::processMessage(const MessageBase::Ptr &message)
 
         if (_consumer && _logger->level() >= messageLog->level())
             _consumer->postMessage(messageLog);
-
     }
 }
 

@@ -24,9 +24,6 @@ HandlerBase::HandlerBase(HandlerDataConsumer *consumer,
     , _descriptor(descriptor)
     #endif
 {
-    setConnectionState((INVALID_DESCRIPTOR == this->descriptor())
-            ? ConnectionState::Disconnected
-            : ConnectionState::Connected);
 }
 
 #ifdef _WIN32

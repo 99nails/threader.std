@@ -32,7 +32,6 @@ HandlerTcpSocket::HandlerTcpSocket(HandlerDataConsumer *consumer,
     if(INVALID_DESCRIPTOR != descriptor)
     {
         SocketUtils::setBlockingMode(descriptor, false);
-        setConnectionState(ConnectionState::Connected);
     }
 }
 

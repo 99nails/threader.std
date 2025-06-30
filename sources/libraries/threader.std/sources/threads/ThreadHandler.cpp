@@ -24,6 +24,7 @@ ThreadHandler::ThreadHandler(MessageConsumer *parent,
                              const std::string &threadName,
                              const bool &portionedIO)
     : ThreadBase(parent, threadName, ThreadRunMode::Polling)
+//    , _handler(handler)
     , _reconnectTimeout(reconnectTimeout)
     , _nextTryToConnect(DateTimeUtils::getTickCount())
     , _packetFactory(packetFactory)
@@ -64,10 +65,12 @@ void ThreadHandler::initializeThread()
 {
     ThreadBase::initializeThread();
 
-//    if (!_handler)
-//        return;
+    if (!_handler)
+        return;
 
-    if (_handler->connectionState() != HandlerBase::ConnectionState::Disconnected)
+    if (_handler->descriptor() != INVALID_DESCRIPTOR && _handler->connectionState() == HandlerBase::ConnectionState::Disconnected)
+        _handler->setDescriptor(_handler->descriptor());
+    else if (_handler->connectionState() != HandlerBase::ConnectionState::Disconnected)
         onConnectionStateChanged(_handler,
                                  HandlerBase::ConnectionState::Disconnected,
                                  _handler->connectionState());

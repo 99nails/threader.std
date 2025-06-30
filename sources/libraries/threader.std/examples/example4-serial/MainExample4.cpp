@@ -1,3 +1,4 @@
+// use in Linux
 // socat -d -d pty,rawer,echo=0 pty,rawer,echo=0 &
 // NullModem Emulator
 
@@ -52,7 +53,7 @@ int main(int argc, char *argv[])
             #ifdef WIN32
                 "COM5"
             #else
-                "/dev/pts/2"
+                "/dev/pts/0"
             #endif
                 );
     threadPong->start();
