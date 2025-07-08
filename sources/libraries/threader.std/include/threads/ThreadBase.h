@@ -405,7 +405,7 @@ protected:
      * @param timerName - Имя сообщения таймера
      * @return - Признак остановки потока
      */
-    virtual bool stopTimer(const std::string &timerName);
+    virtual bool stopThreadTimer(const std::string &timerName);
 
     /**
      * @brief stopAllTimers - Остановка всех потоков таймеров

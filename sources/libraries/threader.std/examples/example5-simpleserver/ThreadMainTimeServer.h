@@ -6,10 +6,10 @@
 
 using namespace Threader::Threads;
 
-class ThreadMainExample5 : public ThreadBase
+class ThreadMainTimeServer : public ThreadBase
 {
 public:
-    explicit ThreadMainExample5();
+    explicit ThreadMainTimeServer();
 
 protected:
     void onThreadStarted() override;

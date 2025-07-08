@@ -67,6 +67,21 @@ bool FileUtils::isPathExists(const std::string &path)
 #endif
 }
 
+bool FileUtils::isFileExists(const std::string &fieName)
+{
+#ifdef linux
+    struct stat sb;
+    return stat(fieName.c_str(), &sb) == 0
+           && S_ISREG(sb.st_mode);
+#endif
+#ifdef WIN32
+    _finddata_t data;
+    long nFind = _findfirst(fieName.c_str(), &data);
+    _findclose(nFind);
+    return nFind != -1 && data.;
+#endif
+}
+
 std::string FileUtils::absolutePath(const std::string &relativePath)
 {
     char result[PATH_MAX] = "";
@@ -81,6 +96,15 @@ std::string FileUtils::absolutePath(const std::string &relativePath)
                     nullptr);
 #endif
     return result;
+}
+
+bool FileUtils::makeDir(const std::string &path)
+{
+    return mkdir(path.c_str()
+#ifdef linux
+                        , S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
+#endif
+                        ) == 0;
 }
 
 }

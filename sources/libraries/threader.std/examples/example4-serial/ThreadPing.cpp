@@ -75,7 +75,7 @@ void ThreadPing::onDisconnected()
         return;
     writeLog(Message113, handler()->deviceName().c_str());
 
-    stopTimer(MESSAGE_NAME_SEND_PING);
+    stopThreadTimer(MESSAGE_NAME_SEND_PING);
 }
 
 void ThreadPing::onReadData(const void *, const int &count)

@@ -1,4 +1,6 @@
 #include "StdStringUtils.h"
+#include <cstring>
+#include <sstream>
 
 #ifdef WIN32
 #include <windows.h>
@@ -26,6 +28,23 @@ bool StdStringUtils::endsWith(const std::string &s, const std::string &end)
 {
     unsigned endIndex = s.length() - end.length();
     return s.compare(endIndex, end.length(), end) == 0;
+}
+
+StdStringList StdStringUtils::split(const std::string &str,
+                                      const char delimiter,
+                                      const bool keepEmptyParts)
+{
+    StdStringList result;
+    std::string token;
+    std::istringstream stream(str);
+
+    while (std::getline(stream, token, delimiter))
+    {
+        if (keepEmptyParts || !token.empty())
+            result.push_back(token);
+    }
+
+    return result;
 }
 
 #ifdef WIN32

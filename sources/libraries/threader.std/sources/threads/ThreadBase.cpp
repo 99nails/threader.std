@@ -593,7 +593,7 @@ ThreadBase * ThreadBase::startThreadTimer(const std::string &timerName,
     return thread;
 }
 
-bool ThreadBase::stopTimer(const std::string &timerName)
+bool ThreadBase::stopThreadTimer(const std::string &timerName)
 {
     bool result = false;
 

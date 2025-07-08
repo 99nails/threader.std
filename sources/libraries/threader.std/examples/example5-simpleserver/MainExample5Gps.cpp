@@ -1,8 +1,6 @@
-#include "Example5Common.h"
-#include "ThreadMain.h"
+#include "ThreadMainGps.h"
 
 #include "DateTimeUtils.h"
-#include "StdStringUtils.h"
 #include "SignalHandler.h"
 
 #include "ThreadLog.h"
@@ -35,10 +33,8 @@ int main(int argc, char *argv[])
     auto threadLog = new ThreadLog(argv[0]);
     threadLog->start();
 
-    auto threadMain = new ThreadMainExample5();
+    auto threadMain = new ThreadMainGps();
     threadMain->start();
-
-    ThreadBase::writeLog(Message11);
 
     readStr();
 

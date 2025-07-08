@@ -30,9 +30,11 @@ set(THREADER_SOURCES
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
     include/utils/FileUtils.h sources/utils/FileUtils.cpp
+    include/utils/IniFile.h sources/utils/IniFile.cpp
     include/utils/Logger.h sources/utils/Logger.cpp
     include/utils/MemoryBlock.h sources/utils/MemoryBlock.cpp
     include/utils/SerialUtils.h sources/utils/SerialUtils.cpp
+    include/utils/SettingsBase.h sources/utils/SettingsBase.cpp
     include/utils/SignalHandler.h sources/utils/SignalHandler.cpp
     include/utils/SocketUtils.h sources/utils/SocketUtils.cpp
     include/utils/StdStringUtils.h sources/utils/StdStringUtils.cpp
@@ -122,17 +124,34 @@ target_link_libraries(example4-serial
 
 # example5-simpleserver
 
-add_executable(example5-simpleserver
+add_executable(example5-timeserver
    examples/example5-simpleserver/Example5Common.h
-   examples/example5-simpleserver/MainExample5.cpp
+   examples/example5-simpleserver/MainExample5TimeServer.cpp
    examples/example5-simpleserver/ThreadConnectionServer.h examples/example5-simpleserver/ThreadConnectionServer.cpp
    examples/example5-simpleserver/ThreadListenConnections.h examples/example5-simpleserver/ThreadListenConnections.cpp
-   examples/example5-simpleserver/ThreadMain.h examples/example5-simpleserver/ThreadMain.cpp
+   examples/example5-simpleserver/ThreadMainTimeServer.h examples/example5-simpleserver/ThreadMainTimeServer.cpp
 )
-target_compile_features(example5-simpleserver PUBLIC cxx_std_17)
+target_compile_features(example5-timeserver PUBLIC cxx_std_17)
 
-target_link_libraries(example5-simpleserver
+target_link_libraries(example5-timeserver
    -lpthread
    -lstdc++fs
    threader-std
 )
+
+add_executable(example5-gps
+    examples/example5-simpleserver/Example5Common.h
+    examples/example5-simpleserver/MainExample5Gps.cpp
+    examples/example5-simpleserver/SettingsExample5.h examples/example5-simpleserver/SettingsExample5.cpp
+    examples/example5-simpleserver/SettingsGpsEmulator.h examples/example5-simpleserver/SettingsGpsEmulator.cpp
+    examples/example5-simpleserver/ThreadGpsEmulator.h examples/example5-simpleserver/ThreadGpsEmulator.cpp
+    examples/example5-simpleserver/ThreadMainGps.h examples/example5-simpleserver/ThreadMainGps.cpp
+)
+target_compile_features(example5-gps PUBLIC cxx_std_17)
+
+target_link_libraries(example5-gps
+   -lpthread
+   -lstdc++fs
+   threader-std
+)
+

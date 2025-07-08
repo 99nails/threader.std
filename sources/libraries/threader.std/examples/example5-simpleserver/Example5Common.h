@@ -15,11 +15,13 @@ constexpr char MESSAGE_NAME_THREAD[] = "Message.Thread";
 #define LOG_SUBSYSTEM "Main"
 
 MESSAGE_TEMPLATE(10, 0, MessageType::Message,
-                 "Запуск главного потока приложения...")
+                 "Запуск главного потока приложения [%s]...")
+
 MESSAGE_TEMPLATE(11, 0, MessageType::Message,
-                 "Завершение главного потока приложения...")
+                 "Завершение главного потока приложения [%s]...")
+
 MESSAGE_TEMPLATE(12, 0, MessageType::Message,
-                 "Главный поток приложения завершен")
+                 "Главный поток приложения [%s] завершен")
 
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Listen"
@@ -85,3 +87,50 @@ MESSAGE_TEMPLATE(215, 0, MessageType::Message,
 
 MESSAGE_TEMPLATE(220, 0, MessageType::Error,
                  "Ошибка работы с подключением к [%s] - [%d] %s")
+
+#undef LOG_SUBSYSTEM
+#define LOG_SUBSYSTEM "GPS"
+
+MESSAGE_TEMPLATE(300, 0, MessageType::Message,
+                 "Запуск потока эмуляции GPS на порт [%s]...")
+
+MESSAGE_TEMPLATE(301, 0, MessageType::Message,
+                 "Завершение потока эмуляции GPS на порт [%s]...")
+
+MESSAGE_TEMPLATE(302, 0, MessageType::Message,
+                 "Поток эмуляции GPS на порт [%s] завершен")
+
+
+MESSAGE_TEMPLATE(310, 0, MessageType::Message,
+                 "Подключение к устройству [%s]...")
+
+MESSAGE_TEMPLATE(311, 0, MessageType::Attention,
+                 "Подключение к устройству [%s] установлено")
+
+MESSAGE_TEMPLATE(312, 0, MessageType::Message,
+                 "Ошибка подключения к устройству [%s] - %s")
+
+MESSAGE_TEMPLATE(313, 0, MessageType::Attention,
+                 "Подключение к устройству [%s] закрыто")
+
+
+MESSAGE_TEMPLATE(314, 0, MessageType::Message,
+                 "Получено [%d] байт от подключения [%s]")
+
+MESSAGE_TEMPLATE(315, 0, MessageType::Message,
+                 "Передано [%d] байт на подключение [%s]")
+
+
+
+MESSAGE_TEMPLATE(316, 0, MessageType::Message,
+                 "Получен пакет [%s] байт от подключения [%s]")
+
+MESSAGE_TEMPLATE(317, 0, MessageType::Message,
+                 "Передан пакет [%s] байт от подключения [%s]")
+
+
+MESSAGE_TEMPLATE(320, 0, MessageType::Message,
+                 "Получено сообщение [%s]")
+
+MESSAGE_TEMPLATE(321, 0, MessageType::Message,
+                 "Отправлено сообщение [%s]")

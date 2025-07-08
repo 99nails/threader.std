@@ -1,17 +1,21 @@
 #pragma once
 
-#include <string>
+#include <charconv>
 #include <cstdio>
 #include <cstdarg>
 #include <cstdlib>
 #include <list>
-// #include <utility>
+#include <vector>
+#include <stdint.h>
+#include <string>
 
 namespace Threader {
 
 namespace Utils {
 
 using StdStringList = std::list<std::string>;
+
+using StdStringVector = std::vector<std::string>;
 
 class StdStringUtils
 {
@@ -20,7 +24,12 @@ public:
 
     static std::string toLower(std::string s);
 
-    static bool endsWith(const std::string &s, const std::string &end);
+    static bool endsWith(const std::string &s,
+                         const std::string &end);
+
+    static StdStringList split(const std::string &str,
+                               const char delimiter,
+                               const bool keepEmptyParts);
 
 #ifdef WIN32
     static std::string ConvertCP1251ToUTF8(const std::string &str);
@@ -70,5 +79,28 @@ static std::string format(const char * format, ...)
         delete heap_buffer;
 
     return result;
+}
+
+template <typename T>
+bool vtonum(const std::string_view &view, T& value)
+{
+    if (view.empty()) {
+        return false;
+    }
+
+    const char* first = view.data();
+    const char* last = view.data() + view.length();
+
+    std::from_chars_result res = std::from_chars(first, last, value);
+
+    if (res.ec != std::errc()) {
+        return false;
+    }
+
+    if (res.ptr != last) {
+        return false;
+    }
+
+    return true;
 }
 
