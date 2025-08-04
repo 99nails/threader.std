@@ -15,8 +15,7 @@ ThreadMainGps::ThreadMainGps()
 void ThreadMainGps::onThreadStarted()
 {
     writeLog(Message10, APPLICATION_NAME);
-
-    _settings->readBundle();
+    _settings->read();
 }
 
 void ThreadMainGps::onThreadFinishing()
@@ -31,6 +30,7 @@ void ThreadMainGps::onThreadFinished()
 
 void ThreadMainGps::startChildThreads()
 {
-    _threadGps = registerAndStartChildThread(new ThreadGpsEmulator(_settings->settingsGpsEmulator(),
+    auto settingsGps = _settings->get<SettingsGpsEmulator>();
+    _threadGps = registerAndStartChildThread(new ThreadGpsEmulator(settingsGps.get(),
                                                                    this));
 }

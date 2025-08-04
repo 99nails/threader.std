@@ -16,7 +16,7 @@ SettingsGpsEmulator::SettingsGpsEmulator()
 {
 }
 
-bool SettingsGpsEmulator::read(IniFile &iniFile)
+bool SettingsGpsEmulator::readFromIniFile(IniFile &iniFile)
 {
     _portName = iniFile.value(SECTION_NAME, "Port", "");
     _period = iniFile.valueOf(SECTION_NAME, "Period", _period) * 1000;
@@ -26,7 +26,7 @@ bool SettingsGpsEmulator::read(IniFile &iniFile)
     return true;
 }
 
-bool SettingsGpsEmulator::write(IniFile &settings)
+bool SettingsGpsEmulator::writeToIniFile(IniFile &settings)
 {
     return true;
 }

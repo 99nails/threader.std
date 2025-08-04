@@ -25,24 +25,24 @@ void SettingsBundle::setFileName(const std::string &fileName)
     _fileName = fileName;
 }
 
-bool SettingsBundle::read(IniFile &settings)
+bool SettingsBundle::readFromIniFile(IniFile &settings)
 {
     bool result = true;
     for (const auto &s: _settingsBundle)
     {
-        bool r = s->read(settings);
+        bool r = s->readFromIniFile(settings);
         if (!r)
             result = false;
     }
     return result;
 }
 
-bool SettingsBundle::write(IniFile &settings)
+bool SettingsBundle::writeToIniFile(IniFile &settings)
 {
     bool result = true;
     for (const auto &s: _settingsBundle)
     {
-        if (!s->write(settings))
+        if (!s->writeToIniFile(settings))
             result = false;
     }
     return result;

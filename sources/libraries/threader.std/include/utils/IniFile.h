@@ -149,7 +149,7 @@ public:
                       const std::string &parameterName,
                       const std::string &defaultValue);
 
-    template <class ValueType>
+    template <typename ValueType>
     ValueType valueOf(const std::string &sectionName,
                       const std::string &parameterName,
                       const ValueType &defaultValue)

@@ -103,4 +103,11 @@ bool vtonum(const std::string_view &view, T& value)
 
     return true;
 }
-
+// TODO Обработать ошибки и сменить точку на запятую
+template <>
+inline bool vtonum<double>(const std::string_view &view, double &value)
+{
+    std::string s(view);
+    value = std::strtod(s.c_str(), nullptr);
+    return true;
+}

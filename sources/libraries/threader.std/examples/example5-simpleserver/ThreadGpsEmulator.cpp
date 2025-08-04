@@ -5,7 +5,18 @@
 #include "HandlerSerialPort.h"
 #include "PacketFactoryAsciiLines.h"
 
+#include "StdStringUtils.h"
+
+#include <time.h>
+#include <ctime>
+#include <chrono>
+
 constexpr char MESSAGE_NAME_TIMER[] = "Message.Timer";
+
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::system_clock;
+
 
 ThreadGpsEmulator::ThreadGpsEmulator(SettingsGpsEmulator *settings,
                                      MessageConsumer *parent)
@@ -124,7 +135,15 @@ void ThreadGpsEmulator::processMessage(const MessageBase::Ptr &message)
 
 void ThreadGpsEmulator::sendGpsData()
 {
-    auto packet = packetFactory()->buildPacket("$RMC\r\n", false);
+    auto msecsSinceEpoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+    std::time_t temp = msecsSinceEpoch / 1000;
+    auto time = std::gmtime(&temp);
+
+    auto timeString = format("$GNZDA,%.2d%.2d%.2d.000,%.2d,%.2d,%.4d,00,00*FF\r\n",
+                             time->tm_hour, time->tm_min, time->tm_sec,
+                             time->tm_mday, time->tm_mon, time->tm_year + 1900);
+
+    auto packet = packetFactory()->buildPacket(timeString.c_str(), false);
     sendPacket(packet);
 }
 

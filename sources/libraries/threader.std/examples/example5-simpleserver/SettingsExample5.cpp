@@ -5,8 +5,7 @@
 SettingsExample5 *SettingsExample5::_instance = nullptr;
 
 SettingsExample5::SettingsExample5(const std::string &fileName)
-    : SettingsBundle()
-    , _settingsGpsEmulator(std::make_shared<SettingsGpsEmulator>())
+    : SettingsBundleTemplate<SettingsGpsEmulator>()
 {
     _instance = this;
 
@@ -26,32 +25,9 @@ SettingsExample5::SettingsExample5(const std::string &fileName)
     }
 
     setFileName(localFileName);
-
-    registerSettings(_settingsGpsEmulator);
-}
-
-bool SettingsExample5::readBundle()
-{
-    if (FileUtils::isFileExists(fileName()))
-    {
-        IniFile iniFile;
-        iniFile.fileOpen(fileName());
-        return SettingsBundle::read(iniFile);
-    }
-    return false;
-}
-
-bool SettingsExample5::writeBundle()
-{
-    return true;
 }
 
 SettingsExample5 *SettingsExample5::instance()
 {
     return _instance;
-}
-
-SettingsGpsEmulator *SettingsExample5::settingsGpsEmulator() const
-{
-    return _settingsGpsEmulator.get();
 }

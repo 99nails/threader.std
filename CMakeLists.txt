@@ -74,7 +74,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/sources/libraries/threader.std/include/
 
 SET(CPACK_GERATOR "DEB")
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Maxim Mazitov <99nails@gmail.com>")
-SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Multithreaded applications frameword library")
+SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Multithreaded applications framework library")
 set(CPACK_PACKAGE_NAME "libthreaderstd")
 SET(CPACK_DEBIAN_PACKAGE_MAJOR ${VER_MAJ})
 SET(CPACK_DEBIAN_PACKAGE_MINOR ${VER_MIN})

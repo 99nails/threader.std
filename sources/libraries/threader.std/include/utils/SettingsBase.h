@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IniFile.h"
+#include "FileUtils.h"
 
 #include <map>
 #include <vector>
@@ -17,6 +18,9 @@ enum class SettingsLocation
     DirectReference
 };
 
+constexpr char SETTINGS_FOLDER[] = "../config";
+constexpr char SETTINGS_FILENAME[] = "config.ini";
+
 class SettingsBase
 {
 public:
@@ -24,8 +28,8 @@ public:
 
 public:
     virtual ~SettingsBase() = default;
-    virtual bool read(IniFile &settings) = 0;
-    virtual bool write(IniFile &settings) = 0;
+    virtual bool readFromIniFile(IniFile &settings) = 0;
+    virtual bool writeToIniFile(IniFile &settings) = 0;
 };
 
 
@@ -59,16 +63,108 @@ public:
         return nullptr;
     }
 
+    bool readFromIniFile(IniFile &settings) override;
+
+    bool writeToIniFile(IniFile &settings) override;
+
 protected:
-
-    bool read(IniFile &settings) override;
-
-    bool write(IniFile &settings) override;
-
     SettingsBase::Ptr registerSettings(const SettingsBase::Ptr &settings);
 
 private:
     SettingsBaseVector _settingsBundle;
+    std::string _fileName = std::string();
+};
+
+template<class Class>
+class SettingHolder
+{
+public:
+    explicit SettingHolder()
+        : _settings(std::make_shared<Class>())
+    {}
+
+    using Ptr = std::shared_ptr<Class>;
+
+    Ptr settings() const
+    {
+        return _settings;
+    }
+private:
+    Ptr _settings;
+};
+
+
+template<class... SettingsClasses>
+class SettingsBundleTemplate : public SettingHolder<SettingsClasses>...
+{
+public:
+    explicit SettingsBundleTemplate(const std::string &fileName = std::string())
+        : SettingHolder<SettingsClasses>()...
+    {
+        std::string localFileName = fileName;
+        if (localFileName.empty()) {
+
+            auto path = FileUtils::absolutePath(SETTINGS_FOLDER);
+
+            if (!FileUtils::isPathExists(path))
+                FileUtils::makeDir(path);
+
+            localFileName = path + FileUtils::DELIMITER + SETTINGS_FILENAME;
+        }
+        else
+        {
+            localFileName = fileName;
+        }
+
+        setFileName(localFileName);
+    }
+
+    template<class SettingClass>
+    typename SettingHolder<SettingClass>::Ptr get()
+    {
+        return this->SettingHolder<SettingClass>::settings();
+    }
+
+    bool read()
+    {
+        if (FileUtils::isFileExists(_fileName))
+        {
+            IniFile iniFile;
+            iniFile.fileOpen(_fileName);
+            return readFromIniFile(iniFile);
+        }
+        return false;
+    }
+
+    std::string fileName() const
+    {
+        return _fileName;
+    }
+
+    void setFileName(const std::string &fileName)
+    {
+        _fileName = fileName;
+    }
+
+
+protected:
+    bool readFromIniFile(IniFile &settings)
+    {
+        bool results[] =
+        {
+            get<SettingsClasses>()->readFromIniFile(settings)...
+        };
+
+        for (const auto &result : results)
+        {
+            if (not result)
+                return false;
+        }
+
+        return true;
+    }
+
+private:
     std::string _fileName = std::string();
 };
 

@@ -12,8 +12,8 @@ public:
 public:
     explicit SettingsGpsEmulator();
 
-    bool read(IniFile &iniFile);
-    bool write(IniFile &settings);
+    bool readFromIniFile(IniFile &iniFile) override;
+    bool writeToIniFile(IniFile &settings) override;
 
     std::string portName() const;
 
