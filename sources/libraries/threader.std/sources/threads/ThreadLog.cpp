@@ -1,12 +1,38 @@
 #include "ThreadLog.h"
 
-// #include "DateTimeUtils.h"
+#include "DateTimeUtils.h"
 #include "MessageLog.h"
 #include "StdStringUtils.h"
 
 namespace Threader::Threads {
 
 using namespace Threader::Utils;
+
+bool startLogSubsystem(const std::string &pathToBin,
+                       MessageConsumer *consumer)
+{
+    if (ThreadBase::logThread())
+        return true;
+
+    auto thread = new ThreadLog(pathToBin, consumer);
+    thread->start();
+
+    return true;
+}
+
+void stopLogSubsystem()
+{
+    auto logThread = ThreadBase::logThread();
+    if (!logThread)
+        return;
+
+    logThread->postTerminateEvent();
+    while (!logThread->isFinished())
+    {
+        DateTimeUtils::sleepMilliseconds(100);
+    }
+}
+
 
 ThreadLog *ThreadLog::_instance = nullptr;
 
@@ -17,7 +43,7 @@ ThreadLog::ThreadLog(const std::string &pathToBin,
     , _consumer(consumer)
 {
     _instance = this;
-    _logger = new Logger(true, pathToBin, 9, logDetailsAllWithotDate);
+    _logger = new Logger(true, pathToBin, 9, logDetailsAllWithoutDate);
 
     ThreadBase::setLogThread(this, _logger->level());
 
@@ -26,6 +52,9 @@ ThreadLog::ThreadLog(const std::string &pathToBin,
 
 ThreadLog::~ThreadLog()
 {
+    if (ThreadBase::logThread())
+        ThreadBase::setLogThread(nullptr);
+
     if (_logger)
     {
         delete _logger;

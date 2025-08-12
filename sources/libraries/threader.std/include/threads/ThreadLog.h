@@ -5,6 +5,8 @@
 
 using namespace Threader::Threads;
 
+namespace Threader::Threads {
+
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Log"
 
@@ -15,7 +17,10 @@ MESSAGE_TEMPLATE(2, 0, MessageType::Message, "Подсистема проток�
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Common"
 
-namespace Threader::Threads {
+bool startLogSubsystem(const std::string &pathToBin,
+                       MessageConsumer *consumer = nullptr);
+
+void stopLogSubsystem();
 
 class ThreadLog : public ThreadBase
 {

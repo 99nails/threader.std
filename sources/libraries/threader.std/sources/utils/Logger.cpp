@@ -37,14 +37,7 @@ Logger::Logger(bool doConsoleOutput,
     , _descriptor(INVALID_DESCRIPTOR)
     , _logDetails(logDetails)
 {
-#ifdef linux
-    auto slash = '/';
-#endif
-
-#ifdef _WIN32
-    auto slash = '\\';
-#endif
-    auto slashIndex = pathToBin.rfind(slash);
+    auto slashIndex = pathToBin.rfind(FileUtils::DELIMITER);
 
     _logFilePrefix = (slashIndex == std::string::npos)
             ? pathToBin
@@ -58,10 +51,10 @@ Logger::Logger(bool doConsoleOutput,
     if (StdStringUtils::endsWith(StdStringUtils::toUpper(_logFilePrefix), ".EXE"))
     {
         _logFilePrefix.erase(_logFilePrefix.length() - 4, 4);
-    }    
+    }
 #endif
-
-    _pathToLog = FileUtils::absolutePath("../log/");
+    _pathToLog = FileUtils::absolutePath(FileUtils::extractFilePath(pathToBin) +
+                                         "/../log/");
     if (!_pathToLog.empty())
     {
         auto end = _pathToLog.back();
@@ -273,7 +266,7 @@ void Logger::printLine(const std::string &line, MessageType messageType)
         break;
         std::cout << line;
     }
-    std::cout << line;
+    std::cout << line << ANSI_COLOR_RESET;
 #endif
 #ifdef _WIN32
     uint8_t color;
@@ -296,12 +289,10 @@ void Logger::printLine(const std::string &line, MessageType messageType)
     if (INVALID_HANDLE_VALUE != _consoleHandle)
         SetConsoleTextAttribute(_consoleHandle, color);
 
-//    if (_codec) {
-//        QByteArray dosString = _codec->fromUnicode(messageString.toUtf8());
-//        std::cout << dosString.constData();
-//    }
     std::cout << StdStringUtils::ConvertUTF8ToCP1251(line);
-//    std::cout << line;
+
+    if (INVALID_HANDLE_VALUE != _consoleHandle)
+        SetConsoleTextAttribute(_consoleHandle, 7);
 #endif
 }
 

@@ -376,7 +376,7 @@ protected:
      * @param thread - Поток приема и обработки сообщений протоколирования
      * @param level - Уровень протоколирования
      */
-    static void setLogThread(ThreadBase *thread, int level);
+    static void setLogThread(ThreadBase *thread, int level = 0);
 
     /**
      * @brief writeLog - Отправка сообщения протоколирования потоку протоколирования

@@ -1,6 +1,7 @@
 
 #ifdef linux
 
+#include <cxxabi.h>
 #include <csignal>
 #include <execinfo.h>
 #include <unistd.h>
@@ -78,6 +79,37 @@ void setSignalHandler(const char* arg0)
 
 using namespace Threader::Threads;
 
+std::string demangle(const char* name)
+{
+    int status;
+    char* demangled = abi::__cxa_demangle(name, nullptr, nullptr, &status);
+    std::string result = std::string((0 == status) ? demangled : name);
+
+    if (demangled)
+        free(demangled);
+
+    return result;
+}
+
+std::string demangleFunctionName(char* line)
+{
+    std::string result{line};
+
+    auto start = result.find('(');
+    auto end = result.find('+');
+    if (start > 0 && end > 0 && start < end)
+    {
+        std::string name = result.substr(start + 1, end - start - 1);
+        if (!name.empty())
+        {
+            name = demangle(name.c_str());
+            result.replace(start + 1, end - start - 1, name);
+        }
+    }
+
+    return result;
+}
+
 void handleDeathSignal(int signum)
 {
     if(signum == SIGABRT)
@@ -115,7 +147,7 @@ void handleDeathSignal(int signum)
             if (strings)
             {
                 for (int j = 0; j < num; j++)
-                    content += std::string(strings[j]) + "\r\n";
+                    content += demangleFunctionName(strings[j]) + "\r\n";
                 free(strings);
             }
             write(file, content.c_str(), content.length());

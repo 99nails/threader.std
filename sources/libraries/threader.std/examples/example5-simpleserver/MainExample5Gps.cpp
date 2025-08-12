@@ -30,8 +30,7 @@ int main(int argc, char *argv[])
     std::cout << "Press Enter to terminate program...\r\n";
 #endif
 
-    auto threadLog = new ThreadLog(argv[0]);
-    threadLog->start();
+    startLogSubsystem(argv[0]);
 
     auto threadMain = new ThreadMainGps();
     threadMain->start();
@@ -44,9 +43,5 @@ int main(int argc, char *argv[])
         DateTimeUtils::sleepMilliseconds(100);
     }
 
-    threadLog->postTerminateEvent();
-    while (!threadLog->isFinished())
-    {
-        DateTimeUtils::sleepMilliseconds(100);
-    }
+    stopLogSubsystem();
 }

@@ -105,7 +105,7 @@ constexpr int logDetailsDefault =
         LogDetails::Number |
         LogDetails::Text;
 
-constexpr int logDetailsAllWithotDate =
+constexpr int logDetailsAllWithoutDate =
         LogDetails::Time |
         LogDetails::Type |
         LogDetails::Number |

@@ -104,7 +104,32 @@ bool FileUtils::makeDir(const std::string &path)
 #ifdef linux
                         , S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
 #endif
-                        ) == 0;
+                 ) == 0;
+}
+
+std::string FileUtils::extractFilePath(const std::string &fileName)
+{
+    auto slashIndex = fileName.rfind(DELIMITER);
+    return (std::string::npos == slashIndex) ? std::string()
+                                             : fileName.substr(0, slashIndex + 1);
+}
+
+std::string FileUtils::extractFileName(const std::string &fileName)
+{
+    auto slashIndex = fileName.rfind(DELIMITER);
+    return (std::string::npos == slashIndex)
+            ? fileName
+            : (slashIndex < fileName.length() - 1)
+              ? fileName.substr(slashIndex + 1)
+              : "";
+}
+
+std::string FileUtils::extractFileExtension(const std::string &fileName)
+{
+    auto shortName = extractFileName(fileName);
+    auto pointIndex = shortName.rfind('.');
+    return (std::string::npos == pointIndex) ? ""
+                                             : fileName.substr(pointIndex);
 }
 
 }

@@ -18,6 +18,10 @@ public:
     static bool isFileExists(const std::string &fieName);
     static std::string absolutePath(const std::string &relativePath);
     static bool makeDir(const std::string &path);
+
+    static std::string extractFilePath(const std::string &fileName);
+    static std::string extractFileName(const std::string &fileName);
+    static std::string extractFileExtension(const std::string &fileName);
 };
 
 }

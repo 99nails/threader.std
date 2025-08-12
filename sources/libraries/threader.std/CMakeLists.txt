@@ -28,6 +28,7 @@ set(THREADER_SOURCES
     include/threads/ThreadListenSocketConnection.h sources/threads/ThreadListenSocketConnection.cpp
     include/threads/ThreadLog.h sources/threads/ThreadLog.cpp
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
+    include/utils/DaemonApplication.h
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
     include/utils/FileUtils.h sources/utils/FileUtils.cpp
     include/utils/IniFile.h sources/utils/IniFile.cpp
