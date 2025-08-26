@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    ThreadBase::writeLog(Message13);
+    ThreadBase::writeLog(Message113);
 
     if (threadLog->wasStarted())
     {

@@ -51,6 +51,7 @@ void ThreadConnectionServer::onConnected()
 void ThreadConnectionServer::onDisconnected()
 {
     writeLog(Message211, handler()->deviceName().c_str());
+    terminate();
 }
 
 void ThreadConnectionServer::onReadData(const void *,
@@ -67,12 +68,12 @@ void ThreadConnectionServer::onWriteData(const void *,
 
 bool ThreadConnectionServer::onPacketReceived(const PacketBase::Ptr &packet)
 {
-    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLines>(packet);
+    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLine>(packet);
     if (!packetAscii)
         return false;
 
     writeLog(Message214,
-             packetAscii->lines().front().c_str(),
+             packetAscii->line().c_str(),
              handler()->deviceName().c_str());
 
     return true;
@@ -81,4 +82,22 @@ bool ThreadConnectionServer::onPacketReceived(const PacketBase::Ptr &packet)
 bool ThreadConnectionServer::onPacketSent(const PacketBase::Ptr &packet)
 {
     return true;
+}
+
+void ThreadConnectionServer::processMessage(const MessageBase::Ptr &message)
+{
+    if (!message)
+        return;
+
+    auto messageName = message->name();
+    if (MESSAGE_NAME_DATETIME == messageName)
+        doMessageDateTime(std::dynamic_pointer_cast<MessageString>(message));
+}
+
+void ThreadConnectionServer::doMessageDateTime(const MessageString::Ptr &message)
+{
+    if (!message)
+        return;
+
+    handler()->writeString(message->value() + "\r\n");
 }

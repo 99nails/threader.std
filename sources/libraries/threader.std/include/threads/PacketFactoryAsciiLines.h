@@ -9,35 +9,40 @@ namespace Threader::Threads {
 
 using namespace Threader::Utils;
 
-class PacketAsciiLines : public PacketBase
+class PacketAsciiLine : public PacketBase
 {
 public:
-    using Ptr = std::shared_ptr<PacketAsciiLines>;
+    using Ptr = std::shared_ptr<PacketAsciiLine>;
 
 public:
-    explicit PacketAsciiLines(const StdStringList &lines = {});
-    virtual ~PacketAsciiLines() = default;
+    explicit PacketAsciiLine(const std::string &line = std::string());
+    virtual ~PacketAsciiLine() = default;
 
     bool write(MemoryBlock::Ptr &data) const override;
 
-    StdStringList lines() const;
+    std::string line() const;
 
 protected:
-    StdStringList _lines;
+    std::string _line;
 
 };
 
 
+constexpr char CR[] = "\r";
+constexpr char LF[] = "\n";
+constexpr char CRLF[] = "\r\n";
+
 class PacketFactoryAsciiLines : public PacketFactoryBase
 {
 public:
-    static const char CRLF[];
-
-    explicit PacketFactoryAsciiLines();
+    explicit PacketFactoryAsciiLines(const std::string &lineTerminator = CRLF);
 
     PacketBase::Ptr tryExtractPacket(MemoryBlock::Ptr &data) override;
     PacketBase::Ptr buildPacket(const void *data,
                                 bool generatePacketId = false) override;
+
+private:
+    std::string _lineTerminator;
 };
 
 }

@@ -13,7 +13,7 @@ namespace Threader {
 
 namespace Utils {
 
-using UnuxTimeMSecs = uint64_t;
+using UnixTimeMSecs = uint64_t;
 
 #ifdef WIN32
 typedef ULONGLONG (WINAPI GetTickCount64Prototype)(VOID);
@@ -22,12 +22,15 @@ typedef ULONGLONG (WINAPI GetTickCount64Prototype)(VOID);
 class DateTimeUtils
 {
 public:
-    static UnuxTimeMSecs msecsSinceEpochLocal();
+    static UnixTimeMSecs msecsSinceEpochLocal();
 
-    static std::string msecsSinceEpochToStdString(const UnuxTimeMSecs &msecsSinceEpoch,
+    static std::string msecsSinceEpochToStdString(const UnixTimeMSecs &msecsSinceEpoch,
                                                   const bool addMsecs,
                                                   const bool isLocal = true,
                                                   const std::string format = "%Y-%m-%d %H:%M:%S");
+
+    static UnixTimeMSecs StdStringToMsecsSinceEpoch(const std::string &from,
+                                                    const std::string &format);
 
     static void sleepMilliseconds(int milliseconds);
 

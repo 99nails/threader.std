@@ -14,7 +14,9 @@ public:
 
     // HandlerDataConsumer interface
 public:
-    void onError(HandlerBase *sender, const int errorCode, const std::string &errorDescription) override;
+    void onError(HandlerBase *sender,
+                 const int errorCode,
+                 const std::string &errorDescription) override;
 
     // ThreadHandler interface
 protected:
@@ -30,5 +32,10 @@ protected:
 
     bool onPacketReceived(const PacketBase::Ptr &packet) override;
     bool onPacketSent(const PacketBase::Ptr &packet) override;
+
+    void processMessage(const MessageBase::Ptr &message) override;
+
+private:
+    void doMessageDateTime(const MessageString::Ptr &message);
 };
 

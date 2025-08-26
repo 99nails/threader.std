@@ -62,8 +62,6 @@ void MemoryBlock::setCapacity(size_t capacity)
         _size = capacity;
 
     _capacity = capacity;
-
-    std::cout << "Capacity " << _capacity << std::endl;
 }
 
 size_t MemoryBlock::size() const
@@ -100,7 +98,8 @@ void MemoryBlock::append(const void *data,
 }
 
 size_t MemoryBlock::remove(size_t from,
-                           size_t count)
+                           size_t count,
+                           bool setToZero)
 {
     if (from > _size)
         return 0;
@@ -111,6 +110,12 @@ size_t MemoryBlock::remove(size_t from,
     memcpy((uint8_t*)_data + from,
            (uint8_t*)_data + from + count,
            _size - from - count);
+
+    if (setToZero)
+    {
+        uint8_t* fromPointer = static_cast<uint8_t*>(_data) + _size - from - count;
+        memset(fromPointer, 0, count);
+    }
 
     _size -= count;
 

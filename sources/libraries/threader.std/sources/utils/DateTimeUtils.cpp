@@ -2,6 +2,8 @@
 
 #include <chrono>
 #include <iomanip>
+#include <iostream>
+#include <sstream>
 
 namespace Threader::Utils {
 
@@ -13,13 +15,13 @@ using std::chrono::system_clock;
 GetTickCount64Prototype* DateTimeUtils::_getTickCount = nullptr;
 #endif
 
-UnuxTimeMSecs DateTimeUtils::msecsSinceEpochLocal()
+UnixTimeMSecs DateTimeUtils::msecsSinceEpochLocal()
 {
     auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     return millisec_since_epoch.count();
 }
 
-std::string DateTimeUtils::msecsSinceEpochToStdString(const UnuxTimeMSecs &msecsSinceEpoch,
+std::string DateTimeUtils::msecsSinceEpochToStdString(const UnixTimeMSecs &msecsSinceEpoch,
                                                       const bool addMsecs,
                                                       const bool isLocal,
                                                       const std::string format)
@@ -40,6 +42,23 @@ std::string DateTimeUtils::msecsSinceEpochToStdString(const UnuxTimeMSecs &msecs
     }
     auto result = ss.str();
     return result;
+}
+
+UnixTimeMSecs DateTimeUtils::StdStringToMsecsSinceEpoch(const std::string &from, const std::string &format)
+{
+    std::istringstream ss(from);
+    std::tm t{};
+    ss >> std::get_time(&t, format.c_str());
+    if (ss.fail())
+        return 0;
+
+    std::time_t timeSinceEpoch = mktime(&t);
+    if (timeSinceEpoch == -1) {
+        std::cerr << "Failed to convert to time_t\n";
+        return 0;
+    }
+
+    return timeSinceEpoch * 1000;
 }
 
 void DateTimeUtils::sleepMilliseconds(int milliseconds)

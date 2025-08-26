@@ -1,27 +1,37 @@
 #pragma once
 
 #include "Example5Common.h"
+#include "SettingsGps.h"
+#include "SettingsTimeServer.h"
 
-#include "ThreadBase.h"
+#include "ThreadMain.h"
 
 using namespace Threader::Threads;
 
-class ThreadMainTimeServer : public ThreadBase
+using SettingsType = SettingsBundleTemplate<SettingsGps, SettingsTimeServer>;
+
+using MapThreadBase = std::map<ThreadBase*, UnixTimeMSecs>;
+
+class ThreadMainTimeServer : public ThreadMain<SettingsType>
 {
 public:
     explicit ThreadMainTimeServer();
 
 protected:
-    void onThreadStarted() override;
-    void onThreadFinishing() override;
-    void onThreadFinished() override;
     void startChildThreads() override;
+
+    void onDestroyTerminatedChildThread(ThreadBase *thread) override;
 
     void processMessage(const MessageBase::Ptr &message) override;
 
 private:
+    ThreadBase *_threadGps;
     ThreadBase *_threadListen;
 
+    ListThreadBase _threads;
+
     void doMessageThread(const MessageThread::Ptr &message);
+    void doMessageDateTime(const MessageString::Ptr &message);
+
 };
 

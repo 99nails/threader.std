@@ -33,7 +33,9 @@ public:
     void append(const void *data,
                 const size_t size);
 
-    size_t remove(size_t from, size_t count);
+    size_t remove(size_t from,
+                  size_t count,
+                  bool setToZero = true);
 
 protected:
     void setSize(size_t size);

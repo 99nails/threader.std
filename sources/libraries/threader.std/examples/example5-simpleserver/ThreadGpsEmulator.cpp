@@ -21,10 +21,11 @@ using std::chrono::system_clock;
 ThreadGpsEmulator::ThreadGpsEmulator(SettingsGpsEmulator *settings,
                                      MessageConsumer *parent)
     : ThreadHandler(parent,
-                    new HandlerSerialPort(nullptr, settings->portName()),
+                    new HandlerSerialPort(nullptr, settings->port()),
                     1000,
                     new PacketFactoryAsciiLines(),
-                    "Thread.Gps.Emulator")
+                    "Thread.Gps.Emulator",
+                    false)
     , _settings(settings)
 {
 }
@@ -100,24 +101,21 @@ void ThreadGpsEmulator::onError(HandlerBase *handler,
 
 bool ThreadGpsEmulator::onPacketReceived(const PacketBase::Ptr &packet)
 {
-    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLines>(packet);
+    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLine>(packet);
 
-    if (!packetAscii || packetAscii->lines().size() < 1)
-        return false;
-
-    writeLog(Message320, packetAscii->lines().front().c_str());
+    writeLog(Message320, packetAscii->line().c_str());
 
     return true;
 }
 
 bool ThreadGpsEmulator::onPacketSent(const PacketBase::Ptr &packet)
 {
-    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLines>(packet);
+    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLine>(packet);
 
-    if (!packetAscii || packetAscii->lines().size() < 1)
+    if (!packetAscii || packetAscii->line().size() < 1)
         return false;
 
-    writeLog(Message321, packetAscii->lines().front().c_str());
+    writeLog(Message321, packetAscii->line().c_str());
 
     return true;
 }
@@ -139,7 +137,8 @@ void ThreadGpsEmulator::sendGpsData()
     std::time_t temp = msecsSinceEpoch / 1000;
     auto time = std::gmtime(&temp);
 
-    auto timeString = format("$GNZDA,%.2d%.2d%.2d.000,%.2d,%.2d,%.4d,00,00*FF\r\n",
+    auto timeString = format(FORMAT_TEMPLATE_DATETIME,
+                             GPS_PREFIX_GNZDA,
                              time->tm_hour, time->tm_min, time->tm_sec,
                              time->tm_mday, time->tm_mon, time->tm_year + 1900);
 

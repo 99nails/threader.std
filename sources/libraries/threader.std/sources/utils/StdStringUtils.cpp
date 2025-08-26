@@ -24,17 +24,22 @@ std::string StdStringUtils::toLower(std::string s)
     return s;
 }
 
+bool StdStringUtils::startWith(const std::string &s, const std::string &start)
+{
+    return s.compare(0, start.length(), start) == 0;
+}
+
 bool StdStringUtils::endsWith(const std::string &s, const std::string &end)
 {
     unsigned endIndex = s.length() - end.length();
     return s.compare(endIndex, end.length(), end) == 0;
 }
 
-StdStringList StdStringUtils::split(const std::string &str,
+StdStringVector StdStringUtils::split(const std::string &str,
                                       const char delimiter,
                                       const bool keepEmptyParts)
 {
-    StdStringList result;
+    StdStringVector result;
     std::string token;
     std::istringstream stream(str);
 

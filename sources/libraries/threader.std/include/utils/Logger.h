@@ -137,7 +137,7 @@ public:
     std::string pathToLog() const;
     int level() const;
 
-    bool collectMessage(UnuxTimeMSecs created,
+    bool collectMessage(UnixTimeMSecs created,
                         int number,
                         int level,
                         MessageType messageType,
@@ -148,7 +148,7 @@ public:
     bool flush();
 
 private:
-    UnuxTimeMSecs currentDate();
+    UnixTimeMSecs currentDate();
 
     bool prepareFilePath();
 
@@ -166,7 +166,7 @@ private:
     std::list<std::string> _buffer;
 
     std::string _logFilePrefix;
-    UnuxTimeMSecs _currentLogFileDate;
+    UnixTimeMSecs _currentLogFileDate;
 
     int _logDetails;
 

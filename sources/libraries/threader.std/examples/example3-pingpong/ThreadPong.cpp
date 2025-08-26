@@ -15,12 +15,12 @@ void ThreadPong::setThreadPing(ThreadBase *threadPing)
 
 void ThreadPong::onThreadStarted()
 {
-    writeLog(Message30);
+    writeLog(Message130);
 }
 
 void ThreadPong::onThreadFinished()
 {
-    writeLog(Message31);
+    writeLog(Message131);
 }
 
 void ThreadPong::processMessage(const MessageBase::Ptr &message)
@@ -30,11 +30,11 @@ void ThreadPong::processMessage(const MessageBase::Ptr &message)
 
     const auto messageName = message->name();
 
-   writeLog(Message32, messageName.c_str());
+   writeLog(Message132, messageName.c_str());
 
     if (_threadPing)
     {
         _threadPing->postMessage(std::make_shared<MessageBase>(MESSAGE_NAME_PONG));
-        writeLog(Message33, MESSAGE_NAME_PONG);
+        writeLog(Message133, MESSAGE_NAME_PONG);
     }
 }

@@ -45,4 +45,6 @@ int AppMain(int argc, char *argv[])
     }
 
     stopLogSubsystem();
+
+    return 0;
 }

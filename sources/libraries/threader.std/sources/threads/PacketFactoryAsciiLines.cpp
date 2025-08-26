@@ -8,22 +8,20 @@ namespace Threads {
  * PacketAsciiLines
  *****************************************************************************/
 
-PacketAsciiLines::PacketAsciiLines(const StdStringList &lines)
+PacketAsciiLine::PacketAsciiLine(const std::string &line)
     : PacketBase(0)
-    , _lines(lines)
+    , _line(line)
 {
 }
 
-StdStringList PacketAsciiLines::lines() const
+std::string PacketAsciiLine::line() const
 {
-    return _lines;
+    return _line;
 }
 
-bool PacketAsciiLines::write(MemoryBlock::Ptr &data) const
+bool PacketAsciiLine::write(MemoryBlock::Ptr &data) const
 {
-    std::string packetString = "";
-    for (const auto &line : _lines)
-        packetString += line + PacketFactoryAsciiLines::CRLF;
+    std::string packetString =  _line + CRLF;
     data->append(packetString.c_str(), packetString.length());
     return true;
 }
@@ -33,60 +31,35 @@ bool PacketAsciiLines::write(MemoryBlock::Ptr &data) const
  * PacketFactoryAsciiLines
  *****************************************************************************/
 
-const char PacketFactoryAsciiLines::CRLF[] = "\r\n";
-
-PacketFactoryAsciiLines::PacketFactoryAsciiLines()
+PacketFactoryAsciiLines::PacketFactoryAsciiLines(const std::string &lineTerminator)
     : PacketFactoryBase()
+    , _lineTerminator(lineTerminator)
 {
 }
 
 PacketBase::Ptr PacketFactoryAsciiLines::tryExtractPacket(MemoryBlock::Ptr &data)
 {
-    int conveyorPosition = 0;
-    int conveyorLength = data->size();
-    int deleteToPosition = -1;
-    std::string currentLine = "";
-    StdStringList lines;
+    if (!data || data->size() == 0)
+        return nullptr;
 
-    char* dataPointer = (char*)data->data();
+    auto dataString = std::string((char*)data->data());
+    auto position = dataString.find(_lineTerminator);
+    if (std::string::npos == position || position >= dataString.length())
+        return nullptr;
 
-    while (conveyorPosition < conveyorLength) {
-        char currentChar = dataPointer[conveyorPosition];
+    data->remove(0, position + _lineTerminator.length());
 
-        if (CRLF[0] != currentChar && CRLF[1] != currentChar) {
-            currentLine += currentChar;
-        }
-        else
-        {
-            if (!currentLine.empty()) {
-                lines.push_back(currentLine);
-                currentLine.clear();
-            }
-            deleteToPosition = conveyorPosition;
-        }
-
-        conveyorPosition++;
-    }
-
-    if (deleteToPosition >= 0) {
-        data->remove(0, deleteToPosition + 1);
-    }
-
-    if (lines.size() > 0) {
-        return std::make_shared<PacketAsciiLines>(lines);
-    }
-
-    return nullptr;
+    auto line = dataString.substr(0, position);
+    return std::make_shared<PacketAsciiLine>(line);
 }
 
 PacketBase::Ptr PacketFactoryAsciiLines::buildPacket(const void *data,
                                                      bool generatePacketId)
 {
     std::string stringData((char*)data);
-    return std::make_shared<PacketAsciiLines>(StdStringList({stringData}));
+    return std::make_shared<PacketAsciiLine>(stringData);
 
     (void)(generatePacketId);
 }
-
 
 }}

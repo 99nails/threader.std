@@ -80,7 +80,7 @@ int Logger::level() const
     return _level;
 }
 
-bool Logger::collectMessage(UnuxTimeMSecs created,
+bool Logger::collectMessage(UnixTimeMSecs created,
                             int number,
                             int level,
                             MessageType messageType,
@@ -188,7 +188,7 @@ bool Logger::flush()
     return true;
 }
 
-UnuxTimeMSecs Logger::currentDate()
+UnixTimeMSecs Logger::currentDate()
 {
     auto date = DateTimeUtils::msecsSinceEpochLocal();
     date -= date % 86400000;

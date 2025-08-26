@@ -29,16 +29,13 @@ int main(int argc, char *argv[])
 
 #ifdef WIN32
     setlocale(LC_ALL, "russian_Russia.1251");
-    auto line = StdStringUtils::ConvertUTF8ToCP1251("Press Enter to terminate program...\r\n");
+    std::cout << StdStringUtils::ConvertUTF8ToCP1251("Press Enter to terminate program...\r\n");
 #else
     setlocale(LC_ALL, "ru_RU.UTF-8");
     std::cout << "Press Enter to terminate program...\r\n";
 #endif
 
-
-
-    auto threadLog = new ThreadLog(argv[0]);
-    threadLog->start();
+    startLogSubsystem(argv[0]);
 
     auto threadPing = new ThreadPing(
             #ifdef WIN32
@@ -73,13 +70,8 @@ int main(int argc, char *argv[])
         DateTimeUtils::sleepMilliseconds(100);
     }
 
-    threadLog->postTerminateEvent();
-    while (!threadLog->isFinished())
-    {
-        DateTimeUtils::sleepMilliseconds(100);
-    }
-
     delete threadPong;
     delete threadPing;
-    delete threadLog;
+
+    stopLogSubsystem();
 }

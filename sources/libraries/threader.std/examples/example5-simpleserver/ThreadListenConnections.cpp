@@ -5,8 +5,11 @@
 
 #include "SocketUtils.h"
 
-ThreadListenConnections::ThreadListenConnections(MessageConsumer *parent)
-    : ThreadListenSocketConnection(35976, parent)
+ThreadListenConnections::ThreadListenConnections(MessageConsumer *parent,
+                                                 const SettingsTimeServer::Ptr &settings)
+    : ThreadListenSocketConnection((settings) ? settings->port() : DEFAULT_PORT,
+                                   parent)
+    , _settings(settings)
 {
 }
 

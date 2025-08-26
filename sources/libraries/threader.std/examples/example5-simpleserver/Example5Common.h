@@ -11,6 +11,13 @@ using MessageThread = MessageValue<ThreadBase*>;
 
 constexpr char MESSAGE_NAME_THREAD[] = "Message.Thread";
 
+constexpr char MESSAGE_NAME_DATETIME[] = "Message.DateTime";
+
+constexpr char GPS_PREFIX[] = "$";
+constexpr char GPS_PREFIX_GNZDA[] = "GNZDA";
+constexpr char GPS_DELIMITER = ',';
+constexpr char FORMAT_TEMPLATE_DATETIME[] = "$%s,%.2d%.2d%.2d.000,%.2d,%.2d,%.4d,00,00*FF";
+
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Main"
 
@@ -134,3 +141,51 @@ MESSAGE_TEMPLATE(320, 0, MessageType::Message,
 
 MESSAGE_TEMPLATE(321, 0, MessageType::Message,
                  "Отправлено сообщение [%s]")
+
+
+MESSAGE_TEMPLATE(400, 0, MessageType::Message,
+                 "Запуск потока работы с GPS на порт [%s]...")
+
+MESSAGE_TEMPLATE(401, 0, MessageType::Message,
+                 "Завершение потока работы с GPS на порт [%s]...")
+
+MESSAGE_TEMPLATE(402, 0, MessageType::Message,
+                 "Поток работы с GPS на порт [%s] завершен")
+
+
+MESSAGE_TEMPLATE(410, 0, MessageType::Message,
+                 "Подключение к устройству GPS [%s]...")
+
+MESSAGE_TEMPLATE(411, 0, MessageType::Attention,
+                 "Подключение к устройству GPS [%s] установлено")
+
+MESSAGE_TEMPLATE(412, 0, MessageType::Message,
+                 "Ошибка подключения к устройству GPS [%s] - %s")
+
+MESSAGE_TEMPLATE(413, 0, MessageType::Attention,
+                 "Подключение к устройству GPS [%s] закрыто")
+
+
+MESSAGE_TEMPLATE(414, 0, MessageType::Message,
+                 "Получено [%d] байт от подключения [%s]")
+
+MESSAGE_TEMPLATE(415, 0, MessageType::Message,
+                 "Передано [%d] байт на подключение [%s]")
+
+
+MESSAGE_TEMPLATE(416, 0, MessageType::Message,
+                 "Получен пакет [%s] байт от подключения [%s]")
+
+MESSAGE_TEMPLATE(417, 0, MessageType::Message,
+                 "Передан пакет [%s] байт от подключения [%s]")
+
+
+MESSAGE_TEMPLATE(420, 0, MessageType::Message,
+                 "Получено сообщение [%s]")
+
+MESSAGE_TEMPLATE(421, 0, MessageType::Message,
+                 "Отправлено сообщение [%s]")
+
+
+MESSAGE_TEMPLATE(430, 0, MessageType::Attention,
+                 "Получено время от устройства GPS [%s]")

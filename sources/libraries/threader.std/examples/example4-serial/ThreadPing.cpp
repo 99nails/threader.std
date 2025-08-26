@@ -109,8 +109,8 @@ bool ThreadPing::onPacketReceived(const PacketBase::Ptr &packet)
     if (!packet)
         return false;
 
-    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLines>(packet);
-    writeLog(Message116, packetAscii->lines().front().c_str(), handler()->deviceName().c_str());
+    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLine>(packet);
+    writeLog(Message116, packetAscii->line().c_str(), handler()->deviceName().c_str());
 
     return true;
 }
@@ -120,8 +120,8 @@ bool ThreadPing::onPacketSent(const PacketBase::Ptr &packet)
     if (!packet)
         return false;
 
-    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLines>(packet);
-    writeLog(Message117, packetAscii->lines().front().c_str(), handler()->deviceName().c_str());
+    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLine>(packet);
+    writeLog(Message117, packetAscii->line().c_str(), handler()->deviceName().c_str());
 
     return true;
 }

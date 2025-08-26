@@ -2,35 +2,23 @@
 
 #include "Example5Common.h"
 #include "ThreadGpsEmulator.h"
+#include "StdStringUtils.h"
+
+using namespace Threader::Utils;
 
 constexpr char APPLICATION_NAME[] = "Gps.Emulator";
 
 ThreadMainGps::ThreadMainGps()
-    : ThreadBase(nullptr, "Thread.Main")
+    : ThreadMain(nullptr,
+                 "Thread.Main",
+                 format("%s%c%s", SETTINGS_FOLDER, FileUtils::DELIMITER, "example5.ini"))
     , _threadGps(nullptr)
-    , _settings(std::make_shared<SettingsExample5>())
 {
-}
-
-void ThreadMainGps::onThreadStarted()
-{
-    writeLog(Message10, APPLICATION_NAME);
-    _settings->read();
-}
-
-void ThreadMainGps::onThreadFinishing()
-{
-    writeLog(Message11, APPLICATION_NAME);
-}
-
-void ThreadMainGps::onThreadFinished()
-{
-    writeLog(Message12, APPLICATION_NAME);
 }
 
 void ThreadMainGps::startChildThreads()
 {
-    auto settingsGps = _settings->get<SettingsGpsEmulator>();
+    auto settingsGps = settings().get<SettingsGpsEmulator>();
     _threadGps = registerAndStartChildThread(new ThreadGpsEmulator(settingsGps.get(),
                                                                    this));
 }

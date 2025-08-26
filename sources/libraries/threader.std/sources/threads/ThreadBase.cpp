@@ -1,13 +1,12 @@
 #include "ThreadBase.h"
 
 #include "ListThreads.h"
+#include "LogMessagesTemplates.h"
 #include "MessageLog.h"
 #include "ThreadTimer.h"
 
 #include "DateTimeUtils.h"
 #include "ThreadUtils.h"
-
-// #include <QTextCodec>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -225,20 +224,14 @@ void ThreadBase::run()
 {
     initializeThread();
 
-    _thisThreadId = threadId();
-
     _startedTickCount = DateTimeUtils::getTickCount();
     _startedUtc       = DateTimeUtils::msecsSinceEpochLocal();
 
+    _thisThreadId = threadId();
+
     onThreadStarted();
 
-#undef LOG_SUBSYSTEM
-#define LOG_SUBSYSTEM "Daemon"
-    MESSAGE_TEMPLATE(50, 0, Debug, "Идентификатор потока [%s]: %d");
-#undef LOG_SUBSYSTEM
-#define LOG_SUBSYSTEM "Common"
-
-    writeLog(Message50, STRLOG(threadName()), threadId());
+    writeLog(Message13, STRLOG(threadName()), threadId());
 
     startChildThreads();
 
@@ -370,7 +363,10 @@ void ThreadBase::destroyTerminatedChildThreads(bool rightNow)
         while (iterator != _childThreadsList.end())
         {
             if ((*iterator)->isFinished())
+            {
+                onDestroyTerminatedChildThread(*iterator);
                 iterator = _childThreadsList.erase(iterator);
+            }
             else
                 iterator++;
         }
@@ -380,7 +376,10 @@ void ThreadBase::destroyTerminatedChildThreads(bool rightNow)
     }
 }
 
-void ThreadBase::waitEvents() { waitEvents(timeout()); }
+void ThreadBase::waitEvents()
+{
+    waitEvents(timeout());
+}
 
 void ThreadBase::waitEvents(uint32_t timeout)
 {
@@ -428,14 +427,6 @@ std::string ThreadBase::errorString(int errorNo)
 
 void ThreadBase::processError(const std::string &errorTitle, int errorNo)
 {
-#undef LOG_SUBSYSTEM
-#define LOG_SUBSYSTEM "Error"
-
-    MESSAGE_TEMPLATE(99999, 0, Error, "%s: %d - %s");
-
-#undef LOG_SUBSYSTEM
-#define LOG_SUBSYSTEM "Common"
-
     if (errorNo < 0)
         errorNo = errno;
 

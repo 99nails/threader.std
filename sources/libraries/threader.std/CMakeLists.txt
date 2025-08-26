@@ -12,6 +12,7 @@ set(THREADER_SOURCES
     include/threads/HandlerSerialPort.h sources/threads/HandlerSerialPort.cpp
     include/threads/HandlerTcpSocket.h sources/threads/HandlerTcpSocket.cpp
     include/threads/ListThreads.h sources/threads/ListThreads.cpp
+    include/threads/LogMessagesTemplates.h
     include/threads/MessageBase.h sources/threads/MessageBase.cpp
     include/threads/MessageBinary.h sources/threads/MessageBinary.cpp
     include/threads/MessageLog.h sources/threads/MessageLog.cpp
@@ -27,6 +28,7 @@ set(THREADER_SOURCES
     include/threads/ThreadHandler.h sources/threads/ThreadHandler.cpp
     include/threads/ThreadListenSocketConnection.h sources/threads/ThreadListenSocketConnection.cpp
     include/threads/ThreadLog.h sources/threads/ThreadLog.cpp
+    include/threads/ThreadMain.h sources/threads/ThreadMain.cpp
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
     include/utils/DaemonApplication.h
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
@@ -128,7 +130,10 @@ target_link_libraries(example4-serial
 add_executable(example5-timeserver
    examples/example5-simpleserver/Example5Common.h
    examples/example5-simpleserver/MainExample5TimeServer.cpp
+   examples/example5-simpleserver/SettingsGps.h examples/example5-simpleserver/SettingsGps.cpp
+   examples/example5-simpleserver/SettingsTimeServer.h examples/example5-simpleserver/SettingsTimeServer.cpp
    examples/example5-simpleserver/ThreadConnectionServer.h examples/example5-simpleserver/ThreadConnectionServer.cpp
+   examples/example5-simpleserver/ThreadGps.h examples/example5-simpleserver/ThreadGps.cpp
    examples/example5-simpleserver/ThreadListenConnections.h examples/example5-simpleserver/ThreadListenConnections.cpp
    examples/example5-simpleserver/ThreadMainTimeServer.h examples/example5-simpleserver/ThreadMainTimeServer.cpp
 )
@@ -143,7 +148,6 @@ target_link_libraries(example5-timeserver
 add_executable(example5-gps
     examples/example5-simpleserver/Example5Common.h
     examples/example5-simpleserver/MainExample5Gps.cpp
-    examples/example5-simpleserver/SettingsExample5.h examples/example5-simpleserver/SettingsExample5.cpp
     examples/example5-simpleserver/SettingsGpsEmulator.h examples/example5-simpleserver/SettingsGpsEmulator.cpp
     examples/example5-simpleserver/ThreadGpsEmulator.h examples/example5-simpleserver/ThreadGpsEmulator.cpp
     examples/example5-simpleserver/ThreadMainGps.h examples/example5-simpleserver/ThreadMainGps.cpp

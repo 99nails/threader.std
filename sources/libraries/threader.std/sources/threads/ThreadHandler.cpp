@@ -22,9 +22,9 @@ ThreadHandler::ThreadHandler(MessageConsumer *parent,
                              const uint32_t &reconnectTimeout,
                              PacketFactoryBase *packetFactory,
                              const std::string &threadName,
-                             const bool &portionedIO)
+                             const bool &portionedIO,
+                             const bool verbose)
     : ThreadBase(parent, threadName, ThreadRunMode::Polling)
-//    , _handler(handler)
     , _reconnectTimeout(reconnectTimeout)
     , _nextTryToConnect(DateTimeUtils::getTickCount())
     , _packetFactory(packetFactory)
@@ -324,12 +324,7 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
                     break;
                 }
             }
-
-            std::cout << "Local " << _localInputBuffer.size()
-                      << "/ "<< _localInputBuffer.capacity() << std::endl;
-            std::cout << "Global " << _inputBuffer->size()
-                      << "/ "<< _inputBuffer->capacity() << std::endl;
-        }
+       }
     }
 }
 

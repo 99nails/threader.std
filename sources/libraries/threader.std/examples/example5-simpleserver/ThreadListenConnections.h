@@ -1,13 +1,15 @@
 #pragma once
 
-#include <ThreadListenSocketConnection.h>
+#include "ThreadListenSocketConnection.h"
+#include "SettingsTimeServer.h"
 
 using namespace Threader::Threads;
 
 class ThreadListenConnections : public ThreadListenSocketConnection
 {
 public:
-    explicit ThreadListenConnections(MessageConsumer *parent);
+    explicit ThreadListenConnections(MessageConsumer *parent,
+                                     const SettingsTimeServer::Ptr &settings);
     virtual ~ThreadListenConnections() {};
 
     // ThreadBase interface
@@ -25,7 +27,12 @@ protected:
     // ConsumerListenSocketEvents interface
 public:
     void onListenSocketError(PollerListenSocketConnection *sender, int errorCode);
-    void onConnectionRequest(PollerListenSocketConnection *sender, Descriptor socket, const sockaddr_in &addr, bool &accept);
+    void onConnectionRequest(PollerListenSocketConnection *sender,
+                             Descriptor socket,
+                             const sockaddr_in &addr,
+                             bool &accept);
 
+private:
+    SettingsTimeServer::Ptr _settings;
 };
 

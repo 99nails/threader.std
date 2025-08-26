@@ -1,28 +1,22 @@
 #pragma once
 
-#include "SettingsExample5.h"
-
+#include "SettingsGpsEmulator.h"
 #include "ThreadBase.h"
-
-// #include "IniFile.h"
+#include "ThreadMain.h"
 
 using namespace Threader::Threads;
 
+using SettingsType = SettingsBundleTemplate<SettingsGpsEmulator>;
 
-class ThreadMainGps : public ThreadBase
+class ThreadMainGps : public ThreadMain<SettingsType>
 {
 public:
     explicit ThreadMainGps();
 
 protected:
-    void onThreadStarted() override;
-    void onThreadFinishing() override;
-    void onThreadFinished() override;
     void startChildThreads() override;
 
 private:
     IniFile _iniFile;
     ThreadBase *_threadGps;
-
-    SettingsExample5::Ptr _settings;
 };

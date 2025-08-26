@@ -30,7 +30,8 @@ public:
                            const uint32_t &reconnectTimeout = 0,
                            PacketFactoryBase *packetFactory = nullptr,
                            const std::string &threadName = std::string(),
-                           const bool &portionedIO = false);
+                           const bool &portionedIO = false,
+                           const bool verbose = false);
     ~ThreadHandler() override;
 
     uint64_t openDateTime() const;
@@ -85,9 +86,6 @@ protected:
 
     void onReadyWrite(HandlerBase *handler) override;
 
-    // void onError(HandlerBase *handler,
-    //              int errorCode,
-    //              std::string errorDescription) override;
 private:
     HandlerBase *_handler;
     uint32_t _reconnectTimeout;
@@ -112,7 +110,6 @@ private:
 
     uint64_t _openDateTime;
     uint64_t _closedDateTime;
-
 };
 
 }

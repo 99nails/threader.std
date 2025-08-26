@@ -101,22 +101,7 @@ public:
     explicit SettingsBundleTemplate(const std::string &fileName = std::string())
         : SettingHolder<SettingsClasses>()...
     {
-        std::string localFileName = fileName;
-        if (localFileName.empty()) {
-
-            auto path = FileUtils::absolutePath(SETTINGS_FOLDER);
-
-            if (!FileUtils::isPathExists(path))
-                FileUtils::makeDir(path);
-
-            localFileName = path + FileUtils::DELIMITER + SETTINGS_FILENAME;
-        }
-        else
-        {
-            localFileName = fileName;
-        }
-
-        setFileName(localFileName);
+        setFileName(fileName);
     }
 
     template<class SettingClass>
@@ -143,7 +128,22 @@ public:
 
     void setFileName(const std::string &fileName)
     {
-        _fileName = fileName;
+        std::string localFileName = fileName;
+        if (localFileName.empty()) {
+
+            auto path = FileUtils::absolutePath(SETTINGS_FOLDER);
+
+            if (!FileUtils::isPathExists(path))
+                FileUtils::makeDir(path);
+
+            localFileName = path + FileUtils::DELIMITER + SETTINGS_FILENAME;
+        }
+        else
+        {
+            localFileName = FileUtils::absolutePath(fileName);
+        }
+
+        _fileName = localFileName;
     }
 
 

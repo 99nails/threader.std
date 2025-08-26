@@ -413,8 +413,8 @@ void IniFile::parseContent()
     clear();
 
     static const std::regex regExpComment("\\s*\\;.*");
-    static const std::regex regExpSection("^\\[[A-z](\\w|\\.|\\d)*\\]\\s*$");
-    static const std::regex regExpParameter("^[A-z](\\w|\\.|\\d)*\\=.*$");
+    static const std::regex regExpSection("^\\[[A-z\\d](\\w|\\.|\\d)*\\]\\s*$");
+    static const std::regex regExpParameter("^[A-z\\d](\\w|\\.|\\d)*\\=.*$");
 
     IniLineSection *currentSection = nullptr;
 

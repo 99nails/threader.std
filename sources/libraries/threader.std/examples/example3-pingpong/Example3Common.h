@@ -11,35 +11,35 @@ constexpr char MESSAGE_NAME_PONG[] = "Message.Pong";
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Main"
 
-MESSAGE_TEMPLATE(10, 0, MessageType::Message,
+MESSAGE_TEMPLATE(110, 0, MessageType::Message,
                  "Запуск потоков...")
-MESSAGE_TEMPLATE(11, 0, MessageType::Message,
+MESSAGE_TEMPLATE(111, 0, MessageType::Message,
                  "Все потоки запущены")
-MESSAGE_TEMPLATE(12, 0, MessageType::Message,
+MESSAGE_TEMPLATE(112, 0, MessageType::Message,
                  "Завершение потоков...")
-MESSAGE_TEMPLATE(13, 0, MessageType::Message,
+MESSAGE_TEMPLATE(113, 0, MessageType::Message,
                  "Все потоки завершены")
 
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Ping"
 
-MESSAGE_TEMPLATE(20, 0, MessageType::Message,
+MESSAGE_TEMPLATE(120, 0, MessageType::Message,
                  "Поток Ping запущен")
-MESSAGE_TEMPLATE(21, 0, MessageType::Message,
+MESSAGE_TEMPLATE(121, 0, MessageType::Message,
                  "Поток Ping завершен")
-MESSAGE_TEMPLATE(22, 0, MessageType::Message,
+MESSAGE_TEMPLATE(122, 0, MessageType::Message,
                  "Получено сообщение %s")
-MESSAGE_TEMPLATE(23, 0, MessageType::Message,
+MESSAGE_TEMPLATE(123, 0, MessageType::Message,
                  "Отправлено сообщение %s")
 
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Pong"
 
-MESSAGE_TEMPLATE(30, 0, MessageType::Message,
+MESSAGE_TEMPLATE(130, 0, MessageType::Message,
                  "Поток Pong запущен")
-MESSAGE_TEMPLATE(31, 0, MessageType::Message,
+MESSAGE_TEMPLATE(131, 0, MessageType::Message,
                  "Поток Pong завершен")
-MESSAGE_TEMPLATE(32, 0, MessageType::Message,
+MESSAGE_TEMPLATE(132, 0, MessageType::Message,
                  "Получено сообщение %s")
-MESSAGE_TEMPLATE(33, 0, MessageType::Message,
+MESSAGE_TEMPLATE(133, 0, MessageType::Message,
                  "Отправлено сообщение %s")

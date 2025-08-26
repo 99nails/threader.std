@@ -7,21 +7,21 @@ constexpr char PARAMETER_NAME_PERIOD[] = "Period";
 constexpr char PARAMETER_NAME_LATITUDE[] = "Latitude";
 constexpr char PARAMETER_NAME_LONGITUDE[] = "Longitude";
 
-SettingsGpsEmulator::SettingsGpsEmulator()
+SettingsGpsEmulator::SettingsGpsEmulator(std::string portName, uint64_t period, double latitude, double longitude)
     : SettingsBase()
-    , _portName(std::string())
-    , _period(2)
-    , _latitude(0.)
-    , _longitude(0.)
+    , _latitude(latitude)
+    , _longitude(longitude)
+    , _period(period)
+    , _port(portName)
 {
 }
 
 bool SettingsGpsEmulator::readFromIniFile(IniFile &iniFile)
 {
-    _portName = iniFile.value(SECTION_NAME, "Port", "");
-    _period = iniFile.valueOf(SECTION_NAME, "Period", _period) * 1000;
     _latitude = iniFile.valueOf(SECTION_NAME, "Latitude", _latitude);
     _longitude = iniFile.valueOf(SECTION_NAME, "Longitude", _longitude);
+    _period = iniFile.valueOf(SECTION_NAME, "Period", _period) * 1000;
+    _port = iniFile.value(SECTION_NAME, "Port", "");
 
     return true;
 }
@@ -29,16 +29,6 @@ bool SettingsGpsEmulator::readFromIniFile(IniFile &iniFile)
 bool SettingsGpsEmulator::writeToIniFile(IniFile &settings)
 {
     return true;
-}
-
-std::string SettingsGpsEmulator::portName() const
-{
-    return _portName;
-}
-
-uint64_t SettingsGpsEmulator::period() const
-{
-    return _period;
 }
 
 double SettingsGpsEmulator::latitude() const
@@ -50,3 +40,15 @@ double SettingsGpsEmulator::longitude() const
 {
     return _longitude;
 }
+
+uint64_t SettingsGpsEmulator::period() const
+{
+    return _period;
+}
+
+std::string SettingsGpsEmulator::port() const
+{
+    return _port;
+}
+
+

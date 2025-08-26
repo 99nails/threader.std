@@ -24,10 +24,13 @@ public:
 
     static std::string toLower(std::string s);
 
+    static bool startWith(const std::string &s,
+                         const std::string &start);
+
     static bool endsWith(const std::string &s,
                          const std::string &end);
 
-    static StdStringList split(const std::string &str,
+    static StdStringVector split(const std::string &str,
                                const char delimiter,
                                const bool keepEmptyParts);
 
