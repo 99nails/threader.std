@@ -28,6 +28,7 @@ int AppMain(int argc, char *argv[])
     auto line = StdStringUtils::ConvertUTF8ToCP1251("Нажмите Enter для завершения программы...\r\n");
 #else
     setlocale(LC_ALL, "ru_RU.UTF-8");
+    setlocale(LC_NUMERIC, "C");
     std::cout << "Press Enter to terminate program...\r\n";
 #endif
 

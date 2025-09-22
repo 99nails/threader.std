@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <charconv>
 #include <cstdio>
 #include <cstdarg>
@@ -106,11 +107,19 @@ bool vtonum(const std::string_view &view, T& value)
 
     return true;
 }
-// TODO Обработать ошибки и сменить точку на запятую
+// TODO Обработать ошибки
 template <>
 inline bool vtonum<double>(const std::string_view &view, double &value)
 {
     std::string s(view);
+    std::replace(s.begin(), s.end(), ',', '.');
     value = std::strtod(s.c_str(), nullptr);
+    return true;
+}
+
+template <>
+inline bool vtonum<bool>(const std::string_view &view, bool &value)
+{
+    value = (view == "true" || view == "1");
     return true;
 }
