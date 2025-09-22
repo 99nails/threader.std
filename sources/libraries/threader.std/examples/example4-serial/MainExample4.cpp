@@ -1,6 +1,6 @@
 // use in Linux
 // socat -d -d pty,rawer,echo=0 pty,rawer,echo=0 &
-// NullModem Emulator
+// use NullModem Emulator in Windows
 
 #include "DateTimeUtils.h"
 #include "StdStringUtils.h"

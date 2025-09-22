@@ -32,6 +32,8 @@ public:
     static UnixTimeMSecs StdStringToMsecsSinceEpoch(const std::string &from,
                                                     const std::string &format);
 
+    static bool setCurrentDateTime(const UnixTimeMSecs &dateTime);
+
     static void sleepMilliseconds(int milliseconds);
 
     static uint64_t getTickCount();

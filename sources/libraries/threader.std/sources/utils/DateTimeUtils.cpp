@@ -1,9 +1,11 @@
 #include "DateTimeUtils.h"
 
 #include <chrono>
+#include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <sys/time.h>
 
 namespace Threader::Utils {
 
@@ -59,6 +61,41 @@ UnixTimeMSecs DateTimeUtils::StdStringToMsecsSinceEpoch(const std::string &from,
     }
 
     return timeSinceEpoch * 1000;
+}
+
+
+bool DateTimeUtils::setCurrentDateTime(const UnixTimeMSecs &dateTime)
+{
+#ifdef Q_OS_WIN
+    SYSTEMTIME systemTime;
+    memset(&systemTime, 0, sizeof(systemTime));
+
+    QDate date = dateTime.date();
+    QTime time = dateTime.time();
+
+    systemTime.wYear = date.year();
+    systemTime.wMonth = date.month();
+    systemTime.wDay = date.day();
+    systemTime.wDayOfWeek = date.dayOfWeek() % 7;
+    systemTime.wHour = time.hour();
+    systemTime.wMinute = time.minute();
+    systemTime.wSecond = time.second();
+    systemTime.wMilliseconds = time.msec();
+
+    auto result = SetLocalTime(&systemTime);
+    return result != 0;
+#endif
+#ifdef linux
+    timeval currentTime;
+    if (gettimeofday(&currentTime, nullptr) != 0)
+        return false;
+    currentTime.tv_sec = dateTime / 1000;
+    currentTime.tv_usec = long((dateTime % 1000) * 1000);
+
+    int result = settimeofday(&currentTime, nullptr);
+    return 0 == result;
+#endif
+    return false;
 }
 
 void DateTimeUtils::sleepMilliseconds(int milliseconds)

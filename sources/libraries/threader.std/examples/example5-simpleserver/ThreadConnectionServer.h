@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ThreadHandler.h"
+#include <PacketFactoryAsciiLines.h>
+#include <ThreadHandler.h>
 
 using namespace Threader::Threads;
 
@@ -37,5 +38,7 @@ protected:
 
 private:
     void doMessageDateTime(const MessageString::Ptr &message);
-};
 
+private:
+    PacketFactoryAsciiLines *_factory;
+};

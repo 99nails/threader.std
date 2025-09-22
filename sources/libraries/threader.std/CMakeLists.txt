@@ -145,6 +145,25 @@ target_link_libraries(example5-timeserver
    threader-std
 )
 
+# example5-simpleclient
+
+add_executable(example5-timeclient
+    examples/example5-simpleserver/Example5Common.h
+    examples/example5-simpleserver/MainExample5TimeClient.cpp
+    examples/example5-simpleserver/SettingsTimeServer.h examples/example5-simpleserver/SettingsTimeServer.cpp
+    examples/example5-simpleserver/ThreadConnectionClient.h examples/example5-simpleserver/ThreadConnectionClient.cpp
+    examples/example5-simpleserver/ThreadMainTimeClient.h examples/example5-simpleserver/ThreadMainTimeClient.cpp
+)
+target_compile_features(example5-timeclient PUBLIC cxx_std_17)
+
+target_link_libraries(example5-timeclient
+   -lpthread
+   -lstdc++fs
+   threader-std
+)
+
+# example5-gps
+
 add_executable(example5-gps
     examples/example5-simpleserver/Example5Common.h
     examples/example5-simpleserver/MainExample5Gps.cpp
@@ -159,4 +178,3 @@ target_link_libraries(example5-gps
    -lstdc++fs
    threader-std
 )
-

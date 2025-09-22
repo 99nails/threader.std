@@ -189,3 +189,43 @@ MESSAGE_TEMPLATE(421, 0, MessageType::Message,
 
 MESSAGE_TEMPLATE(430, 0, MessageType::Attention,
                  "Получено время от устройства GPS [%s]")
+
+#undef LOG_SUBSYSTEM
+#define LOG_SUBSYSTEM "Client"
+
+MESSAGE_TEMPLATE(500, 0, MessageType::Message,
+                 "Запуск потока работы с подключением [%s]...")
+
+MESSAGE_TEMPLATE(501, 0, MessageType::Message,
+                 "Завершение потока работы с подключением [%s]...")
+
+MESSAGE_TEMPLATE(502, 0, MessageType::Message,
+                 "Поток работы с подключением [%s] завершен")
+
+
+MESSAGE_TEMPLATE(509, 0, MessageType::Attention,
+                 "Установка подключения к [%s]...")
+
+MESSAGE_TEMPLATE(510, 0, MessageType::Attention,
+                 "Подключение к [%s] установлено")
+
+MESSAGE_TEMPLATE(511, 0, MessageType::Attention,
+                 "Подключение к [%s] закрыто")
+
+MESSAGE_TEMPLATE(512, 0, MessageType::Message,
+                 "Получено [%d] байт от подключения к [%s]")
+
+MESSAGE_TEMPLATE(513, 0, MessageType::Message,
+                 "Передано [%d] байт на подключение к [%s]")
+
+MESSAGE_TEMPLATE(514, 0, MessageType::Message,
+                 "Получен пакет [%s] от подключения к [%s]")
+
+MESSAGE_TEMPLATE(515, 0, MessageType::Message,
+                 "Передан пакет [%s] на подключение к [%s]")
+
+MESSAGE_TEMPLATE(520, 0, MessageType::Error,
+                 "Ошибка работы с подключением к [%s] - [%d] %s")
+
+MESSAGE_TEMPLATE(530, 0, MessageType::Attention,
+                 "Получено время от сервера [%s]")

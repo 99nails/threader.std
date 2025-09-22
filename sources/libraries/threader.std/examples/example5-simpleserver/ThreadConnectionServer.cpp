@@ -4,8 +4,6 @@
 
 #include "HandlerTcpSocket.h"
 
-#include "PacketFactoryAsciiLines.h"
-
 ThreadConnectionServer::ThreadConnectionServer(MessageConsumer *parent,
                                                const std::string &host,
                                                const uint16_t port,
@@ -18,6 +16,7 @@ ThreadConnectionServer::ThreadConnectionServer(MessageConsumer *parent,
 {
     if (handler())
         setThreadName(threadName() + "[" + handler()->deviceName() + "]");
+    _factory = dynamic_cast<PacketFactoryAsciiLines*>(packetFactory());
 }
 
 void ThreadConnectionServer::onThreadStarted()
@@ -81,6 +80,13 @@ bool ThreadConnectionServer::onPacketReceived(const PacketBase::Ptr &packet)
 
 bool ThreadConnectionServer::onPacketSent(const PacketBase::Ptr &packet)
 {
+    auto packetAscii = std::dynamic_pointer_cast<PacketAsciiLine>(packet);
+    if (!packetAscii)
+        return false;
+
+    writeLog(Message215,
+             packetAscii->line().c_str(),
+             handler()->deviceName().c_str());
     return true;
 }
 
@@ -99,5 +105,10 @@ void ThreadConnectionServer::doMessageDateTime(const MessageString::Ptr &message
     if (!message)
         return;
 
-    handler()->writeString(message->value() + "\r\n");
+    if (_factory)
+    {
+        auto packet = _factory->buildPacket(message->value().c_str());
+        if (packet)
+            sendPacket(packet);
+    }
 }
