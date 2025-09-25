@@ -36,6 +36,9 @@ MESSAGE_TEMPLATE(12, 0, MessageType::Attention,
 MESSAGE_TEMPLATE(13, 0, Debug,
                  "Идентификатор потока [%s]: %d");
 
+MESSAGE_TEMPLATE(14, 0, Message,
+                 "Статистика выполнения - потоков: %d шт., используемая память: %d Kb.");
+
 
 MESSAGE_TEMPLATE(20, 0, MessageType::Message,
                  "Чтение настроек службы [%s] из файла [%s]")

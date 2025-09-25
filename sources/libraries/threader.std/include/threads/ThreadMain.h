@@ -1,20 +1,37 @@
 #pragma once
 
 #include "LogMessagesTemplates.h"
+#include "ListThreads.h"
+#include "MessageWriteToFile.h"
+#include "StdStringUtils.h"
 #include "ThreadBase.h"
+
+#ifdef linux
+#include <sys/resource.h>
+#endif
 
 namespace Threader::Threads
 {
+
+constexpr uint TIMEOUT_BUILD_STATISTIC_MILLISECONDS = 10000;
+constexpr uint TIMEOUT_BUILD_COMMON_STATISTIC_MILLISECONDS = 60000;
 
 template <class SettingsSet>
 class ThreadMain : public ThreadBase
 {
 public:
     explicit ThreadMain(MessageConsumer *parent = nullptr,
+                        const std::string &applicationName = std::string(),
                         const std::string &threadName = std::string(),
                         const std::string &iniFileName = std::string(),
                         const ThreadRunMode &threadRunMode = ThreadRunMode::Polling)
-        : ThreadBase(parent, threadName, threadRunMode)
+        : ThreadBase(parent,
+                     (threadName.empty()) ? "Thread.Main" : threadName,
+                     threadRunMode)
+        , _nextBuildStatisticTickCount(
+              DateTimeUtils::getNextTickCount(TIMEOUT_BUILD_STATISTIC_MILLISECONDS))
+        , _nextBuildCommonStatisticTickCount(0)
+        , _threadStatisticFileName(applicationName + ".Threads")
     {
         _settings.setFileName(iniFileName);
     }
@@ -45,9 +62,109 @@ protected:
         writeLog(Message12, threadName().c_str());
     }
 
+    void onIdle() override
+    {
+        snapshotThreads();
+    }
+
+private:
+    void snapshotThreads(bool rightNow = false)
+    {
+        auto tickCount = DateTimeUtils::getTickCount();
+        if (!rightNow && tickCount < _nextBuildStatisticTickCount)
+            return;
+
+        _nextBuildStatisticTickCount =
+                DateTimeUtils::getNextTickCount(TIMEOUT_BUILD_STATISTIC_MILLISECONDS);
+
+        auto listThreads = ThreadsStaticticCollector::instance();
+        if (!listThreads)
+            return;
+
+        if (!logThread())
+            return;
+
+        auto statisticList = listThreads->statistic();
+
+        std::string statisticString = "";
+
+        int memoryUsage = 0;
+    #ifdef linux
+        rusage ru;
+        if (0 == getrusage(RUSAGE_SELF, &ru))
+        {
+            memoryUsage = ru.ru_maxrss;
+            statisticString = format("Memory usage: %d Kb\r\n", ru.ru_maxrss);
+        }
+    #endif
+
+    #ifdef WIN32
+        PROCESS_MEMORY_COUNTERS pmc;
+        if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+            memoryUsage = pmc.WorkingSetSize / 1024;
+            statisticString = format("Memory usage: %1 Kb\r\n", memoryUsage);
+        }
+    #endif
+
+//        int messagesCount = MessageBase::referenceCount();
+//        statisticString += QString("Messages count: %1\r\n").arg(messagesCount);
+
+        int i = 0;
+        for (auto iterator = statisticList.cbegin(); iterator != statisticList.cend(); iterator++)
+//        for (int i = 0; i < statisticList.count(); i++)
+        {
+            ThreadStatisticStruct statistic = *iterator;
+            int64_t workingTotalMSecs = (statistic.AliveMsecsSinceEpoch - statistic.StartedMsecsSinceEpoch);
+            int64_t workingMSecs = workingTotalMSecs - statistic.WaitMSecsCount;
+
+            std::string alive = DateTimeUtils::msecsSinceEpochToStdString(statistic.AliveMsecsSinceEpoch,
+                                                                          true,
+                                                                          false);
+
+            statisticString += format("%d. (Id: %ld) %s %s (%lld/%lld) [%llu] Queue: %d",
+                                                 ++i,
+                                                 statistic.ThreadId,
+                                                 statistic.ThreadName.c_str(),
+                                                 alive.c_str(),
+                                                 workingMSecs,
+                                                 workingTotalMSecs,
+                                                 statistic.AliveTickCount,
+                                                 statistic.QueueCount) +
+                    ((statistic.Terminated) ? " Terminated" : "") + "\r\n";
+
+        }
+
+    #ifdef linux
+//        setThreadInfo(statisticString);
+    #endif
+
+        statisticString += "{EOF}" + std::string(DateTimeUtils::msecsSinceEpochLocal() % 8, ' ');
+
+        ThreadBase *logThreadInstance = logThread();
+        if (logThreadInstance)
+        {
+            logThreadInstance->postMessage(std::make_shared<MessageWriteToFile>(
+                                               _threadStatisticFileName,
+                                               statisticString,
+                                               MessageWriteToFile::WriteMode::Truncate));
+        }
+
+        if (rightNow || _nextBuildCommonStatisticTickCount <= tickCount)
+        {
+            writeLog(Message14, i, memoryUsage);
+
+            _nextBuildCommonStatisticTickCount = DateTimeUtils::getNextTickCount(TIMEOUT_BUILD_COMMON_STATISTIC_MILLISECONDS);
+        }
+    }
+
+
 private:
     std::string _iniFileName;
     SettingsSet _settings;
+    uint64_t _nextBuildStatisticTickCount;
+    uint64_t _nextBuildCommonStatisticTickCount;
+    std::string _threadStatisticFileName;
+
 };
 
 }

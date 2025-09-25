@@ -55,6 +55,11 @@ install(TARGETS ${PROJECT_NAME}
                 COMPONENT lib
 )
 
+install(FILES ${PROJECT_SOURCE_DIR}/install/threader-std.conf
+        DESTINATION /etc/ld.so.conf.d/
+        COMPONENT lib
+        )
+
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/sources/libraries/threader.std/include/
             DESTINATION /usr/local/include/threader.std
             FILE_PERMISSIONS

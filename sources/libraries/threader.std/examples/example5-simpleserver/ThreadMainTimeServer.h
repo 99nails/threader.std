@@ -15,7 +15,7 @@ using MapThreadBase = std::map<ThreadBase*, UnixTimeMSecs>;
 class ThreadMainTimeServer : public ThreadMain<SettingsType>
 {
 public:
-    explicit ThreadMainTimeServer();
+    explicit ThreadMainTimeServer(const std::string &applicationName = std::string());
 
 protected:
     void startChildThreads() override;

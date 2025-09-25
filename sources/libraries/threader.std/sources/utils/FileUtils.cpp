@@ -28,7 +28,24 @@ char FileUtils::DELIMITER =
 Descriptor FileUtils::fileOpenOrCreate(const std::string &fileName)
 {
 #ifdef linux
-    Descriptor descriptor = ::open(fileName.c_str(), O_CREAT | O_RDWR, S_IWUSR | S_IRUSR);
+    Descriptor descriptor = ::open(fileName.c_str(), O_APPEND | O_RDWR, S_IWUSR | S_IRUSR | S_IROTH);
+#endif
+#ifdef WIN32
+    Descriptor descriptor = CreateFileA((LPCSTR)fileName.c_str(),
+                                        GENERIC_READ | GENERIC_WRITE,
+                                        FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                        nullptr,
+                                        OPEN_ALWAYS,
+                                        0, 0);
+
+#endif
+    return descriptor;
+}
+
+Descriptor FileUtils::fileCreate(const std::string &fileName)
+{
+#ifdef linux
+    Descriptor descriptor = ::open(fileName.c_str(), O_CREAT | O_RDWR, S_IWUSR | S_IRUSR | S_IROTH);
 #endif
 #ifdef WIN32
     Descriptor descriptor = CreateFileA((LPCSTR)fileName.c_str(),
@@ -49,6 +66,20 @@ void FileUtils::fileClose(Descriptor descriptor)
 #endif
 #ifdef WIN32
     CloseHandle(descriptor);
+#endif
+}
+
+size_t FileUtils::fileWrite(const Descriptor &descriptor, const std::string &data)
+{
+#ifdef linux
+
+    return ::write(descriptor, data.c_str(), data.length());
+
+#endif
+#ifdef _WIN32
+        DWORD writtenCount;
+        WriteFile(_descriptor, idata.c_str(), data.length(), &writtenCount, nullptr);
+        return writtenCount;
 #endif
 }
 

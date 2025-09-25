@@ -147,6 +147,9 @@ public:
 
     bool flush();
 
+    bool snapshot(const std::string &fileName,
+                  const std::string &content);
+
 private:
     UnixTimeMSecs currentDate();
 

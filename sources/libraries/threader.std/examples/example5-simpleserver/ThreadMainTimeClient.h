@@ -13,7 +13,7 @@ using SettingsType = SettingsBundleTemplate<SettingsTimeServer>;
 class ThreadMainTimeClient : public ThreadMain<SettingsType>
 {
 public:
-    explicit ThreadMainTimeClient();
+    explicit ThreadMainTimeClient(const std::string &applicationName = std::string());
 
 protected:
     void startChildThreads() override;

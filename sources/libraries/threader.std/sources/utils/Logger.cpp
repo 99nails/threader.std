@@ -188,6 +188,18 @@ bool Logger::flush()
     return true;
 }
 
+bool Logger::snapshot(const std::string &fileName, const std::string &content)
+{
+    auto descriptor = FileUtils::fileCreate(_pathToLog + fileName);
+    if (INVALID_DESCRIPTOR != descriptor)
+    {
+        bool result = FileUtils::fileWrite(descriptor, content) == content.length();
+        FileUtils::fileClose(descriptor);
+        return true;
+    }
+    return false;
+}
+
 UnixTimeMSecs Logger::currentDate()
 {
     auto date = DateTimeUtils::msecsSinceEpochLocal();

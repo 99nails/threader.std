@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DateTimeUtils.h"
+#include "FileUtils.h"
 #include "SignalHandler.h"
 
 #include "ThreadLog.h"
@@ -34,7 +35,9 @@ int AppMain(int argc, char *argv[])
 
     startLogSubsystem(argv[0]);
 
-    auto threadMain = new ThreadMainType();
+    auto applicationName = FileUtils::extractFileName(argv[0]);
+
+    auto threadMain = new ThreadMainType(applicationName);
     threadMain->start();
 
     readStr();

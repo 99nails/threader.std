@@ -12,7 +12,10 @@ public:
     static char DELIMITER;
 
     static Descriptor fileOpenOrCreate(const std::string &fileName);
+    static Descriptor fileCreate(const std::string &fileName);
     static void fileClose(Descriptor descriptor);
+    static size_t fileWrite(const Descriptor &descriptor,
+                            const std::string &data);
 
     static bool isPathExists(const std::string &path);
     static bool isFileExists(const std::string &fieName);

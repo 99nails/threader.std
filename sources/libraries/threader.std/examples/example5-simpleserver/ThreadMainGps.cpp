@@ -8,8 +8,9 @@ using namespace Threader::Utils;
 
 constexpr char APPLICATION_NAME[] = "Gps.Emulator";
 
-ThreadMainGps::ThreadMainGps()
+ThreadMainGps::ThreadMainGps(const std::string &applicationName)
     : ThreadMain(nullptr,
+                 applicationName,
                  "Thread.Main",
                  format("%s%c%s", SETTINGS_FOLDER, FileUtils::DELIMITER, "example5.ini"))
     , _threadGps(nullptr)

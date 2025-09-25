@@ -1,6 +1,7 @@
 #include "ThreadLog.h"
 
 #include "DateTimeUtils.h"
+#include "FileUtils.h"
 #include "MessageLog.h"
 #include "StdStringUtils.h"
 
@@ -119,21 +120,37 @@ void ThreadLog::processMessage(const MessageBase::Ptr &message)
 
     if (MessageLog::MESSAGE_NAME == messageName)
     {
-        const auto messageLog = std::dynamic_pointer_cast<MessageLog>(message);
-        if (!messageLog || !_logger)
-            return;
-
-        _logger->collectMessage(messageLog->created(),
-                       messageLog->number(),
-                       messageLog->level(),
-                       messageLog->messageType(),
-                       messageLog->subSystem(),
-                       messageLog->threadId(),
-                       messageLog->value());
-
-        if (_consumer && _logger->level() >= messageLog->level())
-            _consumer->postMessage(messageLog);
+        doMessageLog(std::dynamic_pointer_cast<MessageLog>(message));
     }
+    else if (MessageWriteToFile::MESSAGE_NAME == messageName)
+    {
+        doMessageWriteToFile(std::dynamic_pointer_cast<MessageWriteToFile>(message));
+    }
+}
+
+void ThreadLog::doMessageLog(const MessageLog::Ptr &message)
+{
+    if (!message || !_logger)
+        return;
+
+    _logger->collectMessage(message->created(),
+                   message->number(),
+                   message->level(),
+                   message->messageType(),
+                   message->subSystem(),
+                   message->threadId(),
+                   message->value());
+
+    if (_consumer && _logger->level() >= message->level())
+        _consumer->postMessage(message);
+}
+
+void ThreadLog::doMessageWriteToFile(const MessageWriteToFile::Ptr &message)
+{
+    if (!message || !_logger)
+        return;
+
+    _logger->snapshot(message->fileName(), message->value());
 }
 
 }

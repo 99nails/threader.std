@@ -15,9 +15,10 @@ set(THREADER_SOURCES
     include/threads/LogMessagesTemplates.h
     include/threads/MessageBase.h sources/threads/MessageBase.cpp
     include/threads/MessageBinary.h sources/threads/MessageBinary.cpp
+    include/threads/MessageConsumer.h sources/threads/MessageConsumer.cpp
     include/threads/MessageLog.h sources/threads/MessageLog.cpp
     include/threads/MessageTimer.h sources/threads/MessageTimer.cpp
-    include/threads/MessageConsumer.h sources/threads/MessageConsumer.cpp
+    include/threads/MessageWriteToFile.h sources/threads/MessageWriteToFile.cpp
     include/threads/PacketFactoryAsciiLines.h sources/threads/PacketFactoryAsciiLines.cpp
     include/threads/PacketFactoryBase.h sources/threads/PacketFactoryBase.cpp
     include/threads/PollerListenSocketConnection.h sources/threads/PollerListenSocketConnection.cpp
@@ -45,6 +46,7 @@ set(THREADER_SOURCES
     include/utils/TrafficCounter.h sources/utils/TrafficCounter.cpp
     include/utils/ThreadsCommon.h
     include/utils/ThreadUtils.h sources/utils/ThreadUtils.cpp
+    include/utils/UdevEnumerator.h sources/utils/UdevEnumerator.cpp
     )
 
 if (WIN32)
@@ -58,11 +60,15 @@ add_library(threader-std SHARED
 
 target_compile_features(threader-std PUBLIC cxx_std_17)
 
-set_target_properties(threader-std PROPERTIES VERSION ${VERSION} SOVERSION ${VER_MAJ})
+set_target_properties(threader-std
+    PROPERTIES
+        VERSION ${VERSION}
+        SOVERSION ${VER_MAJ}
+        )
 
 target_link_libraries(threader-std PRIVATE
     -lpthread
-#    -lstdc++fs
+    -ludev
 )
 
 # example1-messages
@@ -176,5 +182,17 @@ target_compile_features(example5-gps PUBLIC cxx_std_17)
 target_link_libraries(example5-gps
    -lpthread
    -lstdc++fs
+   threader-std
+)
+
+# example6-devicelist
+add_executable(example6-devicelist
+    examples/example6-udev/MainExample6DeviceList.cpp
+    )
+
+target_compile_features(example6-devicelist PUBLIC cxx_std_17)
+
+target_link_libraries(example6-devicelist
+   pthread
    threader-std
 )
