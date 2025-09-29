@@ -87,7 +87,7 @@ public:
      * @brief threadClassName - Получение имени класса потока
      * @return - Имя класса потока
      */
-    // std::string threadClassName();
+     std::string threadClassName();
 
     /**
      * @brief threadId - Получение идентификатора потока

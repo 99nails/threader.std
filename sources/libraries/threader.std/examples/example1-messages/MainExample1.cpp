@@ -76,7 +76,6 @@ protected:
         while (!_isTerminated.load())
         {
             processMessages();
-//            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         processMessages();
     }

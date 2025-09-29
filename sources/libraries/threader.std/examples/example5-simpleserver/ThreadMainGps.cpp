@@ -6,8 +6,6 @@
 
 using namespace Threader::Utils;
 
-constexpr char APPLICATION_NAME[] = "Gps.Emulator";
-
 ThreadMainGps::ThreadMainGps(const std::string &applicationName)
     : ThreadMain(nullptr,
                  applicationName,

@@ -23,6 +23,7 @@ set(THREADER_SOURCES
     include/threads/PacketFactoryBase.h sources/threads/PacketFactoryBase.cpp
     include/threads/PollerListenSocketConnection.h sources/threads/PollerListenSocketConnection.cpp
     include/threads/PollerThread.h sources/threads/PollerThread.cpp
+    include/threads/PollerUdev.h sources/threads/PollerUdev.cpp
     include/threads/PollingPosix.h sources/threads/PollingPosix.cpp
     include/threads/QueueMessages.h sources/threads/QueueMessages.cpp
     include/threads/ThreadBase.h sources/threads/ThreadBase.cpp
@@ -31,6 +32,7 @@ set(THREADER_SOURCES
     include/threads/ThreadLog.h sources/threads/ThreadLog.cpp
     include/threads/ThreadMain.h sources/threads/ThreadMain.cpp
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
+    include/threads/ThreadUdevMonitor.h sources/threads/ThreadUdevMonitor.cpp
     include/utils/DaemonApplication.h
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
     include/utils/FileUtils.h sources/utils/FileUtils.cpp
@@ -180,12 +182,13 @@ add_executable(example5-gps
 target_compile_features(example5-gps PUBLIC cxx_std_17)
 
 target_link_libraries(example5-gps
-   -lpthread
-   -lstdc++fs
+   pthread
+   stdc++fs
    threader-std
 )
 
 # example6-devicelist
+
 add_executable(example6-devicelist
     examples/example6-udev/MainExample6DeviceList.cpp
     )
@@ -193,6 +196,21 @@ add_executable(example6-devicelist
 target_compile_features(example6-devicelist PUBLIC cxx_std_17)
 
 target_link_libraries(example6-devicelist
+   pthread
+   threader-std
+)
+
+# example6-waitdevice
+
+add_executable(example6-waitdevice
+    examples/example6-udev/MainExample6WaitDevice.cpp
+    examples/example6-udev/ThreadMainWaitDevice.h examples/example6-udev/ThreadMainWaitDevice.cpp
+    examples/example6-udev/SettingsDevice.h examples/example6-udev/SettingsDevice.cpp
+    )
+
+target_compile_features(example6-waitdevice PUBLIC cxx_std_17)
+
+target_link_libraries(example6-waitdevice
    pthread
    threader-std
 )

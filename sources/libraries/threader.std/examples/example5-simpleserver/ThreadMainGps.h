@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SettingsGpsEmulator.h"
-#include "ThreadBase.h"
 #include "ThreadMain.h"
 
 using namespace Threader::Threads;

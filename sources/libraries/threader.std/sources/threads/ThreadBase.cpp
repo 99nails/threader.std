@@ -7,6 +7,7 @@
 
 #include "DateTimeUtils.h"
 #include "ThreadUtils.h"
+#include "SignalHandler.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -108,11 +109,11 @@ void ThreadBase::setThreadRunMode(const ThreadRunMode &threadRunMode)
     }
 }
 
-// std::string ThreadBase::threadClassName()
-// {
+ std::string ThreadBase::threadClassName()
+ {
 
-//     return typeid(*this);
-// }
+     return demangle(typeid(*this).name());
+ }
 
 THREAD_ID ThreadBase::threadId()
 {

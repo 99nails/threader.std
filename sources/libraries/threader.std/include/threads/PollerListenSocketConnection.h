@@ -25,7 +25,7 @@ class PollerListenSocketConnection : public PollerBase
 {
 public:
     explicit PollerListenSocketConnection(ConsumerListenSocketEvents *consumer,
-                                uint16_t port);
+                                          uint16_t port);
     ~PollerListenSocketConnection() override;
 
     bool isInitialized() const;

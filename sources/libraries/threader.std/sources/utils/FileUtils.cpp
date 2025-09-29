@@ -28,7 +28,7 @@ char FileUtils::DELIMITER =
 Descriptor FileUtils::fileOpenOrCreate(const std::string &fileName)
 {
 #ifdef linux
-    Descriptor descriptor = ::open(fileName.c_str(), O_APPEND | O_RDWR, S_IWUSR | S_IRUSR | S_IROTH);
+    Descriptor descriptor = ::open(fileName.c_str(), O_CREAT | O_APPEND | O_RDWR, S_IWUSR | S_IRUSR | S_IROTH);
 #endif
 #ifdef WIN32
     Descriptor descriptor = CreateFileA((LPCSTR)fileName.c_str(),
