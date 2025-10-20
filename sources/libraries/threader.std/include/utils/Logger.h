@@ -150,6 +150,9 @@ public:
     bool snapshot(const std::string &fileName,
                   const std::string &content);
 
+    bool append(const std::string &fileName,
+                const std::string &content);
+
 private:
     UnixTimeMSecs currentDate();
 

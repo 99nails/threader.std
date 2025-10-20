@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <iostream>
 
 namespace Threader::Utils
 {
@@ -137,10 +138,9 @@ void UdevEnumerator::enumerate(UdevEnumerationCallback &handler)
             if (!handler(deviceInfo))
                 break;
         }
+        // освобождение нумератора
+        udev_enumerate_unref(enumerator);
     }
-
-    // освобождение нумератора
-    udev_enumerate_unref(enumerator);
 }
 
 void UdevEnumerator::initializeContext()

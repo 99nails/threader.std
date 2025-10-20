@@ -52,6 +52,38 @@ StdStringVector StdStringUtils::split(const std::string &str,
     return result;
 }
 
+std::string StdStringUtils::section(const std::string &str,
+                                    const char delimiter,
+                                    const int number,
+                                    const bool keepEmptyParts)
+{
+    auto words = split(str, delimiter, keepEmptyParts);
+    if (words.size() <= number)
+        return std::string();
+
+    return words[number];
+}
+
+void StdStringUtils::ltrim(std::string &s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+void StdStringUtils::rtrim(std::string &s)
+{
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+void StdStringUtils::trim(std::string &s)
+{
+    ltrim(s);
+    rtrim(s);
+}
+
 #ifdef WIN32
 
 std::string StdStringUtils::ConvertCP1251ToUTF8(const std::string &str)

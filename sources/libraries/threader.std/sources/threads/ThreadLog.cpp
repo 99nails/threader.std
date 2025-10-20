@@ -10,12 +10,13 @@ namespace Threader::Threads {
 using namespace Threader::Utils;
 
 bool startLogSubsystem(const std::string &pathToBin,
-                       MessageConsumer *consumer)
+                       MessageConsumer *consumer,
+                       int level)
 {
     if (ThreadBase::logThread())
         return true;
 
-    auto thread = new ThreadLog(pathToBin, consumer);
+    auto thread = new ThreadLog(pathToBin, consumer, level);
     thread->start();
 
     return true;
@@ -38,13 +39,14 @@ void stopLogSubsystem()
 ThreadLog *ThreadLog::_instance = nullptr;
 
 ThreadLog::ThreadLog(const std::string &pathToBin,
-                     MessageConsumer *consumer)
+                     MessageConsumer *consumer,
+                     int level)
     : ThreadBase(nullptr, "Thread.Log")
     , _logger(nullptr)
     , _consumer(consumer)
 {
     _instance = this;
-    _logger = new Logger(true, pathToBin, 9, logDetailsAllWithoutDate);
+    _logger = new Logger(true, pathToBin, level, logDetailsAllWithoutDate);
 
     ThreadBase::setLogThread(this, _logger->level());
 
@@ -150,7 +152,14 @@ void ThreadLog::doMessageWriteToFile(const MessageWriteToFile::Ptr &message)
     if (!message || !_logger)
         return;
 
-    _logger->snapshot(message->fileName(), message->value());
+    switch (message->writeMode()) {
+    case Threader::Threads::MessageWriteToFile::WriteMode::Truncate:
+        _logger->snapshot(message->fileName(), message->value());
+        break;
+    case Threader::Threads::MessageWriteToFile::WriteMode::Append:
+        _logger->append(message->fileName(), message->value());
+        break;
+    }
 }
 
 }

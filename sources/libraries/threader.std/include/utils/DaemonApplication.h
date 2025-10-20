@@ -33,7 +33,7 @@ int AppMain(int argc, char *argv[])
     std::cout << "Press Enter to terminate program...\r\n";
 #endif
 
-    startLogSubsystem(argv[0]);
+    startLogSubsystem(argv[0], nullptr, 9);
 
     auto applicationName = FileUtils::extractFileName(argv[0]);
 

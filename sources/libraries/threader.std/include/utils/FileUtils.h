@@ -14,6 +14,7 @@ public:
     static Descriptor fileOpenOrCreate(const std::string &fileName);
     static Descriptor fileCreate(const std::string &fileName);
     static void fileClose(Descriptor descriptor);
+    static void fileSeek(Descriptor descriptor, int mode, int offset);
     static size_t fileWrite(const Descriptor &descriptor,
                             const std::string &data);
 

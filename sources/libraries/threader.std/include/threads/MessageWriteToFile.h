@@ -7,7 +7,11 @@ namespace Threader::Threads {
 class MessageWriteToFile : public MessageString
 {
 public:
-    enum class WriteMode {Truncate, Append};
+    enum class WriteMode
+    {
+        Truncate,
+        Append
+    };
 
     using Ptr = std::shared_ptr<MessageWriteToFile>;
 

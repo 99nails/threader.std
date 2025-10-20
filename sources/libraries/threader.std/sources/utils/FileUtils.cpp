@@ -69,6 +69,16 @@ void FileUtils::fileClose(Descriptor descriptor)
 #endif
 }
 
+void FileUtils::fileSeek(Descriptor descriptor, int mode, int offset)
+{
+#ifdef linux
+    lseek(descriptor, offset, mode);
+#endif
+#ifdef WIN32
+    SetFilePointer(descriptor, offset, NULL, mode);
+#endif
+}
+
 size_t FileUtils::fileWrite(const Descriptor &descriptor, const std::string &data)
 {
 #ifdef linux

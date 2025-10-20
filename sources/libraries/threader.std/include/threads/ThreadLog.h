@@ -11,7 +11,8 @@ namespace Threader::Threads {
 
 
 bool startLogSubsystem(const std::string &pathToBin,
-                       MessageConsumer *consumer = nullptr);
+                       MessageConsumer *consumer = nullptr,
+                       int level = 9);
 
 void stopLogSubsystem();
 
@@ -19,7 +20,8 @@ class ThreadLog : public ThreadBase
 {
 public:
     explicit ThreadLog(const std::string &pathToBin,
-                       MessageConsumer *consumer = nullptr);
+                       MessageConsumer *consumer = nullptr,
+                       int level = 9);
     virtual ~ThreadLog();
 
     void flush();
