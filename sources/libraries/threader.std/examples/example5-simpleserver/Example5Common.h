@@ -121,25 +121,25 @@ MESSAGE_TEMPLATE(313, 0, MessageType::Attention,
                  "Подключение к устройству [%s] закрыто")
 
 
-MESSAGE_TEMPLATE(314, 0, MessageType::Message,
+MESSAGE_TEMPLATE(314, 9, MessageType::Message,
                  "Получено [%d] байт от подключения [%s]")
 
-MESSAGE_TEMPLATE(315, 0, MessageType::Message,
+MESSAGE_TEMPLATE(315, 9, MessageType::Message,
                  "Передано [%d] байт на подключение [%s]")
 
 
 
-MESSAGE_TEMPLATE(316, 0, MessageType::Message,
+MESSAGE_TEMPLATE(316, 8, MessageType::Message,
                  "Получен пакет [%s] байт от подключения [%s]")
 
-MESSAGE_TEMPLATE(317, 0, MessageType::Message,
+MESSAGE_TEMPLATE(317, 8, MessageType::Message,
                  "Передан пакет [%s] байт от подключения [%s]")
 
 
-MESSAGE_TEMPLATE(320, 0, MessageType::Message,
+MESSAGE_TEMPLATE(320, 7, MessageType::Message,
                  "Получено сообщение [%s]")
 
-MESSAGE_TEMPLATE(321, 0, MessageType::Message,
+MESSAGE_TEMPLATE(321, 7, MessageType::Message,
                  "Отправлено сообщение [%s]")
 
 
@@ -166,24 +166,24 @@ MESSAGE_TEMPLATE(413, 0, MessageType::Attention,
                  "Подключение к устройству GPS [%s] закрыто")
 
 
-MESSAGE_TEMPLATE(414, 0, MessageType::Message,
+MESSAGE_TEMPLATE(414, 9, MessageType::Message,
                  "Получено [%d] байт от подключения [%s]")
 
-MESSAGE_TEMPLATE(415, 0, MessageType::Message,
+MESSAGE_TEMPLATE(415, 9, MessageType::Message,
                  "Передано [%d] байт на подключение [%s]")
 
 
-MESSAGE_TEMPLATE(416, 0, MessageType::Message,
+MESSAGE_TEMPLATE(416, 8, MessageType::Message,
                  "Получен пакет [%s] байт от подключения [%s]")
 
-MESSAGE_TEMPLATE(417, 0, MessageType::Message,
+MESSAGE_TEMPLATE(417, 8, MessageType::Message,
                  "Передан пакет [%s] байт от подключения [%s]")
 
 
-MESSAGE_TEMPLATE(420, 0, MessageType::Message,
+MESSAGE_TEMPLATE(420, 7, MessageType::Message,
                  "Получено сообщение [%s]")
 
-MESSAGE_TEMPLATE(421, 0, MessageType::Message,
+MESSAGE_TEMPLATE(421, 7, MessageType::Message,
                  "Отправлено сообщение [%s]")
 
 
@@ -209,22 +209,22 @@ MESSAGE_TEMPLATE(509, 0, MessageType::Attention,
 MESSAGE_TEMPLATE(510, 0, MessageType::Attention,
                  "Подключение к [%s] установлено")
 
-MESSAGE_TEMPLATE(511, 0, MessageType::Attention,
+MESSAGE_TEMPLATE(511, 9, MessageType::Attention,
                  "Подключение к [%s] закрыто")
 
-MESSAGE_TEMPLATE(512, 0, MessageType::Message,
+MESSAGE_TEMPLATE(512, 9, MessageType::Message,
                  "Получено [%d] байт от подключения к [%s]")
 
-MESSAGE_TEMPLATE(513, 0, MessageType::Message,
+MESSAGE_TEMPLATE(513, 8, MessageType::Message,
                  "Передано [%d] байт на подключение к [%s]")
 
-MESSAGE_TEMPLATE(514, 0, MessageType::Message,
+MESSAGE_TEMPLATE(514, 8, MessageType::Message,
                  "Получен пакет [%s] от подключения к [%s]")
 
-MESSAGE_TEMPLATE(515, 0, MessageType::Message,
+MESSAGE_TEMPLATE(515, 7, MessageType::Message,
                  "Передан пакет [%s] на подключение к [%s]")
 
-MESSAGE_TEMPLATE(520, 0, MessageType::Error,
+MESSAGE_TEMPLATE(520, 7, MessageType::Error,
                  "Ошибка работы с подключением к [%s] - [%d] %s")
 
 MESSAGE_TEMPLATE(530, 0, MessageType::Attention,

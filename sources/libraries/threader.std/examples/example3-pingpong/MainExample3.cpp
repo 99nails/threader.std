@@ -10,7 +10,7 @@
 
 using namespace Threader::Threads;
 
-void readStr()
+void readLine()
 {
     std::string ch;
     std::getline(std::cin, ch);
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
     ThreadBase::writeLog(Message11);
 
-    readStr();
+    readLine();
 
     ThreadBase::writeLog(Message12);
 

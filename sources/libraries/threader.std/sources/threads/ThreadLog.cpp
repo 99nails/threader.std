@@ -9,14 +9,17 @@ namespace Threader::Threads {
 
 using namespace Threader::Utils;
 
+constexpr char MESSAGE_NAME_LOG_LEVEL[] = "Message.Log.Level";
+
 bool startLogSubsystem(const std::string &pathToBin,
                        MessageConsumer *consumer,
+                       bool console,
                        int level)
 {
     if (ThreadBase::logThread())
         return true;
 
-    auto thread = new ThreadLog(pathToBin, consumer, level);
+    auto thread = new ThreadLog(pathToBin, consumer, console, level);
     thread->start();
 
     return true;
@@ -40,13 +43,14 @@ ThreadLog *ThreadLog::_instance = nullptr;
 
 ThreadLog::ThreadLog(const std::string &pathToBin,
                      MessageConsumer *consumer,
-                     int level)
+                     const bool console,
+                     const int level)
     : ThreadBase(nullptr, "Thread.Log")
     , _logger(nullptr)
     , _consumer(consumer)
 {
     _instance = this;
-    _logger = new Logger(true, pathToBin, level, logDetailsAllWithoutDate);
+    _logger = new Logger(console, pathToBin, level, logDetailsAllWithoutDate);
 
     ThreadBase::setLogThread(this, _logger->level());
 
@@ -63,6 +67,14 @@ ThreadLog::~ThreadLog()
         delete _logger;
         _logger = nullptr;
     }
+}
+
+void ThreadLog::setLevel(const int level)
+{
+    if (!_instance)
+        return;
+
+    _instance->postMessage(std::make_shared<MessageInt>(MESSAGE_NAME_LOG_LEVEL, level));
 }
 
 void ThreadLog::flush()
@@ -128,6 +140,10 @@ void ThreadLog::processMessage(const MessageBase::Ptr &message)
     {
         doMessageWriteToFile(std::dynamic_pointer_cast<MessageWriteToFile>(message));
     }
+    if (MESSAGE_NAME_LOG_LEVEL == messageName)
+    {
+        doMessageLogLevel(std::dynamic_pointer_cast<MessageInt>(message));
+    }
 }
 
 void ThreadLog::doMessageLog(const MessageLog::Ptr &message)
@@ -160,6 +176,26 @@ void ThreadLog::doMessageWriteToFile(const MessageWriteToFile::Ptr &message)
         _logger->append(message->fileName(), message->value());
         break;
     }
+}
+
+void ThreadLog::doMessageLogLevel(const MessageInt::Ptr &message)
+{
+    if (!message)
+        return;
+
+    if (!_logger)
+        return;
+
+    _logger->setLevel(message->value());
+
+    _logger->collectMessage(DateTimeUtils::msecsSinceEpochLocal(),
+                            Message3.number,
+                            Message3.level,
+                            Message3.messageType,
+                            Message3.subSystem,
+                            thisThreadId(),
+                            format(Message3.text.c_str(),
+                                   _logger->level()));
 }
 
 }

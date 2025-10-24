@@ -21,19 +21,24 @@ class ThreadMain : public ThreadBase
 {
 public:
     explicit ThreadMain(MessageConsumer *parent = nullptr,
-                        const std::string &applicationName = std::string(),
+                        const std::string &applicationBinaryName = std::string(),
+                        const std::string &applicationFriendlyName = std::string(),
                         const std::string &threadName = std::string(),
                         const std::string &iniFileName = std::string(),
                         const ThreadRunMode &threadRunMode = ThreadRunMode::Polling)
         : ThreadBase(parent,
                      (threadName.empty()) ? "Thread.Main" : threadName,
                      threadRunMode)
+        , _applicationBinaryName(applicationBinaryName)
+        , _applicationFriendlyName(applicationFriendlyName)
         , _nextBuildStatisticTickCount(
               DateTimeUtils::getNextTickCount(TIMEOUT_BUILD_STATISTIC_MILLISECONDS))
         , _nextBuildCommonStatisticTickCount(0)
-        , _threadStatisticFileName(applicationName + ".Threads")
+        , _threadStatisticFileName(applicationBinaryName + ".Threads")
     {
         _settings.setFileName(iniFileName);
+        if (_applicationFriendlyName.empty())
+            _applicationFriendlyName = threadName;
     }
 
     SettingsSet &settings()
@@ -43,23 +48,23 @@ public:
 protected:
     void onThreadStarted() override
     {
-        writeLog(Message10, threadName().c_str());
+        writeLog(Message10, _applicationFriendlyName.c_str());
 
-        writeLog(Message20, threadName().c_str(), _settings.fileName().c_str());
+        writeLog(Message20, _applicationFriendlyName.c_str(), _settings.fileName().c_str());
         if (_settings.read())
-            writeLog(Message21, threadName().c_str(), _settings.fileName().c_str());
+            writeLog(Message21, _applicationFriendlyName.c_str(), _settings.fileName().c_str());
         else
-            writeLog(Message22, threadName().c_str(), _settings.fileName().c_str());
+            writeLog(Message22, _applicationFriendlyName.c_str(), _settings.fileName().c_str());
     }
 
     void onThreadFinishing() override
     {
-        writeLog(Message11, threadName().c_str());
+        writeLog(Message11, _applicationFriendlyName.c_str());
     }
 
     void onThreadFinished() override
     {
-        writeLog(Message12, threadName().c_str());
+        writeLog(Message12, _applicationFriendlyName.c_str());
     }
 
     void onIdle() override
@@ -161,6 +166,8 @@ private:
 private:
     std::string _iniFileName;
     SettingsSet _settings;
+    std::string _applicationBinaryName;
+    std::string _applicationFriendlyName;
     uint64_t _nextBuildStatisticTickCount;
     uint64_t _nextBuildCommonStatisticTickCount;
     std::string _threadStatisticFileName;

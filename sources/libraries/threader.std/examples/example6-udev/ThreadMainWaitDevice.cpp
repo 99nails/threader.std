@@ -5,6 +5,7 @@
 ThreadMainWaitDevice::ThreadMainWaitDevice(const std::string &applicationName)
     : ThreadMain(nullptr,
                  applicationName,
+                 "Ожидание устройства",
                  "Thread.Main",
                  format("%s%c%s", SETTINGS_FOLDER, FileUtils::DELIMITER, "example6.ini"))
     , _threadUdevMonitor(nullptr)

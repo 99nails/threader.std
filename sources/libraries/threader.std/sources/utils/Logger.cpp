@@ -80,6 +80,11 @@ int Logger::level() const
     return _level;
 }
 
+void Logger::setLevel(const int value)
+{
+    _level = value;
+}
+
 bool Logger::collectMessage(UnixTimeMSecs created,
                             int number,
                             int level,
@@ -143,7 +148,6 @@ bool Logger::collectMessage(UnixTimeMSecs created,
 
     if (LogDetails::Subsystem & _logDetails) {
         appendTab(data);
-        // data += '#' + subSystem + '#';
         data += subSystem;
     }
 
@@ -273,7 +277,6 @@ void Logger::closeFile()
 void Logger::printLine(const std::string &line, MessageType messageType)
 {
 #ifdef linux
-    std::string colorString;
     switch (messageType) {
     case Attention:
         std::cout << ANSI_COLOR_GREEN;
@@ -290,7 +293,6 @@ void Logger::printLine(const std::string &line, MessageType messageType)
     default:
         std::cout << ANSI_COLOR_RESET;
         break;
-        std::cout << line;
     }
     std::cout << line << ANSI_COLOR_RESET;
 #endif

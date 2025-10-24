@@ -9,6 +9,7 @@ using namespace Threader::Utils;
 ThreadMainGps::ThreadMainGps(const std::string &applicationName)
     : ThreadMain(nullptr,
                  applicationName,
+                 "Эмулятор GPS",
                  "Thread.Main",
                  format("%s%c%s", SETTINGS_FOLDER, FileUtils::DELIMITER, "example5.ini"))
     , _threadGps(nullptr)

@@ -14,7 +14,7 @@
 
 using namespace Threader::Threads;
 
-void readStr()
+void readLine()
 {
     std::string ch;
     std::getline(std::cin, ch);
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
                 );
     threadPong->start();
 
-    readStr();
+    readLine();
 
     threadPing->postTerminateEvent();
     threadPong->postTerminateEvent();

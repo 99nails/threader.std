@@ -11,6 +11,7 @@ constexpr char THREAD_NAME[] = "Thread.Main.Time.Client";
 ThreadMainTimeClient::ThreadMainTimeClient(const std::string &applicationName)
     : ThreadMain(nullptr,
                  applicationName,
+                 "Клиент сервера времени",
                  THREAD_NAME,
                  format("%s%c%s", SETTINGS_FOLDER, FileUtils::DELIMITER, "example5.ini"))
 {

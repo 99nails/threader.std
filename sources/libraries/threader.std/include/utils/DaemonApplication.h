@@ -3,6 +3,7 @@
 #include "DateTimeUtils.h"
 #include "FileUtils.h"
 #include "SignalHandler.h"
+#include "StdStringUtils.h"
 
 #include "ThreadLog.h"
 
@@ -10,11 +11,40 @@
 
 using namespace Threader::Threads;
 
-void readStr()
+void readLine()
 {
-    std::string ch;
-    std::getline(std::cin, ch);
+    std::string line;
+    std::getline(std::cin, line);
 }
+
+void parseArguments(int argc,
+                      char *argv[],
+                      bool &console,
+                      int &level)
+{
+    constexpr char PARAMETER_NAME_CONSOLE[] = "--console";
+    constexpr char PARAMETER_NAME_LOG[] = "--log";
+
+    for (int i = 1; i < argc; i++)
+    {
+        const auto parameter = StdStringUtils::toLower(argv[i]);
+        if (parameter == PARAMETER_NAME_CONSOLE)
+        {
+            console = true;
+        }
+        if (parameter == PARAMETER_NAME_LOG)
+        {
+            if (i < argc + 1)
+            {
+                i++;
+                std::string levelString = argv[i];
+                if (levelString.find_first_not_of("0123456789") == std::string::npos)
+                    level = std::stoi(argv[i]);
+            }
+        }
+    }
+}
+
 
 template<class ThreadMainType>
 int AppMain(int argc, char *argv[])
@@ -30,17 +60,20 @@ int AppMain(int argc, char *argv[])
 #else
     setlocale(LC_ALL, "ru_RU.UTF-8");
     setlocale(LC_NUMERIC, "C");
-    std::cout << "Press Enter to terminate program...\r\n";
+    std::cout << "Нажмите Enter для завершения программы...\r\n";
 #endif
+    bool console = false;
+    int level = 9;
+    parseArguments(argc, argv, console, level);
 
-    startLogSubsystem(argv[0], nullptr, 9);
+    startLogSubsystem(argv[0], nullptr, console, level);
 
     auto applicationName = FileUtils::extractFileName(argv[0]);
 
     auto threadMain = new ThreadMainType(applicationName);
     threadMain->start();
 
-    readStr();
+    readLine();
 
     threadMain->postTerminateEvent();
     while (!threadMain->isFinished())

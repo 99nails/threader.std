@@ -135,7 +135,9 @@ public:
     virtual ~Logger();
 
     std::string pathToLog() const;
+
     int level() const;
+    void setLevel(const int value);
 
     bool collectMessage(UnixTimeMSecs created,
                         int number,

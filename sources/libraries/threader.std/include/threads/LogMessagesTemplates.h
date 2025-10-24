@@ -19,6 +19,9 @@ MESSAGE_TEMPLATE(1, 0, MessageType::Attention,
 MESSAGE_TEMPLATE(2, 0, MessageType::Attention,
                  "Подсистема протоколирования завершена")
 
+MESSAGE_TEMPLATE(3, 0, MessageType::Attention,
+                 "Подробность протоколирования: %d ")
+
 
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Daemon"

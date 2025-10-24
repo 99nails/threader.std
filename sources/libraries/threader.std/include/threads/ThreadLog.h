@@ -2,6 +2,7 @@
 
 #include "Logger.h"
 #include "LogMessagesTemplates.h"
+#include "MessageBase.h"
 #include "MessageWriteToFile.h"
 #include "ThreadBase.h"
 
@@ -12,6 +13,7 @@ namespace Threader::Threads {
 
 bool startLogSubsystem(const std::string &pathToBin,
                        MessageConsumer *consumer = nullptr,
+                       bool console = false,
                        int level = 9);
 
 void stopLogSubsystem();
@@ -21,8 +23,11 @@ class ThreadLog : public ThreadBase
 public:
     explicit ThreadLog(const std::string &pathToBin,
                        MessageConsumer *consumer = nullptr,
-                       int level = 9);
+                       const bool console = false,
+                       const int level = 9);
     virtual ~ThreadLog();
+
+    static void setLevel(const int level);
 
     void flush();
 protected:
@@ -36,7 +41,7 @@ protected:
 private:
     void doMessageLog(const MessageLog::Ptr &message);
     void doMessageWriteToFile(const MessageWriteToFile::Ptr &message);
-
+    void doMessageLogLevel(const MessageInt::Ptr &message);
 private:
     static ThreadLog *_instance;
     Logger *_logger;
