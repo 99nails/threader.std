@@ -111,9 +111,6 @@ private:
         }
     #endif
 
-//        int messagesCount = MessageBase::referenceCount();
-//        statisticString += format("Messages count: %1\r\n").arg(messagesCount);
-
         int i = 0;
         for (auto iterator = statisticList.cbegin(); iterator != statisticList.cend(); iterator++)
         {

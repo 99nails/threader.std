@@ -102,8 +102,6 @@ private:
     TrafficCounter _inputTrafficCounter;
     TrafficCounter _outputTrafficCounter;
 
-    // bool _portionedIO;
-
     uint64_t _connectedTickCount;
 
     uint64_t _openDateTime;
