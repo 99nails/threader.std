@@ -21,16 +21,14 @@ ThreadHandler::ThreadHandler(MessageConsumer *parent,
                              HandlerBase *handler,
                              const uint32_t &reconnectTimeout,
                              PacketFactoryBase *packetFactory,
-                             const std::string &threadName,
-                             const bool &portionedIO,
-                             const bool verbose)
+                             const std::string &threadName)
     : ThreadBase(parent, threadName, ThreadRunMode::Polling)
     , _reconnectTimeout(reconnectTimeout)
     , _nextTryToConnect(DateTimeUtils::getTickCount())
     , _packetFactory(packetFactory)
     , _lastPacketSent(DateTimeUtils::getTickCount())
     , _lastPacketReceived(_lastPacketSent)
-    , _portionedIO(portionedIO)
+    // , _portionedIO(portionedIO)
     , _connectedTickCount(0)
     , _openDateTime(DateTimeUtils::msecsSinceEpochLocal())
     , _closedDateTime(_openDateTime)
@@ -40,8 +38,9 @@ ThreadHandler::ThreadHandler(MessageConsumer *parent,
     handler->moveToThread(this);
 #endif
 
-    // установка обработчика, его сигналов и слотов
+    // установка обработчика
     setHandler(handler);
+    // создание буферов
     _inputBuffer = std::make_shared<MemoryBlock>();
     _outputBuffer = std::make_shared<MemoryBlock>();
 }
@@ -264,7 +263,7 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
 
         if (readCount > 0) {
             // если обмен данными происходит фиксированными порциями как в UDP
-            if (_portionedIO)
+            if (sender->portionedIO())
             {
                 onReadData(buffer, readCount);
             }
@@ -284,7 +283,7 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
     _inputBuffer->append(_localInputBuffer.data(), _localInputBuffer.size());
 
     // если обмен данными не происходит фиксированными порциями как в UDP
-    if (!_portionedIO)
+    if (!sender->portionedIO())
     {
         // вызов заглушки события приема данных
         onReadData(_localInputBuffer.data(), _localInputBuffer.size());

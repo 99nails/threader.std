@@ -24,8 +24,7 @@ ThreadGpsEmulator::ThreadGpsEmulator(SettingsGpsEmulator *settings,
                     new HandlerSerialPort(nullptr, settings->port()),
                     1000,
                     new PacketFactoryAsciiLines(),
-                    "Thread.Gps.Emulator",
-                    false)
+                    "Thread.Gps.Emulator")
     , _settings(settings)
 {
 }

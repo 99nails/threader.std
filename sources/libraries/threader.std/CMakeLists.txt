@@ -11,6 +11,7 @@ set(THREADER_SOURCES
     include/threads/HandlerBase.h sources/threads/HandlerBase.cpp
     include/threads/HandlerSerialPort.h sources/threads/HandlerSerialPort.cpp
     include/threads/HandlerTcpSocket.h sources/threads/HandlerTcpSocket.cpp
+    include/threads/HandlerUdpSocket.h sources/threads/HandlerUdpSocket.cpp
     include/threads/ListThreads.h sources/threads/ListThreads.cpp
     include/threads/LogMessagesTemplates.h
     include/threads/MessageBase.h sources/threads/MessageBase.cpp

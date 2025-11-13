@@ -9,7 +9,7 @@ namespace Threader::Threads {
 
 HandlerBase::HandlerBase(HandlerDataConsumer *consumer,
                          const std::string &deviceName,
-                         const Descriptor descriptor)
+                         const Descriptor descriptor, const bool portionedIO)
 #ifdef _WIN32
     : PollerBase()
 #endif
@@ -20,6 +20,7 @@ HandlerBase::HandlerBase(HandlerDataConsumer *consumer,
     , _deviceName(deviceName)
     , _connectionState(ConnectionState::Disconnected)
     , _needsToWrite(false)
+    , _portionedIO(portionedIO)
     #ifdef _WIN32
     , _descriptor(descriptor)
     #endif
@@ -84,11 +85,11 @@ std::string HandlerBase::deviceName() const
     return _deviceName;
 }
 
-void HandlerBase::setDeviceName(const std::string &deviceName)
+void HandlerBase::setDeviceName(const std::string &value)
 {
     if (ConnectionState::Disconnected != _connectionState)
         close();
-    _deviceName = deviceName;
+    _deviceName = value;
 }
 
 bool HandlerBase::needsToWrite() const
@@ -96,9 +97,19 @@ bool HandlerBase::needsToWrite() const
     return _needsToWrite;
 }
 
-void HandlerBase::setNeedsToWrite(const bool needsToWrite)
+void HandlerBase::setNeedsToWrite(const bool value)
 {
-    _needsToWrite = needsToWrite;
+    _needsToWrite = value;
+}
+
+bool HandlerBase::portionedIO()
+{
+    return _portionedIO;
+}
+
+void HandlerBase::setPortionedIO(const bool value)
+{
+    _portionedIO = value;
 }
 
 #ifdef linux

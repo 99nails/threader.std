@@ -3,7 +3,6 @@
 // use NullModem Emulator in Windows
 
 #include "DateTimeUtils.h"
-#include "StdStringUtils.h"
 #include "SignalHandler.h"
 
 #include "ThreadLog.h"

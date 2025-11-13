@@ -31,10 +31,6 @@ public:
                           uint16_t length);
 
     static uint32_t Crc32(uint8_t *data, uint32_t length);
-
-    // static QByteArray fileChecksum(const QString &fileName,
-    //                                QCryptographicHash::Algorithm hashAlgorithm);
-
 };
 
 }

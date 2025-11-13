@@ -46,7 +46,8 @@ public:
      */
     explicit HandlerBase(HandlerDataConsumer *consumer = nullptr,
                          const std::string &deviceName = "",
-                         const Descriptor descriptor = INVALID_DESCRIPTOR);
+                         const Descriptor descriptor = INVALID_DESCRIPTOR,
+                         const bool portionedIO = false);
 
 #ifdef _WIN32
     Descriptor descriptor() const;
@@ -64,10 +65,15 @@ public:
     virtual bool isConnected();
 
     std::string deviceName() const;
-    void setDeviceName(const std::string &deviceName);
+    void setDeviceName(const std::string &value);
 
     bool needsToWrite() const;
-    void setNeedsToWrite(const bool needsToWrite);
+    void setNeedsToWrite(const bool value);
+
+    bool portionedIO();
+protected:
+    void setPortionedIO(const bool value);
+public:
 
     virtual bool open() = 0;
     virtual void close() = 0;
@@ -97,7 +103,7 @@ public:
 #ifdef _WIN32
     virtual int read(char *data, int count) = 0;
     virtual int write(const char *data, int count) = 0;
-#endif    
+#endif
 
     std::string readString();
     int writeString(const std::string &data);
@@ -117,6 +123,7 @@ private:
     std::string _deviceName;
     ConnectionState _connectionState;
     bool _needsToWrite;
+    bool _portionedIO;
 
 #ifdef _WIN32
     Descriptor _descriptor;

@@ -15,7 +15,7 @@ PollerListenSocketConnection::PollerListenSocketConnection(ConsumerListenSocketE
     , _isInitialized(false)
     , _port(port)
     , _consumer(consumer)
-    #ifdef Q_OS_WIN
+    #ifdef WIN32
     , _descriptor(INVALID_DESCRIPTOR)
     , _event(INVALID_DESCRIPTOR)
     #endif
@@ -190,7 +190,7 @@ int PollerListenSocketConnection::processConnectionRequests()
         else
         {
             result++;
-            bool acceptConnection = true;            
+            bool acceptConnection = true;
 
             SocketUtils::setBlockingMode(newSocket, false);
 

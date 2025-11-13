@@ -29,9 +29,7 @@ public:
                            HandlerBase *handler,
                            const uint32_t &reconnectTimeout = 0,
                            PacketFactoryBase *packetFactory = nullptr,
-                           const std::string &threadName = std::string(),
-                           const bool &portionedIO = false,
-                           const bool verbose = false);
+                           const std::string &threadName = std::string());
     ~ThreadHandler() override;
 
     uint64_t openDateTime() const;
@@ -104,7 +102,7 @@ private:
     TrafficCounter _inputTrafficCounter;
     TrafficCounter _outputTrafficCounter;
 
-    bool _portionedIO;
+    // bool _portionedIO;
 
     uint64_t _connectedTickCount;
 

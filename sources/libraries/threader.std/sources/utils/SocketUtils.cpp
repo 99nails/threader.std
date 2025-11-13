@@ -85,7 +85,7 @@ std::string SocketUtils::hostToIpAddressString(const std::string &host)
         struct in_addr addr;
         while (entry->h_addr_list[i] != 0) {
             addr.s_addr = *(u_long *) entry->h_addr_list[i++];
-            result = QString(inet_ntoa(addr));
+            result = std::string(inet_ntoa(addr));
             break;
         }
     }
@@ -190,7 +190,7 @@ Descriptor SocketUtils::createTcpServerSocket(uint16_t port,
     return (Descriptor)result;
 }
 
-Descriptor SocketUtils::openTcpClientSocket(const QString &ipAddress,
+Descriptor SocketUtils::openTcpClientSocket(const std::string &ipAddress,
                                             const uint16_t port,
                                             int &errorCode,
                                             const int timeout)
@@ -220,7 +220,7 @@ Descriptor SocketUtils::openTcpClientSocket(const QString &ipAddress,
     sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = inet_addr(ipAddress.toLocal8Bit().constData());
+    addr.sin_addr.s_addr = inet_addr(ipAddress.c_str());
     memset(addr.sin_zero, 0, sizeof(addr.sin_zero));
 
     // подключение

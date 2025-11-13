@@ -112,11 +112,10 @@ private:
     #endif
 
 //        int messagesCount = MessageBase::referenceCount();
-//        statisticString += QString("Messages count: %1\r\n").arg(messagesCount);
+//        statisticString += format("Messages count: %1\r\n").arg(messagesCount);
 
         int i = 0;
         for (auto iterator = statisticList.cbegin(); iterator != statisticList.cend(); iterator++)
-//        for (int i = 0; i < statisticList.count(); i++)
         {
             ThreadStatisticStruct statistic = *iterator;
             int64_t workingTotalMSecs = (statistic.AliveMsecsSinceEpoch - statistic.StartedMsecsSinceEpoch);

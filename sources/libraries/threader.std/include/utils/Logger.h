@@ -62,28 +62,28 @@ struct MessageLogTemplate
 #define GUIDLOG(GUID) GUID.toString().c_str();
 /**
  * Макрос для протоколирования строкового значения
- * @param TEXT - строковое (QString) значение
+ * @param TEXT - строковое (std::string) значение
  */
 #define STRLOG(TEXT) TEXT.c_str()
 /**
  * Макрос для протоколирования двух строковых значений
- * @param TEXT1 - первое строковое (QString) значение
- * @param TEXT2 - второе строковое (QString) значение
+ * @param TEXT1 - первое строковое (std::string) значение
+ * @param TEXT2 - второе строковое (std::string) значение
  */
 #define STRLOG2(TEXT1, TEXT2) STRLOG(TEXT1), STRLOG(TEXT2)
 /**
  * Макрос для протоколирования трех строковых значений
- * @param TEXT1 - первое строковое (QString) значение
- * @param TEXT2 - второе строковое (QString) значение
- * @param TEXT3 - третье строковое (QString) значение
+ * @param TEXT1 - первое строковое (std::string) значение
+ * @param TEXT2 - второе строковое (std::string) значение
+ * @param TEXT3 - третье строковое (std::string) значение
  */
 #define STRLOG3(TEXT1, TEXT2, TEXT3) STRLOG(TEXT1), STRLOG(TEXT2), STRLOG(TEXT3)
 /**
  * Макрос для протоколирования четырех строковых значений
- * @param TEXT1 - первое строковое (QString) значение
- * @param TEXT2 - второе строковое (QString) значение
- * @param TEXT3 - третье строковое (QString) значение
- * @param TEXT4 - четвертое строковое (QString) значение
+ * @param TEXT1 - первое строковое (std::string) значение
+ * @param TEXT2 - второе строковое (std::string) значение
+ * @param TEXT3 - третье строковое (std::string) значение
+ * @param TEXT4 - четвертое строковое (std::string) значение
  */
 #define STRLOG4(TEXT1, TEXT2, TEXT3, TEXT4) \
     STRLOG(TEXT1), STRLOG(TEXT2), STRLOG(TEXT3), STRLOG(TEXT4)

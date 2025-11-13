@@ -561,7 +561,4 @@ private:
     void slotTimerEventLoop();
 };
 
-#define PRINT_THREAD_INFO \
-    qInfo("Thread ID: %ld, Function: %s", threadId(), QString(Q_FUNC_INFO).toUtf8().constData());
-
 } // namespace Threader::Threads
