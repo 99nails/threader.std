@@ -96,25 +96,6 @@ bool Logger::collectMessage(UnixTimeMSecs created,
     if (level > _level)
         return true;
 
-    auto newCurrentDate = currentDate();
-    if (_currentLogFileDate != newCurrentDate)
-    {
-        closeFile();
-        _currentLogFileDate = newCurrentDate;
-    }
-
-    if (INVALID_DESCRIPTOR == _descriptor) {
-        if (!prepareFilePath())
-        {
-            return false;
-        }
-
-        if (!openFile())
-        {
-            return false;
-        }
-    }
-
     auto appendTab = [](std::string &s, std::string tab = "\t") {
         if (s.empty())
             return;
@@ -159,10 +140,29 @@ bool Logger::collectMessage(UnixTimeMSecs created,
     appendTab(data);
     data += text + "\r\n";
 
-    _buffer.push_back(data);
-
     if (_doConsoleOutput)
         printLine(data, messageType);
+
+    auto newCurrentDate = currentDate();
+    if (_currentLogFileDate != newCurrentDate)
+    {
+        closeFile();
+        _currentLogFileDate = newCurrentDate;
+    }
+
+    if (INVALID_DESCRIPTOR == _descriptor) {
+        if (!prepareFilePath())
+        {
+            return false;
+        }
+
+        if (!openFile())
+        {
+            return false;
+        }
+    }
+
+    _buffer.push_back(data);
 
     return true;
 }

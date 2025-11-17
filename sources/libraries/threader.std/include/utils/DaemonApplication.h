@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CommandLineParser.h"
 #include "DateTimeUtils.h"
 #include "FileUtils.h"
 #include "SignalHandler.h"
@@ -7,9 +8,37 @@
 
 #include "ThreadLog.h"
 
+#include <csignal>
 #include <iostream>
 
 using namespace Threader::Threads;
+
+static bool isRunning = true;
+static bool console = false;
+static int logLlevel = 9;
+
+void handleTerminateSignal(int signum)
+{
+    isRunning = false;
+
+    // закрытие stdin в случае консольного вывода
+    if (console)
+    {
+        int fd = open("/dev/null", O_WRONLY);
+        dup2(fd, 0);
+        close(fd);
+        std::cout << std::endl;
+    }
+
+    ThreadBase::writeLog(Message15, signum);
+}
+
+void setTerminateSignalHandlers()
+{
+    signal(SIGINT, handleTerminateSignal);
+    signal(SIGTERM, handleTerminateSignal);
+    // signal(SIGHUP, handleTerminateSignal);
+}
 
 void readLine()
 {
@@ -25,23 +54,15 @@ void parseArguments(int argc,
     constexpr char PARAMETER_NAME_CONSOLE[] = "--console";
     constexpr char PARAMETER_NAME_LOG[] = "--log";
 
-    for (int i = 1; i < argc; i++)
+    CommandLineParser commandLine(argc, argv);
+
+    console = commandLine.optionExist(PARAMETER_NAME_CONSOLE);
+
+    if (commandLine.optionExist(PARAMETER_NAME_LOG))
     {
-        const auto parameter = StdStringUtils::toLower(argv[i]);
-        if (parameter == PARAMETER_NAME_CONSOLE)
-        {
-            console = true;
-        }
-        if (parameter == PARAMETER_NAME_LOG)
-        {
-            if (i < argc + 1)
-            {
-                i++;
-                std::string levelString = argv[i];
-                if (levelString.find_first_not_of("0123456789") == std::string::npos)
-                    level = std::stoi(argv[i]);
-            }
-        }
+        const auto logLevelString = commandLine.optionValue(PARAMETER_NAME_LOG);
+        if (!logLevelString.empty() && logLevelString.find_first_not_of("0123456789") == std::string::npos)
+            level = std::stoi(logLevelString);
     }
 }
 
@@ -51,7 +72,8 @@ int AppMain(int argc, char *argv[])
 {
     (void)argc;
 #ifdef linux
-    setSignalHandler(argv[0]);
+    setErrorSignalHandler(argv[0]);
+    setTerminateSignalHandlers();
 #endif
 
 #ifdef WIN
@@ -60,20 +82,28 @@ int AppMain(int argc, char *argv[])
 #else
     setlocale(LC_ALL, "ru_RU.UTF-8");
     setlocale(LC_NUMERIC, "C");
-    std::cout << "Нажмите Enter для завершения программы...\r\n";
+    std::cout << "Нажмите Enter или Ctrl+C для завершения программы...\r\n";
 #endif
-    bool console = false;
-    int level = 9;
-    parseArguments(argc, argv, console, level);
+    parseArguments(argc, argv, console, logLlevel);
 
-    startLogSubsystem(argv[0], nullptr, console, level);
+    startLogSubsystem(argv[0], nullptr, console, logLlevel);
 
     auto applicationName = FileUtils::extractFileName(argv[0]);
 
     auto threadMain = new ThreadMainType(applicationName);
     threadMain->start();
 
-    readLine();
+    if (console)
+    {
+        readLine();
+    }
+    else
+    {
+        while (isRunning)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
 
     threadMain->postTerminateEvent();
     while (!threadMain->isFinished())

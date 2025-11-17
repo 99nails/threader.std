@@ -20,7 +20,7 @@ MESSAGE_TEMPLATE(2, 0, MessageType::Attention,
                  "Подсистема протоколирования завершена")
 
 MESSAGE_TEMPLATE(3, 0, MessageType::Attention,
-                 "Подробность протоколирования: %d ")
+                 "Подробность протоколирования: %d")
 
 
 #undef LOG_SUBSYSTEM
@@ -37,10 +37,13 @@ MESSAGE_TEMPLATE(12, 0, MessageType::Attention,
                  "Главный поток службы [%s] завершен")
 
 MESSAGE_TEMPLATE(13, 0, Debug,
-                 "Идентификатор потока [%s]: %d");
+                 "Идентификатор потока [%s]: %d")
 
 MESSAGE_TEMPLATE(14, 0, Message,
-                 "Статистика выполнения - потоков: %d шт., используемая память: %d Kb.");
+                 "Статистика выполнения - потоков: %d шт., используемая память: %d Kb.")
+
+MESSAGE_TEMPLATE(15, 0, MessageType::Attention,
+                 "Получен сигнал завершения приложения: %d")
 
 
 MESSAGE_TEMPLATE(20, 0, MessageType::Message,

@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 {
     (void)argc;
 #ifdef linux
-    setSignalHandler(argv[0]);
+    setErrorSignalHandler(argv[0]);
 #endif
 
 #ifdef WIN32

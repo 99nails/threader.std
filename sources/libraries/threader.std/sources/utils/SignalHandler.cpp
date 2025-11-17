@@ -60,7 +60,7 @@ signal_name_num_list[] =
 static std::string applicationPath;
 static std::string applicationBinaryFileName;
 
-void setSignalHandler(const char* arg0)
+void setErrorSignalHandler(const char* arg0)
 {
     std::string binaryFilePath(arg0);
     auto slashIndex = binaryFilePath.rfind("/");

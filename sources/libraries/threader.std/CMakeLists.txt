@@ -34,8 +34,9 @@ set(THREADER_SOURCES
     include/threads/ThreadMain.h sources/threads/ThreadMain.cpp
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
     include/threads/ThreadUdevMonitor.h sources/threads/ThreadUdevMonitor.cpp
-    include/utils/DaemonApplication.h
+    include/utils/CommandLineParser.h
     include/utils/CrcUtils.h sources/utils/CrcUtils.cpp
+    include/utils/DaemonApplication.h
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
     include/utils/FileUtils.h sources/utils/FileUtils.cpp
     include/utils/IniFile.h sources/utils/IniFile.cpp
