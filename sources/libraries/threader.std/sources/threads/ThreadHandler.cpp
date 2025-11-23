@@ -28,7 +28,6 @@ ThreadHandler::ThreadHandler(MessageConsumer *parent,
     , _packetFactory(packetFactory)
     , _lastPacketSent(DateTimeUtils::getTickCount())
     , _lastPacketReceived(_lastPacketSent)
-    // , _portionedIO(portionedIO)
     , _connectedTickCount(0)
     , _openDateTime(DateTimeUtils::msecsSinceEpochLocal())
     , _closedDateTime(_openDateTime)

@@ -9,7 +9,8 @@ namespace Threader::Threads {
 
 HandlerBase::HandlerBase(HandlerDataConsumer *consumer,
                          const std::string &deviceName,
-                         const Descriptor descriptor, const bool portionedIO)
+                         const Descriptor descriptor, 
+                         const bool portionedIO)
 #ifdef _WIN32
     : PollerBase()
 #endif

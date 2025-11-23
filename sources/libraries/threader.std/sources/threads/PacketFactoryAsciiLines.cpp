@@ -49,8 +49,7 @@ PacketBase::Ptr PacketFactoryAsciiLines::tryExtractPacket(MemoryBlock::Ptr &data
 
     data->remove(0, position + _lineTerminator.length());
 
-    auto line = dataString.substr(0, position);
-    StdStringUtils::rtrim(line);
+    auto line = StdStringUtils::rtrim(dataString.substr(0, position));
     return std::make_shared<PacketAsciiLine>(line);
 }
 

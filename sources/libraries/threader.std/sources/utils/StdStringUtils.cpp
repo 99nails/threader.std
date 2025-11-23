@@ -64,24 +64,33 @@ std::string StdStringUtils::section(const std::string &str,
     return words[number];
 }
 
-void StdStringUtils::ltrim(std::string &s)
+std::string StdStringUtils::ltrim(const std::string &s)
 {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+    if (s.empty())
+        return s;
+    auto result = s;
+    result.erase(result.begin(), std::find_if(result.begin(), result.end(), [](unsigned char ch)
+    {
         return !std::isspace(ch);
     }));
+    return result;
 }
 
-void StdStringUtils::rtrim(std::string &s)
+std::string StdStringUtils::rtrim(const std::string &s)
 {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+    if (s.empty())
+        return s;
+    auto result = s;
+    result.erase(std::find_if(result.rbegin(), result.rend(), [](unsigned char ch)
+    {
         return !std::isspace(ch);
-    }).base(), s.end());
+    }).base(), result.end());
+    return result;
 }
 
-void StdStringUtils::trim(std::string &s)
+std::string StdStringUtils::trim(const std::string &s)
 {
-    ltrim(s);
-    rtrim(s);
+    return ltrim(rtrim(s));
 }
 
 #ifdef WIN32

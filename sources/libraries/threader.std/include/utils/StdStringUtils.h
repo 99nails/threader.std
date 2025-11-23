@@ -40,11 +40,11 @@ public:
                                const int number,
                                const bool keepEmptyParts);
 
-    static void ltrim(std::string &s);
+    static std::string ltrim(const std::string &s);
 
-    static void rtrim(std::string &s);
+    static std::string rtrim(const std::string &s);
 
-    static void trim(std::string &s);
+    static std::string trim(const std::string &s);
 #ifdef WIN32
     static std::string ConvertCP1251ToUTF8(const std::string &str);
 
