@@ -37,6 +37,7 @@ set(THREADER_SOURCES
     include/utils/CommandLineParser.h
     include/utils/CrcUtils.h sources/utils/CrcUtils.cpp
     include/utils/DaemonApplication.h
+    include/utils/DaemonUtils.h sources/utils/DaemonUtils.cpp
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
     include/utils/FileUtils.h sources/utils/FileUtils.cpp
     include/utils/IniFile.h sources/utils/IniFile.cpp

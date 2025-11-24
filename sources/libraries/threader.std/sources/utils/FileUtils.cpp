@@ -45,7 +45,7 @@ Descriptor FileUtils::fileOpenOrCreate(const std::string &fileName)
 Descriptor FileUtils::fileCreate(const std::string &fileName)
 {
 #ifdef linux
-    Descriptor descriptor = ::open(fileName.c_str(), O_CREAT | O_RDWR, S_IWUSR | S_IRUSR | S_IROTH);
+    Descriptor descriptor = ::open(fileName.c_str(), O_CREAT | O_TRUNC | O_RDWR, S_IWUSR | S_IRUSR | S_IROTH);
 #endif
 #ifdef WIN32
     Descriptor descriptor = CreateFileA((LPCSTR)fileName.c_str(),
@@ -108,11 +108,11 @@ bool FileUtils::isPathExists(const std::string &path)
 #endif
 }
 
-bool FileUtils::isFileExists(const std::string &fieName)
+bool FileUtils::isFileExists(const std::string &fileName)
 {
 #ifdef linux
     struct stat sb;
-    return stat(fieName.c_str(), &sb) == 0
+    return stat(fileName.c_str(), &sb) == 0
            && S_ISREG(sb.st_mode);
 #endif
 #ifdef WIN32
@@ -146,6 +146,11 @@ bool FileUtils::makeDir(const std::string &path)
                         , S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
 #endif
                  ) == 0;
+}
+
+bool FileUtils::fileDelete(const std::string &fileName)
+{
+    return 0 == std::remove(fileName.c_str());
 }
 
 std::string FileUtils::extractFilePath(const std::string &fileName)

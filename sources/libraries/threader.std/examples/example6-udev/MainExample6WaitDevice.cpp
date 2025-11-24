@@ -4,5 +4,5 @@
 
 int main(int argc, char *argv[])
 {
-    AppMain<ThreadMainWaitDevice>(argc, argv);
+    return AppMain<ThreadMainWaitDevice>(argc, argv, "wait-device", "Ожидание устройства");
 }

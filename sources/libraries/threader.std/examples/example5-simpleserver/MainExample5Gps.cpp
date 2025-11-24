@@ -3,5 +3,5 @@
 
 int main(int argc, char *argv[])
 {
-    AppMain<ThreadMainGps>(argc, argv);
+    return AppMain<ThreadMainGps>(argc, argv, "gps-emulator", "Эмуляция GPS");
 }

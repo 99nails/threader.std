@@ -3,5 +3,5 @@
 
 int main(int argc, char *argv[])
 {
-    AppMain<ThreadMainTimeClient>(argc, argv);
+    return AppMain<ThreadMainTimeClient>(argc, argv, "timeclient", "Клиент сервера времени");
 }

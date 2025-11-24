@@ -19,9 +19,11 @@ public:
                             const std::string &data);
 
     static bool isPathExists(const std::string &path);
-    static bool isFileExists(const std::string &fieName);
+    static bool isFileExists(const std::string &fileName);
     static std::string absolutePath(const std::string &relativePath);
+
     static bool makeDir(const std::string &path);
+    static bool fileDelete(const std::string &fileName);
 
     static std::string extractFilePath(const std::string &fileName);
     static std::string extractFileName(const std::string &fileName);

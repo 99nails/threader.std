@@ -3,5 +3,5 @@
 
 int main(int argc, char *argv[])
 {
-    AppMain<ThreadMainTimeServer>(argc, argv);
+    return AppMain<ThreadMainTimeServer>(argc, argv, "timeserver", "Сервер времени GPS");
 }

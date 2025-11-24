@@ -1,10 +1,11 @@
 #pragma once
 
 #include "CommandLineParser.h"
+#include "DaemonUtils.h"
 #include "DateTimeUtils.h"
 #include "FileUtils.h"
 #include "SignalHandler.h"
-#include "StdStringUtils.h"
+// #include "StdStringUtils.h"
 
 #include "ThreadLog.h"
 
@@ -15,7 +16,9 @@ using namespace Threader::Threads;
 
 static bool isRunning = true;
 static bool console = false;
+static bool install = false;
 static int logLlevel = 9;
+static bool uninstall = false;
 
 void handleTerminateSignal(int signum)
 {
@@ -46,13 +49,19 @@ void readLine()
     std::getline(std::cin, line);
 }
 
-void parseArguments(int argc,
-                      char *argv[],
-                      bool &console,
-                      int &level)
+bool parseArguments(int argc,
+                    char *argv[],
+                    bool &console,
+                    int &level,
+                    bool &install,
+                    bool &uninstall)
 {
+    bool isValid = true;
+
     constexpr char PARAMETER_NAME_CONSOLE[] = "--console";
+    constexpr char PARAMETER_NAME_INSTALL[] = "--install";
     constexpr char PARAMETER_NAME_LOG[] = "--log";
+    constexpr char PARAMETER_NAME_UNINSTALL[] = "--uninstall";
 
     CommandLineParser commandLine(argc, argv);
 
@@ -64,16 +73,36 @@ void parseArguments(int argc,
         if (!logLevelString.empty() && logLevelString.find_first_not_of("0123456789") == std::string::npos)
             level = std::stoi(logLevelString);
     }
+
+    if (commandLine.optionExist(PARAMETER_NAME_INSTALL))
+    {
+        if (argc != 2)
+            return false;
+
+        install = true;
+    }
+    else if (commandLine.optionExist(PARAMETER_NAME_UNINSTALL))
+    {
+        if (argc != 2)
+            return false;
+
+        uninstall = true;
+    }
+
+
+    return true;
 }
 
 
 template<class ThreadMainType>
-int AppMain(int argc, char *argv[])
+int AppMain(int argc,
+            char *argv[],
+            const std::string &serviceName = std::string(),
+            const std::string &description = std::string())
 {
-    (void)argc;
+    // (void)argc;
 #ifdef linux
     setErrorSignalHandler(argv[0]);
-    setTerminateSignalHandlers();
 #endif
 
 #ifdef WIN
@@ -84,13 +113,27 @@ int AppMain(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
     std::cout << "Нажмите Enter или Ctrl+C для завершения программы...\r\n";
 #endif
-    parseArguments(argc, argv, console, logLlevel);
+    parseArguments(argc, argv, console, logLlevel, install, uninstall);
 
     startLogSubsystem(argv[0], nullptr, console, logLlevel);
 
-    auto applicationName = FileUtils::extractFileName(argv[0]);
+    auto binaryFileName = FileUtils::extractFileName(argv[0]);
 
-    auto threadMain = new ThreadMainType(applicationName);
+    if (install)
+    {
+        auto registered = DaemonUtils::registerDaemon((serviceName.empty()) ? binaryFileName : serviceName,
+                                                      argv[0],
+                                                      description);
+        return (registered) ? 0 : -1;
+    }
+    else if (uninstall)
+    {
+        auto binaryFileName = FileUtils::extractFileName(argv[0]);
+        auto unregistered = DaemonUtils::unregisterDaemon((serviceName.empty()) ? binaryFileName : serviceName);
+        return (unregistered) ? 0 : -1;
+    }
+
+    auto threadMain = new ThreadMainType(binaryFileName);
     threadMain->start();
 
     if (console)
@@ -99,6 +142,9 @@ int AppMain(int argc, char *argv[])
     }
     else
     {
+#ifdef linux
+        setTerminateSignalHandlers();
+#endif
         while (isRunning)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
