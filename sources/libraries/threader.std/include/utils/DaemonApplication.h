@@ -12,6 +12,10 @@
 #include <csignal>
 #include <iostream>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
+
 using namespace Threader::Threads;
 
 static bool isRunning = true;
@@ -121,7 +125,7 @@ int AppMain(int argc,
 
     if (install)
     {
-        auto registered = DaemonUtils::registerDaemon((serviceName.empty()) ? binaryFileName : serviceName,
+        auto registered = DaemonUtils::daemonRegister((serviceName.empty()) ? binaryFileName : serviceName,
                                                       argv[0],
                                                       description);
         return (registered) ? 0 : -1;
@@ -129,9 +133,16 @@ int AppMain(int argc,
     else if (uninstall)
     {
         auto binaryFileName = FileUtils::extractFileName(argv[0]);
-        auto unregistered = DaemonUtils::unregisterDaemon((serviceName.empty()) ? binaryFileName : serviceName);
+        auto unregistered = DaemonUtils::daemonUnregister((serviceName.empty()) ? binaryFileName : serviceName);
         return (unregistered) ? 0 : -1;
     }
+
+    if (DaemonUtils::daemonIsRunning(serviceName))
+    {
+        ThreadBase::writeLog(Message16, serviceName.c_str());
+    }
+
+    DaemonUtils::daemonSetRunning(serviceName, true);
 
     auto threadMain = new ThreadMainType(binaryFileName);
     threadMain->start();
@@ -156,6 +167,8 @@ int AppMain(int argc,
     {
         DateTimeUtils::sleepMilliseconds(100);
     }
+
+    DaemonUtils::daemonSetRunning(serviceName, false);
 
     stopLogSubsystem();
 

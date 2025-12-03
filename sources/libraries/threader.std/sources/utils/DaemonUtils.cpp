@@ -3,9 +3,11 @@
 #include "FileUtils.h"
 #include "StdStringUtils.h"
 
+#include <cerrno>
 #include <errno.h>
+#include <fcntl.h>
 #include <iostream>
-#include <string.h>
+#include <cstring>
 
 constexpr char SERVICE_TEMPLATE[] = R"STRING(
 [Unit]
@@ -25,9 +27,13 @@ SyslogIdentifier=%s
 WantedBy=multi-user.target
 )STRING";
 
+namespace Threader::Utils {
+
 constexpr char SERVICE_FILENAME_TEMPLATE[] = "/etc/systemd/system/%s.service";
 
-bool Threader::Utils::DaemonUtils::registerDaemon(const std::string &serviceName,
+sem_t *DaemonUtils::_semaphore = SEM_FAILED;
+
+bool DaemonUtils::daemonRegister(const std::string &serviceName,
                                                   const std::string &binaryFileName,
                                                   const std::string &description)
 {
@@ -38,17 +44,16 @@ bool Threader::Utils::DaemonUtils::registerDaemon(const std::string &serviceName
         auto content = format(SERVICE_TEMPLATE, description.c_str(), binaryFileName.c_str(), serviceName.c_str());
         FileUtils::fileWrite(descriptor, content);
         FileUtils::fileClose(descriptor);
-
         std::cout << format("Демон %s успешно зарегистрирован", serviceName.c_str()) << std::endl;
 
         return true;
     }
 
-    std::cout << "Ошибка регистрации демона: " << std::string(strerror(errno)) << std::endl;
+    std::cout << "Ошибка регистрации демона: " << std::string(std::strerror(errno)) << std::endl;
     return false;
 }
 
-bool Threader::Utils::DaemonUtils::unregisterDaemon(const std::string &serviceName)
+bool DaemonUtils::daemonUnregister(const std::string &serviceName)
 {
     auto serviceFileName = format(SERVICE_FILENAME_TEMPLATE, serviceName.c_str());
     if (!FileUtils::isFileExists(serviceFileName))
@@ -59,10 +64,45 @@ bool Threader::Utils::DaemonUtils::unregisterDaemon(const std::string &serviceNa
 
     if (!FileUtils::fileDelete(serviceFileName))
     {
-        std::cout << "Ошибка снятия регистрации демона: " << std::string(strerror(errno)) << std::endl;
+        std::cout << "Ошибка снятия регистрации демона: " << std::string(std::strerror(errno)) << std::endl;
         return false;
     }
 
     std::cout << format("Демон %s успешно снят с регистрации", serviceName.c_str()) << std::endl;
     return true;
+}
+
+bool DaemonUtils::daemonSetRunning(const std::string &serviceName,
+                                                    const bool isRunning)
+{
+    auto semaphoreName = format("semaphore.daemon.%s", serviceName.c_str());
+    if (isRunning)
+    {
+        _semaphore = sem_open(semaphoreName.c_str(), O_CREAT | O_EXCL, S_IRWXU, 1);
+        return (_semaphore != SEM_FAILED);
+    }
+
+    if (_semaphore != SEM_FAILED)
+    {
+        sem_unlink(semaphoreName.c_str());
+        _semaphore = SEM_FAILED;
+    }
+    return true;
+}
+
+bool DaemonUtils::daemonIsRunning(const std::string &serviceName)
+{
+    auto semaphoreName = format("semaphore.daemon.%s", serviceName.c_str());
+    _semaphore = sem_open(semaphoreName.c_str(), O_CREAT | O_EXCL, S_IRWXU, 1);
+    if (_semaphore == SEM_FAILED)
+    {
+        if (EEXIST == errno)
+            return true;
+    }
+
+    sem_unlink(semaphoreName.c_str());
+
+    return false;
+}
+
 }

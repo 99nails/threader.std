@@ -43,7 +43,10 @@ MESSAGE_TEMPLATE(14, 0, Message,
                  "Статистика выполнения - потоков: %d шт., используемая память: %d Kb.")
 
 MESSAGE_TEMPLATE(15, 0, MessageType::Attention,
-                 "Получен сигнал завершения приложения: %d")
+                 "Получен сигнал завершения службы: %d")
+
+MESSAGE_TEMPLATE(16, 0, MessageType::Warning,
+                 "Служба [%s] уже запущена. Возможно некорректное выполнение приложения!")
 
 
 MESSAGE_TEMPLATE(20, 0, MessageType::Message,
