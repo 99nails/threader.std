@@ -1,14 +1,15 @@
 #include "SerialUtils.h"
 
 #ifdef linux
-    #include <fcntl.h>
-    #include <sys/ioctl.h>
-    #include <termios.h>
-    #include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/file.h>
+#include <termios.h>
+#include <unistd.h>
 #endif
 
 #ifdef WIN32
-    #include <windows.h>
+#include <windows.h>
 #endif
 
 #include <string.h>
@@ -31,17 +32,23 @@ Descriptor SerialUtils::openSerial(const std::string &deviceName,
                                    const uint32_t &baudRate,
                                    const bool &enableParity,
                                    const bool &twoStopBits,
-                                   const uint32_t &dataSize)
+                                   const uint32_t &dataSize,
+                                   const bool openExclusive)
 {
     Descriptor serialPortDescriptor = INVALID_DESCRIPTOR;
 
 #ifdef linux
 
-    serialPortDescriptor = ::open(deviceName.c_str(), O_RDWR | O_NOCTTY, S_IRWXU);
+    int flags = O_RDWR | O_NOCTTY;
+    if (openExclusive)
+        flags |= O_EXCL;
+
+    serialPortDescriptor = ::open(deviceName.c_str(), flags, S_IRWXU);
 
     bool isOpened = serialPortDescriptor >= 0;
 
-    if (isOpened) {
+    if (isOpened)
+    {
         struct termios options;
         memset(&options, 0, sizeof(options));
 
@@ -73,6 +80,13 @@ Descriptor SerialUtils::openSerial(const std::string &deviceName,
 
         tcflush(serialPortDescriptor, TCIOFLUSH);
         tcsetattr(serialPortDescriptor, TCSANOW, &options);
+
+        auto isLocked = flock(serialPortDescriptor, LOCK_EX | LOCK_NB) == 0;
+        if (!isLocked)
+        {
+            ::close(serialPortDescriptor);
+            return INVALID_DESCRIPTOR;
+        }
     }
 
 #endif

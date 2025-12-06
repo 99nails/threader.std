@@ -8,6 +8,9 @@ set(VER_BLD 0)
 set(VERSION ${VER_MAJ}.${VER_MIN}.${VER_PAT})
 set(VERSION4 ${VERSION}.${VER_BLD})
 
+add_compile_definitions(THREADER_VERSION_STRING="${VERSION}")
+add_compile_definitions(THREADER_VERSION4_STRING="${VERSION4}")
+
 project(threader-std VERSION ${VERSION} LANGUAGES C CXX)
 
 set_target_properties(${TARGET} PROPERTIES
