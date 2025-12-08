@@ -16,6 +16,8 @@ public:
                                  const bool &twoStopBits,
                                  const uint32_t &dataSize
 #ifdef linux
+                                 , const bool openExclusive = false
+#endif
                                  );
 
     static void closeSerial(Descriptor descriptor);
