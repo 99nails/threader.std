@@ -14,8 +14,9 @@ public:
                                  const uint32_t &baudRate,
                                  const bool &enableParity,
                                  const bool &twoStopBits,
-                                 const uint32_t &dataSize,
-                                 const bool openExclusive = true);
+                                 const uint32_t &dataSize
+#ifdef linux
+                                 );
 
     static void closeSerial(Descriptor descriptor);
 
