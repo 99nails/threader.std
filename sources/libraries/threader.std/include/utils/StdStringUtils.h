@@ -96,7 +96,7 @@ static std::string format(const char * format, ...)
 }
 
 template <typename T>
-bool vtonum(const std::string_view &view, T& value)
+bool vtonum(const std::string &view, T& value)
 {
     if (view.empty()) {
         return false;
@@ -119,7 +119,7 @@ bool vtonum(const std::string_view &view, T& value)
 }
 // TODO Обработать ошибки
 template <>
-inline bool vtonum<double>(const std::string_view &view, double &value)
+inline bool vtonum<double>(const std::string &view, double &value)
 {
     std::string s(view);
     std::replace(s.begin(), s.end(), ',', '.');
@@ -128,7 +128,7 @@ inline bool vtonum<double>(const std::string_view &view, double &value)
 }
 
 template <>
-inline bool vtonum<bool>(const std::string_view &view, bool &value)
+inline bool vtonum<bool>(const std::string &view, bool &value)
 {
     value = (view == "true" || view == "1");
     return true;

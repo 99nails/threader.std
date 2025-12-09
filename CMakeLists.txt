@@ -14,7 +14,7 @@ add_compile_definitions(THREADER_VERSION4_STRING="${VERSION4}")
 project(threader-std VERSION ${VERSION} LANGUAGES C CXX)
 
 set_target_properties(${TARGET} PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
 )
 
