@@ -32,8 +32,11 @@ Descriptor SerialUtils::openSerial(const std::string &deviceName,
                                    const uint32_t &baudRate,
                                    const bool &enableParity,
                                    const bool &twoStopBits,
-                                   const uint32_t &dataSize,
-                                   const bool openExclusive)
+                                   const uint32_t &dataSize
+#ifdef linux
+                                   , const bool openExclusive
+#endif
+                                   )
 {
     Descriptor serialPortDescriptor = INVALID_DESCRIPTOR;
 

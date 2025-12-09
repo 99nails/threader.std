@@ -17,10 +17,13 @@ namespace Threader::Threads {
 
 class HandlerSerialPort : public HandlerBase
 {
-    // Q_OBJECT
 public:
     explicit HandlerSerialPort(HandlerDataConsumer *consumer,
-                               const std::string &deviceName);
+                               const std::string &deviceName
+#ifdef linux
+                               , const bool exclusive = false
+#endif
+                               );
 
     bool open() override;
 
@@ -66,6 +69,9 @@ private:
     bool _enableParity;
     bool _twoStopBits;
     uint32_t _dataSize;
+#ifdef linux
+    bool _exclusive;
+#endif
 
 #ifdef WIN32
     bool _useOverlappedIO;

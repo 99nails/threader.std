@@ -21,18 +21,25 @@ using namespace Threader::Utils;
 
 
 HandlerSerialPort::HandlerSerialPort(HandlerDataConsumer *consumer,
-                                     const std::string &deviceName)
+                                     const std::string &deviceName
+#ifdef linux
+                                     , const bool exclusive
+#endif
+                                     )
     : HandlerBase(consumer, deviceName)
     , _enableParity(false)
     , _twoStopBits(false)
-    #ifdef WIN32
+#ifdef WIN32
     , _useOverlappedIO(false)
-    #endif
+#endif
+#ifdef linux
+    , _exclusive(exclusive)
+#endif
 {
 #ifdef linux
-//    _baudRate = B1500000;
-//    _baudRate = B57600;
-//    _baudRate = B9600;
+    //    _baudRate = B1500000;
+    //    _baudRate = B57600;
+    //    _baudRate = B9600;
     _baudRate = B115200;
     _dataSize = CS8;
     _enableParity = false;
@@ -57,7 +64,11 @@ bool HandlerSerialPort::open()
                                                               _baudRate,
                                                               _enableParity,
                                                               _twoStopBits,
-                                                              _dataSize);
+                                                              _dataSize
+#ifdef linux
+                                                              , _exclusive
+#endif
+                                                              );
     bool result = INVALID_DESCRIPTOR != serialPortDescriptor;
 
     setDescriptor(serialPortDescriptor);
