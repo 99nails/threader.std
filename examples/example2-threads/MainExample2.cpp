@@ -7,6 +7,11 @@ using namespace Threader::Threads;
 
 int main(int argc, char *argv[])
 {
+#ifdef QT_SUPPORT
+    // this example doesn't works with QT_SUPPORT option
+    return 1;
+#endif
+
     (void)argc;
     (void)argv;
 
@@ -24,7 +29,7 @@ int main(int argc, char *argv[])
         //     DateTimeUtils::sleepMilliseconds(1);
     }
 
-    thread->terminate();
+    thread->terminateThread();
     while (!thread->isFinished())
     {
         DateTimeUtils::sleepMilliseconds(100);

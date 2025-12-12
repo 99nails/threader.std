@@ -2,16 +2,15 @@
 
 #include <ThreadUdevMonitor.h>
 
-ThreadMainWaitDevice::ThreadMainWaitDevice(const std::string &applicationName)
+ThreadMainWaitDevice::ThreadMainWaitDevice(const std::string &applicationName, const std::string &description)
     : ThreadMain(nullptr,
                  applicationName,
-                 "Ожидание устройства",
+                 description,
                  "Thread.Main",
                  format("%s%c%s", SETTINGS_FOLDER, FileUtils::DELIMITER, "example6.ini"))
     , _threadUdevMonitor(nullptr)
 {
 }
-
 
 void ThreadMainWaitDevice::startChildThreads()
 {

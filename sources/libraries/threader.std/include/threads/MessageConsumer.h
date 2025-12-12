@@ -15,7 +15,7 @@ public:
     virtual ~MessageConsumer() = default;
 
     /**
-     * @brief postMessage - Оправка сообщения потоку
+     * @brief postMessage - Отправка сообщения потоку
      * @param message - Сообщения для потока
      */
     virtual void postMessage(const MessageBase::Ptr &message);

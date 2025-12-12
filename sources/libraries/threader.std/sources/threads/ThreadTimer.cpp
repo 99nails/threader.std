@@ -46,7 +46,7 @@ void ThreadTimer::onIdle()
 {
     sendTimerMessage();
     if (!_multiShot)
-        terminate();
+        terminateThread();
 }
 
 void ThreadTimer::sendTimerMessage()

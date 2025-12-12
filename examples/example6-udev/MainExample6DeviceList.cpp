@@ -30,10 +30,10 @@ bool handlerRadioLookup(DeviceInfo deviceInfo)
                             deviceInfo.properties.cend(),
                             PropertyEntry("ID_VENDOR_ID", "10c4"));
     auto product = std::find(deviceInfo.properties.cbegin(),
-                            deviceInfo.properties.cend(),
-                            PropertyEntry("ID_MODEL_ID", "ea60"));
+                             deviceInfo.properties.cend(),
+                             PropertyEntry("ID_MODEL_ID", "ea60"));
     auto found = (vendor != deviceInfo.properties.cend())
-                  && (product != deviceInfo.properties.cend());
+                 && (product != deviceInfo.properties.cend());
 
     if (found)
     {
@@ -45,15 +45,15 @@ bool handlerRadioLookup(DeviceInfo deviceInfo)
 
 int main(int argc, char *argv[])
 {
-     UdevEnumerationCallback callback = handler;
-//    UdevEnumerationCallback callback = handlerRadioLookup;
+    UdevEnumerationCallback callback = handler;
+    // UdevEnumerationCallback callback = handlerRadioLookup;
 
-//     auto enumerator = UdevEnumerator({"tty"});
+    auto enumerator = UdevEnumerator({"tty"});
 
-     auto enumerator = UdevEnumerator({"tty"},
-                                      {},
-                                      {{"ID_VENDOR_ID", "10c4"},
-                                       {"ID_MODEL_ID", "ea60"}});
+    // auto enumerator = UdevEnumerator({"tty"},
+    //                                  {},
+    //                                  {{"ID_VENDOR_ID", "10c4"},
+    //                                   {"ID_MODEL_ID", "ea60"}});
 
     enumerator.enumerate(callback);
 

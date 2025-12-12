@@ -1,7 +1,7 @@
 #include "StdThreadWrapper.h"
 
-namespace Threader {
-namespace Utils {
+namespace Threader::Utils
+{
 
 StdThreadWrapper::StdThreadWrapper()
     : _isRunning(false)
@@ -61,7 +61,7 @@ void StdThreadWrapper::start()
     _thread->detach();
 }
 
-void StdThreadWrapper::terminate()
+void StdThreadWrapper::terminateThread()
 {
     std::lock_guard<std::mutex> lock(*_mutexIsTerminated);
     _isTerminated = true;
@@ -73,5 +73,4 @@ void StdThreadWrapper::setIsRunning(const bool isRunning)
     _isRunning = isRunning;
 }
 
-} // namespace Utils
-} // namespace Threader
+}

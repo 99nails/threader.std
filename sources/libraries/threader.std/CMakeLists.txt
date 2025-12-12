@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
+project(threader-std LANGUAGES CXX)
+
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/threads
     ${CMAKE_CURRENT_SOURCE_DIR}/include/utils
 )
-
-# threader-std
 
 set(THREADER_SOURCES
     include/threads/HandlerBase.h sources/threads/HandlerBase.cpp
@@ -60,161 +60,18 @@ if (WIN32)
        ";include/threads/PollingWindows.h;sources/threads/PollingWindows.cpp")
 endif()
 
-add_library(threader-std SHARED
-    ${THREADER_SOURCES}
-)
+add_library(${PROJECT_NAME} SHARED ${THREADER_SOURCES})
 
-target_compile_features(threader-std PUBLIC cxx_std_11)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
-set_target_properties(threader-std
-    PROPERTIES
-        VERSION ${VERSION}
-        SOVERSION ${VER_MAJ}
-        )
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${VER_MAJ})
 
-target_link_libraries(threader-std PRIVATE
-    -lpthread
-    -ludev
-)
+set(LINK_LIBRARIES -lpthread -ludev)
 
-# example1-messages
+if (QT_SUPPORT)
+    set(LINK_LIBRARIES ${LINK_LIBRARIES} Qt5::Core)
+endif()
 
-add_executable(example1-messages
-    examples/example1-messages/MainExample1.cpp
-)
-target_compile_features(example1-messages PUBLIC cxx_std_11)
-
-target_link_libraries(example1-messages
-    -lpthread
-#    -lstdc++fs
-    threader-std
-)
-
-#example2-threads
-
-add_executable(example2-threads
-    examples/example2-threads/MainExample2.cpp
-    examples/example2-threads/ThreadTest.h examples/example2-threads/ThreadTest.cpp
-)
-target_compile_features(example2-threads PUBLIC cxx_std_11)
-
-target_link_libraries(example2-threads
-    -lpthread
-#    -lstdc++fs
-    threader-std
-)
-
-# example3-pingpong
-
-add_executable(example3-pingpong
-    examples/example3-pingpong/Example3Common.h
-    examples/example3-pingpong/MainExample3.cpp
-    examples/example3-pingpong/ThreadPing.h examples/example3-pingpong/ThreadPing.cpp
-    examples/example3-pingpong/ThreadPong.h examples/example3-pingpong/ThreadPong.cpp
-)
-target_compile_features(example3-pingpong PUBLIC cxx_std_11)
-# find_package(Qt5 COMPONENTS Core REQUIRED)
-
-target_link_libraries(example3-pingpong
-    -lpthread
-#    -lstdc++fs
-    threader-std
-)
-
-# example4-serial
-
-add_executable(example4-serial
-   examples/example4-serial/Example4Common.h
-   examples/example4-serial/MainExample4.cpp
-   examples/example4-serial/ThreadPing.h examples/example4-serial/ThreadPing.cpp
-   examples/example4-serial/ThreadPong.h examples/example4-serial/ThreadPong.cpp
-)
-target_compile_features(example4-serial PUBLIC cxx_std_11)
-
-target_link_libraries(example4-serial
-   -lpthread
-#   -lstdc++fs
-   threader-std
-)
-
-# example5-simpleserver
-
-add_executable(example5-timeserver
-   examples/example5-simpleserver/Example5Common.h
-   examples/example5-simpleserver/MainExample5TimeServer.cpp
-   examples/example5-simpleserver/SettingsGps.h examples/example5-simpleserver/SettingsGps.cpp
-   examples/example5-simpleserver/SettingsTimeServer.h examples/example5-simpleserver/SettingsTimeServer.cpp
-   examples/example5-simpleserver/ThreadConnectionServer.h examples/example5-simpleserver/ThreadConnectionServer.cpp
-   examples/example5-simpleserver/ThreadGps.h examples/example5-simpleserver/ThreadGps.cpp
-   examples/example5-simpleserver/ThreadListenConnections.h examples/example5-simpleserver/ThreadListenConnections.cpp
-   examples/example5-simpleserver/ThreadMainTimeServer.h examples/example5-simpleserver/ThreadMainTimeServer.cpp
-)
-target_compile_features(example5-timeserver PUBLIC cxx_std_11)
-
-target_link_libraries(example5-timeserver
-   -lpthread
-   -lstdc++fs
-   threader-std
-)
-
-# example5-simpleclient
-
-add_executable(example5-timeclient
-    examples/example5-simpleserver/Example5Common.h
-    examples/example5-simpleserver/MainExample5TimeClient.cpp
-    examples/example5-simpleserver/SettingsTimeServer.h examples/example5-simpleserver/SettingsTimeServer.cpp
-    examples/example5-simpleserver/ThreadConnectionClient.h examples/example5-simpleserver/ThreadConnectionClient.cpp
-    examples/example5-simpleserver/ThreadMainTimeClient.h examples/example5-simpleserver/ThreadMainTimeClient.cpp
-)
-target_compile_features(example5-timeclient PUBLIC cxx_std_11)
-
-target_link_libraries(example5-timeclient
-   -lpthread
-   -lstdc++fs
-   threader-std
-)
-
-# example5-gps
-
-add_executable(example5-gps
-    examples/example5-simpleserver/Example5Common.h
-    examples/example5-simpleserver/MainExample5Gps.cpp
-    examples/example5-simpleserver/SettingsGpsEmulator.h examples/example5-simpleserver/SettingsGpsEmulator.cpp
-    examples/example5-simpleserver/ThreadGpsEmulator.h examples/example5-simpleserver/ThreadGpsEmulator.cpp
-    examples/example5-simpleserver/ThreadMainGps.h examples/example5-simpleserver/ThreadMainGps.cpp
-)
-target_compile_features(example5-gps PUBLIC cxx_std_11)
-
-target_link_libraries(example5-gps
-   pthread
-   stdc++fs
-   threader-std
-)
-
-# example6-devicelist
-
-add_executable(example6-devicelist
-    examples/example6-udev/MainExample6DeviceList.cpp
-    )
-
-target_compile_features(example6-devicelist PUBLIC cxx_std_11)
-
-target_link_libraries(example6-devicelist
-   pthread
-   threader-std
-)
-
-# example6-waitdevice
-
-add_executable(example6-waitdevice
-    examples/example6-udev/MainExample6WaitDevice.cpp
-    examples/example6-udev/ThreadMainWaitDevice.h examples/example6-udev/ThreadMainWaitDevice.cpp
-    examples/example6-udev/SettingsDevice.h examples/example6-udev/SettingsDevice.cpp
-    )
-
-target_compile_features(example6-waitdevice PUBLIC cxx_std_11)
-
-target_link_libraries(example6-waitdevice
-   pthread
-   threader-std
+target_link_libraries(${PROJECT_NAME}
+    ${LINK_LIBRARIES}
 )

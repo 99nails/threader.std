@@ -8,13 +8,29 @@ set(VER_BLD 0)
 set(VERSION ${VER_MAJ}.${VER_MIN}.${VER_PAT})
 set(VERSION4 ${VERSION}.${VER_BLD})
 
+set(CPACK_PACKAGE_VERSION_MAJOR ${VER_MAJ})
+set(CPACK_PACKAGE_VERSION_MINOR ${VER_MIN})
+set(CPACK_PACKAGE_VERSION_PATCH ${VER_PAT})
+
 add_compile_definitions(THREADER_VERSION_STRING="${VERSION}")
 add_compile_definitions(THREADER_VERSION4_STRING="${VERSION4}")
 
 project(threader-std VERSION ${VERSION} LANGUAGES C CXX)
 
+option(QT_SUPPORT "Build with QT Library support" ON)
+
+if (QT_SUPPORT)
+    find_package(Qt5 REQUIRED COMPONENTS Core)
+
+    set(CMAKE_AUTOUIC ON)
+    set(CMAKE_AUTOMOC ON)
+    set(CMAKE_AUTORCC ON)
+
+    add_compile_definitions(QT_SUPPORT)
+endif()
+
 set_target_properties(${TARGET} PROPERTIES
-    CXX_STANDARD 11
+    CXX_STANDARD 17
     CXX_STANDARD_REQUIRED YES
 )
 
@@ -42,7 +58,7 @@ link_directories(${CMAKE_SOURCE_DIR}/lib.${OS_SUFFIX})
 include_directories(${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads)
 
 add_subdirectory(sources/libraries/threader.std)
-
+add_subdirectory(examples)
 
 SET(CMAKE_SKIP_BUILD_RPATH TRUE)
 SET(CMAKE_SKIP_INSTALL_RPATH FALSE)
@@ -84,9 +100,9 @@ SET(CPACK_GERATOR "DEB")
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Maxim Mazitov <99nails@gmail.com>")
 SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Multithreaded applications framework library")
 set(CPACK_PACKAGE_NAME "libthreaderstd")
-SET(CPACK_DEBIAN_PACKAGE_MAJOR ${VER_MAJ})
-SET(CPACK_DEBIAN_PACKAGE_MINOR ${VER_MIN})
-SET(CPACK_DEBIAN_PACKAGE_PATCH ${VER_PAT})
+#SET(CPACK_DEBIAN_PACKAGE_MAJOR ${VER_MAJ})
+#SET(CPACK_DEBIAN_PACKAGE_MINOR ${VER_MIN})
+#SET(CPACK_DEBIAN_PACKAGE_PATCH ${VER_PAT})
 set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_STRIP_FILES ON)
 set(CPACK_DEBIAN_DEV_PACKAGE_DEPENDS "${CPACK_PACKAGE_NAME}-lib")

@@ -13,7 +13,8 @@ using namespace Threader::Threads;
 class MessageConsumerThread : public MessageConsumer
 {
 public:
-    MessageConsumerThread()
+    explicit MessageConsumerThread()
+        : MessageConsumer()
     {
         _isRunning.store(false);
     }
@@ -27,10 +28,11 @@ public:
             _isRunning.store(true);
             _isTerminated.store(false);
 
-            std::cout << "Thread started. threadId = " << Threader::Utils::ThreadUtils::currentThreadId() << std::endl;
+            std::cout << "Thread started. threadId = "
+                      << Threader::Utils::ThreadUtils::currentThreadId() << std::endl;
 
             _count = 0;
-            execute();
+            run();
 
             _isRunning.store(false);
 
@@ -71,7 +73,7 @@ protected:
         std::cout << _count << ". " << message->toString() << std::endl;
     }
 
-    void execute()
+    void run()
     {
         while (!_isTerminated.load())
         {

@@ -10,7 +10,8 @@ using SettingsType = SettingsBundleTemplate<SettingsDevice>;
 class ThreadMainWaitDevice : public ThreadMain<SettingsType>
 {
 public:
-    explicit ThreadMainWaitDevice(const std::string &applicationName);
+    explicit ThreadMainWaitDevice(const std::string &applicationName,
+                                  const std::string &description);
 
 protected:
     void startChildThreads() override;

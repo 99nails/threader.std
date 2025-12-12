@@ -9,10 +9,11 @@
 constexpr char APPLICATION_NAME[] = "Time.Server";
 constexpr char THREAD_NAME[] = "Thread.Main.Time.Server";
 
-ThreadMainTimeServer::ThreadMainTimeServer(const std::string &applicationName)
+ThreadMainTimeServer::ThreadMainTimeServer(const std::string &applicationName,
+                                           const std::string &description)
     : ThreadMain(nullptr,
                  applicationName,
-                 "Сервер времени",
+                 description,
                  THREAD_NAME,
                  format("%s%c%s", SETTINGS_FOLDER, FileUtils::DELIMITER, "example5.ini"))
 {

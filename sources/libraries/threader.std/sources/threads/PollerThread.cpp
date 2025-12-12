@@ -94,18 +94,6 @@ bool PollerThread::process(const pollfd &event)
     if (_signalHandler)
         _signalHandler->signalProcess(signal);
 
-    // switch (static_cast<ThreadSignals>(signal)) {
-    // case ThreadSignals::SignalTerminate:
-    //     // emit signalTerminateThread();
-    //     break;
-    // case ThreadSignals::SignalWakeUp:
-    //     // emit signalWakeUpThread();
-    //     break;
-    // case ThreadSignals::SignalTerminateChildThreads:
-    //     // emit signalTerminateChildThreads();
-    //     break;
-    // }
-
     return true;
 }
 

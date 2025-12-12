@@ -39,7 +39,7 @@ MESSAGE_TEMPLATE(110, 0, MessageType::Attention,
 MESSAGE_TEMPLATE(111, 0, MessageType::Message,
                  "Подключение к устройству [%s] установлено")
 
-MESSAGE_TEMPLATE(112, 0, MessageType::Message,
+MESSAGE_TEMPLATE(112, 0, MessageType::Error,
                  "Ошибка подключения к устройству [%s] - %s")
 
 MESSAGE_TEMPLATE(113, 0, MessageType::Message,
@@ -86,7 +86,7 @@ MESSAGE_TEMPLATE(210, 0, MessageType::Attention,
 MESSAGE_TEMPLATE(211, 0, MessageType::Message,
                  "Подключение к устройству [%s] установлено")
 
-MESSAGE_TEMPLATE(212, 0, MessageType::Message,
+MESSAGE_TEMPLATE(212, 0, MessageType::Error,
                  "Ошибка подключения к устройству [%s] - %s")
 
 MESSAGE_TEMPLATE(213, 0, MessageType::Message,

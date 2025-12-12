@@ -50,7 +50,7 @@ void ThreadConnectionServer::onConnected()
 void ThreadConnectionServer::onDisconnected()
 {
     writeLog(Message211, handler()->deviceName().c_str());
-    terminate();
+    terminateThread();
 }
 
 void ThreadConnectionServer::onReadData(const void *,

@@ -67,7 +67,7 @@ MESSAGE_TEMPLATE(122, 0, MessageType::Warning,
 MESSAGE_TEMPLATE(200, 0, MessageType::Message,
                  "Запуск потока работы с подключением [%s]...")
 
-MESSAGE_TEMPLATE(201, 0, MessageType::Message,
+MESSAGE_TEMPLATE(201, 0, MessageType::Warning,
                  "Завершение потока работы с подключением [%s]...")
 
 MESSAGE_TEMPLATE(202, 0, MessageType::Message,
@@ -114,7 +114,7 @@ MESSAGE_TEMPLATE(310, 0, MessageType::Message,
 MESSAGE_TEMPLATE(311, 0, MessageType::Attention,
                  "Подключение к устройству [%s] установлено")
 
-MESSAGE_TEMPLATE(312, 0, MessageType::Message,
+MESSAGE_TEMPLATE(312, 0, MessageType::Error,
                  "Ошибка подключения к устройству [%s] - %s")
 
 MESSAGE_TEMPLATE(313, 0, MessageType::Attention,
@@ -146,7 +146,7 @@ MESSAGE_TEMPLATE(321, 7, MessageType::Message,
 MESSAGE_TEMPLATE(400, 0, MessageType::Message,
                  "Запуск потока работы с GPS на порт [%s]...")
 
-MESSAGE_TEMPLATE(401, 0, MessageType::Message,
+MESSAGE_TEMPLATE(401, 0, MessageType::Warning,
                  "Завершение потока работы с GPS на порт [%s]...")
 
 MESSAGE_TEMPLATE(402, 0, MessageType::Message,
@@ -159,7 +159,7 @@ MESSAGE_TEMPLATE(410, 0, MessageType::Message,
 MESSAGE_TEMPLATE(411, 0, MessageType::Attention,
                  "Подключение к устройству GPS [%s] установлено")
 
-MESSAGE_TEMPLATE(412, 0, MessageType::Message,
+MESSAGE_TEMPLATE(412, 0, MessageType::Error,
                  "Ошибка подключения к устройству GPS [%s] - %s")
 
 MESSAGE_TEMPLATE(413, 0, MessageType::Attention,
@@ -196,7 +196,7 @@ MESSAGE_TEMPLATE(430, 0, MessageType::Attention,
 MESSAGE_TEMPLATE(500, 0, MessageType::Message,
                  "Запуск потока работы с подключением [%s]...")
 
-MESSAGE_TEMPLATE(501, 0, MessageType::Message,
+MESSAGE_TEMPLATE(501, 0, MessageType::Warning,
                  "Завершение потока работы с подключением [%s]...")
 
 MESSAGE_TEMPLATE(502, 0, MessageType::Message,

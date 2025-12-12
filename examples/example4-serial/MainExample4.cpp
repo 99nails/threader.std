@@ -9,6 +9,11 @@
 #include "ThreadPing.h"
 #include "ThreadPong.h"
 
+#ifdef QT_SUPPORT
+#include <QtConcurrent/QtConcurrent>
+#include <QCoreApplication>
+#endif
+
 #include <iostream>
 
 using namespace Threader::Threads;
@@ -17,7 +22,12 @@ void readLine()
 {
     std::string ch;
     std::getline(std::cin, ch);
+#ifdef QT_SUPPORT
+    QCoreApplication::exit(0);
+#endif
 }
+
+constexpr char MESSAGE_START_HINT[] = "Нажмите Enter для завершения программы...\r\n";
 
 int main(int argc, char *argv[])
 {
@@ -28,13 +38,21 @@ int main(int argc, char *argv[])
 
 #ifdef WIN32
     setlocale(LC_ALL, "russian_Russia.1251");
-    std::cout << StdStringUtils::ConvertUTF8ToCP1251("Press Enter to terminate program...\r\n");
+    auto line = StdStringUtils::ConvertUTF8ToCP1251(MESSAGE_START_HINT);
 #else
     setlocale(LC_ALL, "ru_RU.UTF-8");
-    std::cout << "Press Enter to terminate program...\r\n";
+    auto line = MESSAGE_START_HINT;
 #endif
 
-    startLogSubsystem(argv[0]);
+#ifdef QT_SUPPORT
+    QCoreApplication a(argc, argv);
+
+    QtConcurrent::run(readLine);
+#endif
+
+    std::cout << line;
+
+    startLogSubsystem(argv[0], nullptr, true);
 
     auto threadPing = new ThreadPing(
             #ifdef WIN32
@@ -54,7 +72,11 @@ int main(int argc, char *argv[])
                 );
     threadPong->start();
 
+#ifdef QT_SUPPORT
+    a.exec();
+#else
     readLine();
+#endif
 
     threadPing->postTerminateEvent();
     threadPong->postTerminateEvent();

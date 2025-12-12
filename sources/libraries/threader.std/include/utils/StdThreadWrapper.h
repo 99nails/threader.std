@@ -3,9 +3,8 @@
 #include <mutex>
 #include <thread>
 
-namespace Threader {
-
-namespace Utils {
+namespace Threader::Utils
+{
 
 class StdThreadWrapper
 {
@@ -20,7 +19,7 @@ public:
 
     void start();
     void stop();
-    void terminate();
+    void terminateThread();
 
 protected:
     void setIsRunning(const bool isRunning);
@@ -36,6 +35,4 @@ private:
     std::mutex *_mutexIsTerminated;
 };
 
-} // namespace Utils
-
-} // namespace Threader
+}

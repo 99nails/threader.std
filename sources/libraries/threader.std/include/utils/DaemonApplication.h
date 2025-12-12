@@ -5,16 +5,19 @@
 #include "DateTimeUtils.h"
 #include "FileUtils.h"
 #include "SignalHandler.h"
-// #include "StdStringUtils.h"
 
 #include "ThreadLog.h"
+
+#ifdef QT_SUPPORT
+#include <QCoreApplication>
+#include <QtConcurrent/QtConcurrent>
+#endif
 
 #include <csignal>
 #include <iostream>
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
 
 using namespace Threader::Threads;
 
@@ -31,11 +34,17 @@ void handleTerminateSignal(int signum)
     // закрытие stdin в случае консольного вывода
     if (console)
     {
+#ifndef QT_SUPPORT
         int fd = open("/dev/null", O_WRONLY);
         dup2(fd, 0);
         close(fd);
         std::cout << std::endl;
+#endif
     }
+
+#ifdef QT_SUPPORT
+    QCoreApplication::exit(0);
+#endif
 
     ThreadBase::writeLog(Message15, signum);
 }
@@ -51,6 +60,9 @@ void readLine()
 {
     std::string line;
     std::getline(std::cin, line);
+#ifdef QT_SUPPORT
+    QCoreApplication::exit(0);
+#endif
 }
 
 bool parseArguments(int argc,
@@ -60,8 +72,6 @@ bool parseArguments(int argc,
                     bool &install,
                     bool &uninstall)
 {
-    bool isValid = true;
-
     constexpr char PARAMETER_NAME_CONSOLE[] = "--console";
     constexpr char PARAMETER_NAME_INSTALL[] = "--install";
     constexpr char PARAMETER_NAME_LOG[] = "--log";
@@ -93,7 +103,6 @@ bool parseArguments(int argc,
         uninstall = true;
     }
 
-
     return true;
 }
 
@@ -101,52 +110,71 @@ bool parseArguments(int argc,
 template<class ThreadMainType>
 int AppMain(int argc,
             char *argv[],
-            const std::string &serviceName = std::string(),
-            const std::string &description = std::string())
+            const std::string &description = std::string(),
+            const std::string &serviceName = std::string())
 {
     // (void)argc;
 #ifdef linux
     setErrorSignalHandler(argv[0]);
 #endif
 
+
 #ifdef WIN
+    constexpr char MESSAGE_START_HINT[] = "Нажмите Enter для завершения программы...\r\n";
     setlocale(LC_ALL, "russian_Russia.1251");
-    auto line = StdStringUtils::ConvertUTF8ToCP1251("Нажмите Enter для завершения программы...\r\n");
+    auto line = StdStringUtils::ConvertUTF8ToCP1251(MESSAGE_START_HINT);
 #else
     setlocale(LC_ALL, "ru_RU.UTF-8");
     setlocale(LC_NUMERIC, "C");
-    std::cout << "Нажмите Enter или Ctrl+C для завершения программы...\r\n";
+
+    std::string line = "Нажмите Enter или Ctrl+C для завершения программы...\r\n";
 #endif
     parseArguments(argc, argv, console, logLlevel, install, uninstall);
+
+    if (console)
+        std::cout << line;
+
+#ifdef QT_SUPPORT
+    QCoreApplication a(argc, argv);
+
+    QtConcurrent::run(readLine);
+#endif
 
     startLogSubsystem(argv[0], nullptr, console, logLlevel);
 
     auto binaryFileName = FileUtils::extractFileName(argv[0]);
+    auto binaryPath = FileUtils::extractFilePath(FileUtils::absolutePath(argv[0]));
+
+    auto localServiceName = (serviceName.empty()) ? binaryFileName : serviceName;
+
+    chdir(binaryPath.c_str());
 
     if (install)
     {
-        auto registered = DaemonUtils::daemonRegister((serviceName.empty()) ? binaryFileName : serviceName,
-                                                      argv[0],
+        auto registered = DaemonUtils::daemonRegister(localServiceName,
+                                                      FileUtils::absolutePath(argv[0]),
                                                       description);
-        return (registered) ? 0 : -1;
+        return (registered) ? 0 : 1;
     }
     else if (uninstall)
     {
-        auto binaryFileName = FileUtils::extractFileName(argv[0]);
-        auto unregistered = DaemonUtils::daemonUnregister((serviceName.empty()) ? binaryFileName : serviceName);
-        return (unregistered) ? 0 : -1;
+        auto unregistered = DaemonUtils::daemonUnregister(localServiceName);
+        return (unregistered) ? 0 : 2;
     }
 
-    if (DaemonUtils::daemonIsRunning(serviceName))
+    if (DaemonUtils::daemonIsRunning(localServiceName))
     {
         ThreadBase::writeLog(Message16, serviceName.c_str());
     }
 
     DaemonUtils::daemonSetRunning(serviceName, true);
 
-    auto threadMain = new ThreadMainType(binaryFileName);
+    auto threadMain = new ThreadMainType(binaryFileName, description);
     threadMain->start();
 
+#ifdef QT_SUPPORT
+    a.exec();
+#else
     if (console)
     {
         readLine();
@@ -161,6 +189,7 @@ int AppMain(int argc,
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
+#endif
 
     threadMain->postTerminateEvent();
     while (!threadMain->isFinished())

@@ -10,7 +10,8 @@ using SettingsType = SettingsBundleTemplate<SettingsGpsEmulator>;
 class ThreadMainGps : public ThreadMain<SettingsType>
 {
 public:
-    explicit ThreadMainGps(const std::string &applicationName = std::string());
+    explicit ThreadMainGps(const std::string &applicationName,
+                           const std::string &description);
 
 protected:
     void startChildThreads() override;

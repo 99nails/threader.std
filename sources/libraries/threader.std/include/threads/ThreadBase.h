@@ -11,6 +11,13 @@
 #include "PollingPosix.h"
 #endif
 
+#ifdef QT_SUPPORT
+#include <QEventLoop>
+#include <QObject>
+#include <QThread>
+#include <QTimer>
+#endif
+
 #ifdef _WIN32
 #include "PollingWindows.h"
 #endif
@@ -21,7 +28,8 @@
 #include <mutex>
 #include <vector>
 
-namespace Threader::Threads {
+namespace Threader::Threads
+{
 
 using namespace Threader::Utils;
 
@@ -38,18 +46,27 @@ using VectorThreadBase = std::vector<ThreadBase *>;
  * - отправки и обработки полученных классов сообщений,
  * - ожидания, отправки и обработки внешних событий от потоков и устройств на механизме poll-инга
  */
-class ThreadBase : public StdThreadWrapper,
-                   public MessageConsumer,
-                   public ISignalHandler
+class ThreadBase :
+        #ifdef QT_SUPPORT
+        public QThread,
+        #else
+        public StdThreadWrapper,
+        #endif
+        public MessageConsumer,
+        public ISignalHandler
 {
-    // Q_OBJECT
+#ifdef QT_SUPPORT
+     Q_OBJECT
+#endif
 public:
     /**
      * @brief режим ожидания событий потока
      */
     enum class ThreadRunMode {
-        Polling, // на основе системных функций получения событий дескрипторов
-        EventLoop // на основе QEventLoop
+        Polling, ///< на основе системных функций получения событий дескрипторов
+#ifdef QT_SUPPORT
+        EventLoop ///< на основе QEventLoop
+#endif
     };
 
     static const int TIMEOUT_FINISH_THREADS;
@@ -119,6 +136,12 @@ public:
      */
     static int logLevel();
 
+    /**
+     * @brief setLogLevel - Установка уровня протоколирования
+     * Уровень протоколирования 9 - максимально подоробный протокол работы
+     * Уровень протоколирования 0 - минимально подоробный протокол работы
+     * @param level
+     */
     static void setLogLevel(int level);
 
     /***********************************************************************************************
@@ -195,11 +218,30 @@ public:
      */
     static std::string errorString(int errorNo = 0);
 
+#ifdef QT_SUPPORT
     /**
      * @brief eventLoop - получение указателя на цикл обработки сообщений
      * @return
      */
-    // QEventLoop *eventLoop() const;
+    QEventLoop *eventLoop() const;
+
+    /**
+     * @brief  - Получение признака завершения основвного цикла потока
+     * @return - Признак завершения потока
+     */
+    bool isTerminated();
+
+    /**
+     * @brief terminateThread - поднятие флага остановки основного цикла потока
+     */
+    void terminateThread();
+
+    /**
+     * @brief - Получение признака того, что поток был запущен
+     * @return признак того, что поток был запущен
+     */
+    bool wasStarted();
+#endif
 
     void signalProcess(Signal signal) override;
 
@@ -538,27 +580,33 @@ private:
      */
     ThreadRunMode _threadRunMode;
 
+#ifdef QT_SUPPORT
     /**
      * @brief _eventLoop - цикл обработки сообщений
      */
-    // QEventLoop *_eventLoop;
+    QEventLoop *_eventLoop;
 
     /**
      * @brief _timerEventLoop - таймер для вызова onIdle при схеме работы EventLoop
      */
-    // QTimer *_timerEventLoop;
+    QTimer *_timerEventLoop;
+
+    bool _isTerminated;
+#endif
     std::mutex *_mutex = nullptr;
 
-    // signals:
-    //     void signalTerminate();
-    //     void signalWakeUp();
-    //     void signalTerminateChildThreads();
+#ifdef QT_SUPPORT
+signals:
+    void signalTerminate();
+    void signalWakeUp();
+    void signalTerminateChildThreads();
 
-    // protected slots:
+protected slots:
+#endif
     void slotTerminateThread();
     void slotTerminateChildThreads();
     void slotWakeUpThread();
     void slotTimerEventLoop();
 };
 
-} // namespace Threader::Threads
+}

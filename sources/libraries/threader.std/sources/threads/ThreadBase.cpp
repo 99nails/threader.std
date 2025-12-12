@@ -37,13 +37,17 @@ const int ThreadBase::TIMEOUT_ACCUMULATE_STATISTIC_MILLISECONDS       = 10000;
 const int ThreadBase::TIMEOUT_FINISH_THREADS = 1000;
 
 ThreadBase *ThreadBase::_logThread = nullptr;
-int ThreadBase::_logLevel          = 9;
+int ThreadBase::_logLevel = 9;
 
 ThreadBase::ThreadBase(MessageConsumer *parent,
                        const std::string &threadName,
                        const ThreadRunMode &threadRunMode)
-    // : QThread(nullptr)
-    : StdThreadWrapper()
+    :
+      #ifdef QT_SUPPORT
+      QThread(nullptr)
+      #else
+      StdThreadWrapper()
+    #endif
     , MessageConsumer()
     , _parentThread(parent)
     , _threadName(threadName)
@@ -56,14 +60,13 @@ ThreadBase::ThreadBase(MessageConsumer *parent,
     , _nextCallIdle(0)
 
     , _threadRunMode(threadRunMode)
-    // , _eventLoop(nullptr)
-    // , _timerEventLoop(nullptr)
+    #ifdef QT_SUPPORT
+    , _eventLoop(nullptr)
+    , _timerEventLoop(nullptr)
+    , _isTerminated(false)
+    #endif
     , _mutex(new std::mutex())
 {
-    // _pollerThread.moveToThread(this);
-    // if (ThreadRunMode::EventLoop == _threadRunMode)
-    //     this->moveToThread(this);
-
     _polling.setThreadName(threadName);
 }
 
@@ -102,11 +105,6 @@ void ThreadBase::setThreadRunMode(const ThreadRunMode &threadRunMode)
         return;
 
     _threadRunMode = threadRunMode;
-
-    if (ThreadRunMode::EventLoop == _threadRunMode)
-    {
-        // this->moveToThread(this);
-    }
 }
 
  std::string ThreadBase::threadClassName()
@@ -166,26 +164,28 @@ void ThreadBase::initializeThread()
             _pollerThread.setSignalHandler(this);
             _polling.registerPoller(&_pollerThread);
             break;
+#ifdef QT_SUPPORT
         case ThreadRunMode::EventLoop:
-            // _eventLoop = new QEventLoop();
-            // _eventLoop->moveToThread(this);
+             _eventLoop = new QEventLoop();
+             _eventLoop->moveToThread(this);
 
-            // _timerEventLoop = new QTimer();
-            // _timerEventLoop->moveToThread(this);
-            // _timerEventLoop->setInterval(static_cast<int>(timeout()));
-            // connect(_timerEventLoop, &QTimer::timeout, this, &ThreadBase::slotTimerEventLoop,
-            //         Qt::AutoConnection);
-            // _timerEventLoop->start();
+             _timerEventLoop = new QTimer();
+             _timerEventLoop->moveToThread(this);
+             _timerEventLoop->setInterval(static_cast<int>(timeout()));
+             connect(_timerEventLoop, &QTimer::timeout,
+                     this, &ThreadBase::slotTimerEventLoop, Qt::AutoConnection);
+             _timerEventLoop->start();
 
-            // connect(this, &ThreadBase::signalTerminate, this, &ThreadBase::slotTerminateThread,
-            //         Qt::AutoConnection);
+             connect(this, &ThreadBase::signalTerminate, this, &ThreadBase::slotTerminateThread,
+                     Qt::AutoConnection);
 
-            // connect(this, &ThreadBase::signalTerminateChildThreads, this,
-            //         &ThreadBase::slotTerminateChildThreads, Qt::AutoConnection);
+             connect(this, &ThreadBase::signalTerminateChildThreads,
+                     this, &ThreadBase::slotTerminateChildThreads, Qt::AutoConnection);
 
-            // connect(this, &ThreadBase::signalWakeUp, this, &ThreadBase::slotWakeUpThread,
-            //         Qt::AutoConnection);
-            break;
+             connect(this, &ThreadBase::signalWakeUp,
+                     this, &ThreadBase::slotWakeUpThread, Qt::AutoConnection);
+        break;
+#endif
     }
 }
 
@@ -194,11 +194,13 @@ void ThreadBase::finalizeThread()
     if (ThreadsStaticticCollector::instance())
         ThreadsStaticticCollector::instance()->unregisterThread(this);
 
-    // if (_eventLoop)
-    //     delete _eventLoop;
+#ifdef QT_SUPPORT
+     if (_eventLoop)
+         delete _eventLoop;
 
-    // if (_timerEventLoop)
-    //     delete _timerEventLoop;
+     if (_timerEventLoop)
+         delete _timerEventLoop;
+#endif
 }
 
 void ThreadBase::onThreadStarted() {}
@@ -215,8 +217,10 @@ void ThreadBase::onAfterWaitEvents()
 {
     destroyTerminatedChildThreads(false);
 
+#ifdef QT_SUPPORT
     if (ThreadRunMode::EventLoop == _threadRunMode)
         onIdle();
+#endif
 
     accumulateStatistic();
 }
@@ -236,17 +240,22 @@ void ThreadBase::run()
 
     startChildThreads();
 
-    if (ThreadRunMode::Polling == _threadRunMode) {
-        while (!isTerminated()) {
+    switch (_threadRunMode) {
+    case ThreadRunMode::Polling:
+        while (!isTerminated())
+        {
             onBeforeWaitEvents();
 
             waitEvents();
 
             onAfterWaitEvents();
         }
-    }
-    else {
-        // _eventLoop->exec();
+        break;
+#ifdef QT_SUPPORT
+    case ThreadRunMode::EventLoop:
+        _eventLoop->exec();
+        break;
+#endif
     }
 
     onThreadFinishing();
@@ -285,7 +294,8 @@ bool ThreadBase::accumulateStatistic()
                               nowTickCount,
                               polling()->waitCount(),
                               queue()->count(),
-                              isTerminated());
+                              isTerminated()
+                              );
     return true;
 }
 
@@ -574,13 +584,37 @@ void ThreadBase::signalProcess(Signal signal)
     }
 }
 
-// QEventLoop *ThreadBase::eventLoop() const { return _eventLoop; }
+#ifdef QT_SUPPORT
+QEventLoop *ThreadBase::eventLoop() const
+{
+    return _eventLoop;
+}
+
+bool ThreadBase::isTerminated()
+{
+    return _isTerminated;
+}
+
+void ThreadBase::terminateThread()
+{
+    _isTerminated = true;
+}
+
+bool ThreadBase::wasStarted()
+{
+    return _thisThreadId > 0;
+}
+#endif
 
 ThreadBase * ThreadBase::startThreadTimer(const std::string &timerName,
                                          const int &delayMsecs,
                                          const bool multiShot)
 {
-    auto thread = new ThreadTimer(this, timerName, delayMsecs, multiShot);
+    auto thread = new ThreadTimer(this,
+                                  timerName,
+                                  delayMsecs,
+                                  multiShot);
+
     registerAndStartChildThread(thread);
     return thread;
 }
@@ -619,16 +653,18 @@ int ThreadBase::stopAllTimers()
 
 void ThreadBase::signalEventWakeUp()
 {
-    if (isFinished())
+    if (this->isFinished())
         return;
 
     switch (_threadRunMode) {
         case ThreadRunMode::Polling:
             _pollerThread.sendSignalWakeUp();
             break;
+#ifdef QT_SUPPORT
         case ThreadRunMode::EventLoop:
-            // emit signalWakeUp();
+             emit signalWakeUp();
             break;
+#endif
     }
 }
 
@@ -641,9 +677,11 @@ void ThreadBase::signalEventTerminate()
         case ThreadRunMode::Polling:
         _pollerThread.sendSignalTerminate();
             break;
+#ifdef QT_SUPPORT
         case ThreadRunMode::EventLoop:
-            // emit signalTerminate();
+             emit signalTerminate();
             break;
+#endif
     }
 }
 
@@ -656,9 +694,11 @@ void ThreadBase::signalEventChildThreadTerminated()
         case ThreadRunMode::Polling:
         _pollerThread.sendSignalTerminateChildThreads();
             break;
+#ifdef QT_SUPPORT
         case ThreadRunMode::EventLoop:
-            // emit signalTerminateChildThreads();
+             emit signalTerminateChildThreads();
             break;
+#endif
     }
 }
 
@@ -676,12 +716,19 @@ void ThreadBase::setTimeout(uint32_t timeout)
 
 void ThreadBase::slotTerminateThread()
 {
-    // if (ThreadRunMode::EventLoop == _threadRunMode && _eventLoop)
-    // {
-    //     _eventLoop->exit();
-    // }
+#ifdef QT_SUPPORT
+     if (ThreadRunMode::EventLoop == _threadRunMode && _eventLoop)
+     {
+         _eventLoop->exit();
+     }
+     else
+     {
+         terminateThread();
+     }
+#else
+     terminateThread();
+#endif
 
-    terminate();
 }
 
 void ThreadBase::slotTerminateChildThreads()
@@ -691,10 +738,12 @@ void ThreadBase::slotTerminateChildThreads()
 
 void ThreadBase::slotWakeUpThread()
 {
+#ifdef QT_SUPPORT
     if (threadRunMode() == ThreadRunMode::EventLoop)
     {
         DateTimeUtils::sleepMilliseconds(0);
     }
+#endif
     processMessages();
 }
 
