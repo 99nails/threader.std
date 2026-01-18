@@ -519,6 +519,10 @@ void ThreadBase::signalProcess(Signal signal)
     }
 }
 
+void ThreadBase::processMessage(const MessageBase::Ptr &)
+{
+}
+
 ThreadBase * ThreadBase::startThreadTimer(const std::string &timerName,
                                          const int &delayMsecs,
                                          const bool multiShot)

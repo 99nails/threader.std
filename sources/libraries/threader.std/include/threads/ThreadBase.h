@@ -193,31 +193,6 @@ public:
      */
     static std::string errorString(int errorNo = 0);
 
-#ifdef QT_SUPPORT
-    /**
-     * @brief eventLoop - получение указателя на цикл обработки сообщений
-     * @return
-     */
-    QEventLoop *eventLoop() const;
-
-    /**
-     * @brief  - Получение признака завершения основвного цикла потока
-     * @return - Признак завершения потока
-     */
-    bool isTerminated();
-
-    /**
-     * @brief terminateThread - поднятие флага остановки основного цикла потока
-     */
-    void terminateThread();
-
-    /**
-     * @brief - Получение признака того, что поток был запущен
-     * @return признак того, что поток был запущен
-     */
-    bool wasStarted();
-#endif
-
     void signalProcess(Signal signal) override;
 
 protected:
@@ -228,7 +203,7 @@ protected:
     /**
      * @brief processMessage - Заглушка обработчика сообщений
      */
-    void processMessage(const MessageBase::Ptr &) override {};
+    void processMessage(const MessageBase::Ptr &) override;
 
     /***********************************************************************************************
     * ПОДСИСТЕМА ВЫПОЛНЕНИЯ
