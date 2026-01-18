@@ -17,24 +17,12 @@ add_compile_definitions(THREADER_VERSION4_STRING="${VERSION4}")
 
 project(threader-std VERSION ${VERSION} LANGUAGES C CXX)
 
-option(QT_SUPPORT "Build with QT Library support" ON)
-
-if (QT_SUPPORT)
-    find_package(Qt5 REQUIRED COMPONENTS Core)
-
-    set(CMAKE_AUTOUIC ON)
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
-
-    add_compile_definitions(QT_SUPPORT)
-endif()
-
 set_target_properties(${TARGET} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED YES
 )
 
-SET(OS_SUFFIX ${CMAKE_SYSTEM_NAME})
+set(OS_SUFFIX ${CMAKE_SYSTEM_NAME})
 string(TOLOWER ${OS_SUFFIX} OS_SUFFIX)
 
 message("Target system name - [" ${OS_SUFFIX} "]")
@@ -49,6 +37,9 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(BUILD_SUFFIX debug)
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
+# Установка корневого каталога
+set(ROOT_PROJECT_DIR ${CMAKE_SOURCE_DIR})
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${BUILD_SUFFIX})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib.${OS_SUFFIX})
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
@@ -58,6 +49,7 @@ link_directories(${CMAKE_SOURCE_DIR}/lib.${OS_SUFFIX})
 include_directories(${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads)
 
 add_subdirectory(sources/libraries/threader.std)
+add_subdirectory(sources/libraries/threader.qt)
 add_subdirectory(examples)
 
 SET(CMAKE_SKIP_BUILD_RPATH TRUE)

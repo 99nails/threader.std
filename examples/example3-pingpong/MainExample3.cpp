@@ -6,11 +6,6 @@
 #include "ThreadPing.h"
 #include "ThreadPong.h"
 
-#ifdef QT_SUPPORT
-#include <QtConcurrent/QtConcurrent>
-#include <QCoreApplication>
-#endif
-
 #include <iostream>
 
 using namespace Threader::Threads;
@@ -19,9 +14,6 @@ void readLine()
 {
     std::string ch;
     std::getline(std::cin, ch);
-#ifdef QT_SUPPORT
-    QCoreApplication::exit(0);
-#endif
 }
 
 constexpr char MESSAGE_START_HINT[] = "Нажмите Enter для завершения программы...\r\n";
@@ -37,16 +29,10 @@ int main(int argc, char *argv[])
     auto line = MESSAGE_START_HINT;
 #endif
 
-#ifdef QT_SUPPORT
-    QCoreApplication a(argc, argv);
-
-    QtConcurrent::run(readLine);
-#endif
-
     std::cout << line;
 
     auto threadLog = new ThreadLog(argv[0], nullptr, true);
-    threadLog->start();
+    threadLog->startThread();
 
     ThreadBase::writeLog(Message110);
 
@@ -56,16 +42,12 @@ int main(int argc, char *argv[])
     threadPing->setThreadPong(threadPong);
     threadPong->setThreadPing(threadPing);
 
-    threadPing->start();
-    threadPong->start();
+    threadPing->startThread();
+    threadPong->startThread();
 
     ThreadBase::writeLog(Message111);
 
-#ifdef QT_SUPPORT
-    a.exec();
-#else
     readLine();
-#endif
 
     ThreadBase::writeLog(Message112);
 
@@ -76,7 +58,7 @@ int main(int argc, char *argv[])
 
     if (threadPing->wasStarted())
     {
-        while (!threadPing->isFinished())
+        while (!threadPing->isThreadFinished())
         {
             DateTimeUtils::sleepMilliseconds(1000);
         }
@@ -84,7 +66,7 @@ int main(int argc, char *argv[])
 
     if (threadPong->wasStarted())
     {
-        while (!threadPong->isFinished())
+        while (!threadPong->isThreadFinished())
         {
             DateTimeUtils::sleepMilliseconds(1000);
         }
@@ -95,7 +77,7 @@ int main(int argc, char *argv[])
     if (threadLog->wasStarted())
     {
         threadLog->postTerminateEvent();
-        while (!threadLog->isFinished())
+        while (!threadLog->isThreadFinished())
         {
             DateTimeUtils::sleepMilliseconds(100);
         }

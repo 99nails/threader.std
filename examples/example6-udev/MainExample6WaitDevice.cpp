@@ -4,5 +4,6 @@
 
 int main(int argc, char *argv[])
 {
-    return AppMain<ThreadMainWaitDevice>(argc, argv, "Ожидание устройства");
+    DaemonApplication<ThreadMainWaitDevice> application(argc, argv, "Ожидание устройства");
+    return application.run();
 }

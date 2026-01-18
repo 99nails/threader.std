@@ -14,10 +14,16 @@ class CommandLineParser
 public:
     CommandLineParser(int argc, char** argv)
     {
+        _tokens.reserve(argc);
         for (int i = 1; i < argc; i++)
         {
-            this->_tokens.push_back(std::string(argv[i]));
+            _tokens.push_back(std::string(argv[i]));
         }
+    }
+
+    CommandLineParser(const std::vector<std::string> &arguments)
+        : _tokens(arguments)
+    {
     }
 
     const std::string& optionValue(const std::string& option) const

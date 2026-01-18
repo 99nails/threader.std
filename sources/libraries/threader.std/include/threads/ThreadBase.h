@@ -11,13 +11,6 @@
 #include "PollingPosix.h"
 #endif
 
-#ifdef QT_SUPPORT
-#include <QEventLoop>
-#include <QObject>
-#include <QThread>
-#include <QTimer>
-#endif
-
 #ifdef _WIN32
 #include "PollingWindows.h"
 #endif
@@ -47,28 +40,11 @@ using VectorThreadBase = std::vector<ThreadBase *>;
  * - ожидания, отправки и обработки внешних событий от потоков и устройств на механизме poll-инга
  */
 class ThreadBase :
-        #ifdef QT_SUPPORT
-        public QThread,
-        #else
         public StdThreadWrapper,
-        #endif
         public MessageConsumer,
         public ISignalHandler
 {
-#ifdef QT_SUPPORT
-     Q_OBJECT
-#endif
 public:
-    /**
-     * @brief режим ожидания событий потока
-     */
-    enum class ThreadRunMode {
-        Polling, ///< на основе системных функций получения событий дескрипторов
-#ifdef QT_SUPPORT
-        EventLoop ///< на основе QEventLoop
-#endif
-    };
-
     static const int TIMEOUT_FINISH_THREADS;
 
     /**
@@ -76,8 +52,7 @@ public:
      * @param parent - Владелец потока
      */
     explicit ThreadBase(MessageConsumer *parent = nullptr,
-                        const std::string &threadName = std::string(),
-                        const ThreadRunMode &threadRunMode = ThreadRunMode::Polling);
+                        const std::string &threadName = std::string());
 
     /**
      * @brief ~ThreadBase - Деструктор потока
@@ -299,10 +274,14 @@ protected:
      */
     void virtual onBeforeWaitEvents();
 
+    virtual void onAfterWaitEvents();
+
+    void virtual runEventLoop();
+
     /**
      * @brief run - Главная функция потока
      */
-    void run() override;
+    void execute() override;
 
     /**
      * @brief accumulateStatistic - сбор статистики выполнения потоков
@@ -320,18 +299,6 @@ protected:
      * @param threadName - новое имя потока
      */
     void setThreadName(const std::string &threadName);
-
-    /**
-     * @brief threadRunMode - получение режима ожидания событий потока
-     * @return - режим ожидания событий потока
-     */
-    ThreadRunMode threadRunMode() const;
-
-    /**
-     * @brief setThreadRunMode - установка режима ожидания событий потока
-     * @param threadRunMode - режим ожидания событий потока
-     */
-    void setThreadRunMode(const ThreadRunMode &threadRunMode);
 
     /***********************************************************************************************
     * ПОДСИСТЕМА УПРАВЛЕНИЯ ПОДЧИНЕННЫМИ ПОТОКАМИ
@@ -455,7 +422,25 @@ protected:
      */
     virtual int stopAllTimers();
 
-    virtual void onAfterWaitEvents();
+    /***********************************************************************************************
+     * ВНУТРЕННЯЯ РЕАЛИЗАЦИЯ ПОДСИСТЕМЫ СОБЫТИЙ
+    ************************************************************************************************/
+
+    /**
+     * @brief signalEventWakeUp - Отправка события пробуждения потока
+     */
+    virtual void signalEventWakeUp();
+
+    /**
+     * @brief signalEventTerminate - Отправка события завершения потока
+     */
+    virtual void signalEventTerminate();
+
+    /**
+     * @brief signalEventsChildThreadTerminated - Отправка события завершения потока this к потоку влядельцу parent
+     */
+    virtual void signalEventChildThreadTerminated();
+
 
 private:
     static const int WAIT_RESULT_TIMEOUT;
@@ -465,25 +450,6 @@ private:
 
     static const int TIMEOUT_COLLECT_TERMINATED_THREADS_MILLISECONDS;
     static const int TIMEOUT_ACCUMULATE_STATISTIC_MILLISECONDS;
-
-    /***********************************************************************************************
-     * ВНУТРЕННЯЯ (PRIVATE) РЕАЛИЗАЦИЯ ПОДСИСТЕМЫ СОБЫТИЙ
-    ************************************************************************************************/
-
-    /**
-     * @brief signalEventWakeUp - Отправка события пробуждения потока
-     */
-    void signalEventWakeUp();
-
-    /**
-     * @brief signalEventTerminate - Отправка события завершения потока
-     */
-    void signalEventTerminate();
-
-    /**
-     * @brief signalEventsChildThreadTerminated - Отправка события завершения потока this к потоку влядельцу parent
-     */
-    void signalEventChildThreadTerminated();
 
     /***********************************************************************************************
      * ПОДСИСТЕМА ПРОТОКОЛИРОВАНИЯ
@@ -576,37 +542,9 @@ private:
     std::map<std::string, MessageConsumerVector> _subscribers;
 
     /**
-     * @brief _threadRunMode - режим ожидания событий потока
+     * @brief _mutexTimeout - мьтекс для установки таймаута ожидания событий потока
      */
-    ThreadRunMode _threadRunMode;
-
-#ifdef QT_SUPPORT
-    /**
-     * @brief _eventLoop - цикл обработки сообщений
-     */
-    QEventLoop *_eventLoop;
-
-    /**
-     * @brief _timerEventLoop - таймер для вызова onIdle при схеме работы EventLoop
-     */
-    QTimer *_timerEventLoop;
-
-    bool _isTerminated;
-#endif
-    std::mutex *_mutex = nullptr;
-
-#ifdef QT_SUPPORT
-signals:
-    void signalTerminate();
-    void signalWakeUp();
-    void signalTerminateChildThreads();
-
-protected slots:
-#endif
-    void slotTerminateThread();
-    void slotTerminateChildThreads();
-    void slotWakeUpThread();
-    void slotTimerEventLoop();
+    std::mutex *_mutexTimeout = nullptr;
 };
 
 }

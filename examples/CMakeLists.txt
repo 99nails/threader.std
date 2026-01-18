@@ -1,7 +1,17 @@
 include_directories(
     ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads
     ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/utils
+    ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
 )
+
+# Использовать запуск утилит Qt в автоматическом режиме
+# Автоматическая компиляция .ui файлов с помощью uic
+set(CMAKE_AUTOUIC ON)
+# Автоматический запуск Meta-Object Compiler с помощью moc
+set(CMAKE_AUTOMOC ON)
+# Автоматический запуск Resource Compiler с помощью rcc
+set(CMAKE_AUTORCC ON)
+
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
@@ -23,7 +33,7 @@ add_executable(example2-threads
     example2-threads/MainExample2.cpp
     example2-threads/ThreadTest.h example2-threads/ThreadTest.cpp
 )
-target_compile_features(example2-threads PUBLIC cxx_std_11)
+target_compile_features(example2-threads PUBLIC cxx_std_17)
 
 target_link_libraries(example2-threads
     -lpthread
@@ -38,7 +48,7 @@ add_executable(example3-pingpong
     example3-pingpong/ThreadPing.h example3-pingpong/ThreadPing.cpp
     example3-pingpong/ThreadPong.h example3-pingpong/ThreadPong.cpp
 )
-target_compile_features(example3-pingpong PUBLIC cxx_std_11)
+target_compile_features(example3-pingpong PUBLIC cxx_std_17)
 
 target_link_libraries(example3-pingpong
     -lpthread
@@ -52,7 +62,7 @@ add_executable(example4-serial
    example4-serial/ThreadPing.h example4-serial/ThreadPing.cpp
    example4-serial/ThreadPong.h example4-serial/ThreadPong.cpp
 )
-target_compile_features(example4-serial PUBLIC cxx_std_11)
+target_compile_features(example4-serial PUBLIC cxx_std_17)
 
 target_link_libraries(example4-serial
    -lpthread
@@ -67,7 +77,7 @@ add_executable(example5-gps
    example5-simpleserver/ThreadGpsEmulator.h example5-simpleserver/ThreadGpsEmulator.cpp
    example5-simpleserver/ThreadMainGps.h example5-simpleserver/ThreadMainGps.cpp
 )
-target_compile_features(example5-gps PUBLIC cxx_std_11)
+target_compile_features(example5-gps PUBLIC cxx_std_17)
 
 target_link_libraries(example5-gps
   pthread
@@ -85,7 +95,7 @@ add_executable(example5-timeserver
    example5-simpleserver/ThreadListenConnections.h example5-simpleserver/ThreadListenConnections.cpp
    example5-simpleserver/ThreadMainTimeServer.h example5-simpleserver/ThreadMainTimeServer.cpp
 )
-target_compile_features(example5-timeserver PUBLIC cxx_std_11)
+target_compile_features(example5-timeserver PUBLIC cxx_std_17)
 
 target_link_libraries(example5-timeserver
    pthread
@@ -100,7 +110,7 @@ add_executable(example5-timeclient
    example5-simpleserver/ThreadConnectionClient.h example5-simpleserver/ThreadConnectionClient.cpp
    example5-simpleserver/ThreadMainTimeClient.h example5-simpleserver/ThreadMainTimeClient.cpp
 )
-target_compile_features(example5-timeclient PUBLIC cxx_std_11)
+target_compile_features(example5-timeclient PUBLIC cxx_std_17)
 
 target_link_libraries(example5-timeclient
   -lpthread
@@ -113,7 +123,7 @@ add_executable(example6-devicelist
    example6-udev/MainExample6DeviceList.cpp
    )
 
-target_compile_features(example6-devicelist PUBLIC cxx_std_11)
+target_compile_features(example6-devicelist PUBLIC cxx_std_17)
 
 target_link_libraries(example6-devicelist
   pthread
@@ -127,9 +137,26 @@ add_executable(example6-waitdevice
    example6-udev/SettingsDevice.h example6-udev/SettingsDevice.cpp
    )
 
-target_compile_features(example6-waitdevice PUBLIC cxx_std_11)
+target_compile_features(example6-waitdevice PUBLIC cxx_std_17)
 
 target_link_libraries(example6-waitdevice
   pthread
   threader-std
+)
+
+find_package(Qt5 REQUIRED COMPONENTS Core)
+
+# example7-qteventloop
+add_executable(example7-qteventloop
+    example7-qteventloop/MainExample7-QtEventLoop.cpp
+    example7-qteventloop/ThreadMainQtEventLoop.h example7-qteventloop/ThreadMainQtEventLoop.cpp
+)
+
+target_compile_features(example7-qteventloop PUBLIC cxx_std_17)
+
+target_link_libraries(example7-qteventloop
+  pthread
+  threader-std
+  threader-qt
+  Qt5::Core
 )

@@ -22,7 +22,7 @@ ThreadHandler::ThreadHandler(MessageConsumer *parent,
                              const uint32_t &reconnectTimeout,
                              PacketFactoryBase *packetFactory,
                              const std::string &threadName)
-    : ThreadBase(parent, threadName, ThreadRunMode::Polling)
+    : ThreadBase(parent, threadName)
     , _reconnectTimeout(reconnectTimeout)
     , _nextTryToConnect(DateTimeUtils::getTickCount())
     , _packetFactory(packetFactory)

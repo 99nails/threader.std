@@ -3,6 +3,7 @@
 #include "LogMessagesTemplates.h"
 #include "ListThreads.h"
 #include "MessageWriteToFile.h"
+#include "SignalHandler.h"
 #include "StdStringUtils.h"
 #include "ThreadBase.h"
 
@@ -24,11 +25,9 @@ public:
                         const std::string &applicationBinaryName = std::string(),
                         const std::string &applicationFriendlyName = std::string(),
                         const std::string &threadName = std::string(),
-                        const std::string &iniFileName = std::string(),
-                        const ThreadRunMode &threadRunMode = ThreadRunMode::Polling)
+                        const std::string &iniFileName = std::string())
         : ThreadBase(parent,
-                     (threadName.empty()) ? "Thread.Main" : threadName,
-                     threadRunMode)
+                     (threadName.empty()) ? "Thread.Main" : threadName)
         , _applicationBinaryName(applicationBinaryName)
         , _applicationFriendlyName(applicationFriendlyName)
         , _nextBuildStatisticTickCount(
@@ -136,7 +135,7 @@ private:
         }
 
     #ifdef linux
-//        setThreadInfo(statisticString);
+        setThreadInfo(statisticString);
     #endif
 
         statisticString += "{EOF}" + std::string(DateTimeUtils::msecsSinceEpochLocal() % 8, ' ');

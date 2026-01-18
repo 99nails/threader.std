@@ -8,11 +8,6 @@
 
 #include "ThreadLog.h"
 
-#ifdef QT_SUPPORT
-#include <QCoreApplication>
-#include <QtConcurrent/QtConcurrent>
-#endif
-
 #include <csignal>
 #include <iostream>
 
@@ -21,185 +16,260 @@
 
 using namespace Threader::Threads;
 
-static bool isRunning = true;
-static bool console = false;
-static bool install = false;
-static int logLlevel = 9;
-static bool uninstall = false;
-
-void handleTerminateSignal(int signum)
-{
-    isRunning = false;
-
-    // закрытие stdin в случае консольного вывода
-    if (console)
-    {
-#ifndef QT_SUPPORT
-        int fd = open("/dev/null", O_WRONLY);
-        dup2(fd, 0);
-        close(fd);
-        std::cout << std::endl;
-#endif
-    }
-
-#ifdef QT_SUPPORT
-    QCoreApplication::exit(0);
-#endif
-
-    ThreadBase::writeLog(Message15, signum);
-}
-
-void setTerminateSignalHandlers()
-{
-    signal(SIGINT, handleTerminateSignal);
-    signal(SIGTERM, handleTerminateSignal);
-    // signal(SIGHUP, handleTerminateSignal);
-}
-
 void readLine()
 {
     std::string line;
     std::getline(std::cin, line);
-#ifdef QT_SUPPORT
-    QCoreApplication::exit(0);
-#endif
 }
 
-bool parseArguments(int argc,
-                    char *argv[],
-                    bool &console,
-                    int &level,
-                    bool &install,
-                    bool &uninstall)
+template<class ThreadMainType>
+class DaemonApplication
+{
+public:
+    explicit DaemonApplication(int argc,
+                               char *argv[],
+                               const std::string &description = std::string(),
+                               const std::string &serviceName = std::string());
+    virtual int run();
+protected:
+    bool initialize();
+    virtual void runMainLoop();
+    virtual void exitMainLoop();
+    ThreadMainType *threadMain();
+
+    bool console();
+    int logLevel();
+
+private:
+    bool parseArguments();
+    static void signalHandler(int signal);
+
+private:
+    static DaemonApplication *_instance;
+    ThreadMainType *_threadMain;
+    bool _isRunning = true;
+    int _argc;
+    std::vector<std::string> _arguments;
+    std::string _description;
+    std::string _serviceName;
+    std::string _binaryFileName;
+    std::string _binaryPath;
+
+    Descriptor _pipeDescriptors[2];
+
+    bool _console;
+    bool _install;
+    bool _uninstall;
+    int _logLevel;
+};
+
+template<class ThreadMainType>
+DaemonApplication<ThreadMainType> *DaemonApplication<ThreadMainType>::_instance = nullptr;
+
+template<class ThreadMainType>
+DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
+                                                     char *argv[],
+                                                     const std::string &description,
+                                                     const std::string &serviceName)
+    : _threadMain(nullptr)
+    , _argc(argc)
+    , _description(description)
+    , _serviceName(serviceName)
+    , _console(false)
+    , _install(false)
+    , _uninstall(false)
+    , _logLevel(9)
+{
+    _instance = this;
+    _console = false;
+    _arguments.reserve(argc);
+    for (int i = 0; i < argc; i++)
+        _arguments.push_back(argv[i]);
+
+    _pipeDescriptors[0] = INVALID_DESCRIPTOR;
+    _pipeDescriptors[1] = INVALID_DESCRIPTOR;
+}
+
+template<class ThreadMainType>
+int DaemonApplication<ThreadMainType>::run()
+{
+    if (!initialize())
+        return 1;
+
+    if (DaemonUtils::daemonIsRunning(_serviceName))
+    {
+        ThreadBase::writeLog(Message16, _serviceName.c_str());
+    }
+
+    DaemonUtils::daemonSetRunning(_serviceName, true);
+
+    _threadMain = new ThreadMainType(_serviceName, _description);
+    _threadMain->startThread();
+
+    runMainLoop();
+
+    _threadMain->postTerminateEvent();
+    while (!_threadMain->isThreadFinished())
+    {
+        DateTimeUtils::sleepMilliseconds(100);
+    }
+
+    DaemonUtils::daemonSetRunning(_serviceName, false);
+
+    stopLogSubsystem();
+
+    return 0;
+}
+
+template<class ThreadMainType>
+bool DaemonApplication<ThreadMainType>::initialize()
+{
+#ifdef linux
+    if (_arguments.size() > 0)
+        setErrorSignalHandler(_arguments[0].c_str());
+
+    setlocale(LC_ALL, "ru_RU.UTF-8");
+    setlocale(LC_NUMERIC, "C");
+
+    std::string line = "Нажмите Enter или Ctrl+C для завершения программы...\r\n";
+#endif
+
+#ifdef WIN
+    constexpr char MESSAGE_START_HINT[] = "Нажмите Enter для завершения программы...\r\n";
+    setlocale(LC_ALL, "russian_Russia.1251");
+    auto line = StdStringUtils::ConvertUTF8ToCP1251(MESSAGE_START_HINT);
+#endif
+    if (_arguments.size() < 1)
+        return false;
+
+    if (!parseArguments())
+        return false;
+
+    if (_console)
+        std::cout << line;
+
+    startLogSubsystem(_arguments[0].c_str(), nullptr, _console, _logLevel);
+
+    _binaryFileName = FileUtils::extractFileName(_arguments[0]);
+    _binaryPath = FileUtils::extractFilePath(FileUtils::absolutePath(_arguments[0]));
+
+    if (_serviceName.empty())
+        _serviceName = _binaryFileName;
+
+    chdir(_binaryPath.c_str());
+
+    auto result = signal(SIGINT, DaemonApplication<ThreadMainType>::signalHandler);
+    result = signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler);
+    result = signal(SIGTERM, DaemonApplication<ThreadMainType>::signalHandler);
+    // signal(SIGHUP, handleTerminateSignal);
+
+    return true;
+}
+
+template<class ThreadMainType>
+void DaemonApplication<ThreadMainType>::runMainLoop()
+{
+    if (_console)
+    {
+        readLine();
+    }
+    else
+    {
+        if (pipe2(_pipeDescriptors, O_NONBLOCK) != 0)
+            return;
+
+        int result;
+        do
+        {
+            pollfd fds{.fd = _pipeDescriptors[0], .events = POLLIN};
+            result = poll(&fds, 1,  -1);
+        }
+        while (result < 0 && EINTR == errno);
+    }
+}
+
+template<class ThreadMainType>
+void DaemonApplication<ThreadMainType>::exitMainLoop()
+{
+    if (_console)
+        return;
+
+    ::close(_pipeDescriptors[0]);
+    ::close(_pipeDescriptors[1]);
+}
+
+template<class ThreadMainType>
+inline ThreadMainType *DaemonApplication<ThreadMainType>::threadMain()
+{
+    return _threadMain;
+}
+
+template<class ThreadMainType>
+bool DaemonApplication<ThreadMainType>::console()
+{
+    return _console;
+}
+
+template<class ThreadMainType>
+int DaemonApplication<ThreadMainType>::logLevel()
+{
+    return _logLevel;
+}
+
+template<class ThreadMainType>
+bool DaemonApplication<ThreadMainType>::parseArguments()
 {
     constexpr char PARAMETER_NAME_CONSOLE[] = "--console";
     constexpr char PARAMETER_NAME_INSTALL[] = "--install";
     constexpr char PARAMETER_NAME_LOG[] = "--log";
     constexpr char PARAMETER_NAME_UNINSTALL[] = "--uninstall";
 
-    CommandLineParser commandLine(argc, argv);
+    CommandLineParser commandLine(_arguments);
 
-    console = commandLine.optionExist(PARAMETER_NAME_CONSOLE);
+    _console = commandLine.optionExist(PARAMETER_NAME_CONSOLE);
 
     if (commandLine.optionExist(PARAMETER_NAME_LOG))
     {
         const auto logLevelString = commandLine.optionValue(PARAMETER_NAME_LOG);
         if (!logLevelString.empty() && logLevelString.find_first_not_of("0123456789") == std::string::npos)
-            level = std::stoi(logLevelString);
+           _logLevel = std::stoi(logLevelString);
     }
 
     if (commandLine.optionExist(PARAMETER_NAME_INSTALL))
     {
-        if (argc != 2)
+        if (_arguments.size() != 2)
             return false;
 
-        install = true;
+        _install = true;
     }
     else if (commandLine.optionExist(PARAMETER_NAME_UNINSTALL))
     {
-        if (argc != 2)
+        if (_arguments.size() != 2)
             return false;
 
-        uninstall = true;
+        _uninstall = true;
     }
 
     return true;
 }
 
-
 template<class ThreadMainType>
-int AppMain(int argc,
-            char *argv[],
-            const std::string &description = std::string(),
-            const std::string &serviceName = std::string())
+void DaemonApplication<ThreadMainType>::signalHandler(int signal)
 {
-    // (void)argc;
-#ifdef linux
-    setErrorSignalHandler(argv[0]);
-#endif
+    ThreadBase::writeLog(Message15, signal);
 
+    if (!_instance)
+        return;
 
-#ifdef WIN
-    constexpr char MESSAGE_START_HINT[] = "Нажмите Enter для завершения программы...\r\n";
-    setlocale(LC_ALL, "russian_Russia.1251");
-    auto line = StdStringUtils::ConvertUTF8ToCP1251(MESSAGE_START_HINT);
-#else
-    setlocale(LC_ALL, "ru_RU.UTF-8");
-    setlocale(LC_NUMERIC, "C");
+    _instance->_isRunning = false;
+    _instance->exitMainLoop();
 
-    std::string line = "Нажмите Enter или Ctrl+C для завершения программы...\r\n";
-#endif
-    parseArguments(argc, argv, console, logLlevel, install, uninstall);
-
-    if (console)
-        std::cout << line;
-
-#ifdef QT_SUPPORT
-    QCoreApplication a(argc, argv);
-
-    QtConcurrent::run(readLine);
-#endif
-
-    startLogSubsystem(argv[0], nullptr, console, logLlevel);
-
-    auto binaryFileName = FileUtils::extractFileName(argv[0]);
-    auto binaryPath = FileUtils::extractFilePath(FileUtils::absolutePath(argv[0]));
-
-    auto localServiceName = (serviceName.empty()) ? binaryFileName : serviceName;
-
-    chdir(binaryPath.c_str());
-
-    if (install)
+    if (_instance->_console)
     {
-        auto registered = DaemonUtils::daemonRegister(localServiceName,
-                                                      FileUtils::absolutePath(argv[0]),
-                                                      description);
-        return (registered) ? 0 : 1;
+        int fd = open("/dev/null", O_WRONLY);
+        dup2(fd, 0);
+        ::close(fd);
+        std::cout << std::endl;
     }
-    else if (uninstall)
-    {
-        auto unregistered = DaemonUtils::daemonUnregister(localServiceName);
-        return (unregistered) ? 0 : 2;
-    }
-
-    if (DaemonUtils::daemonIsRunning(localServiceName))
-    {
-        ThreadBase::writeLog(Message16, serviceName.c_str());
-    }
-
-    DaemonUtils::daemonSetRunning(serviceName, true);
-
-    auto threadMain = new ThreadMainType(binaryFileName, description);
-    threadMain->start();
-
-#ifdef QT_SUPPORT
-    a.exec();
-#else
-    if (console)
-    {
-        readLine();
-    }
-    else
-    {
-#ifdef linux
-        setTerminateSignalHandlers();
-#endif
-        while (isRunning)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
-    }
-#endif
-
-    threadMain->postTerminateEvent();
-    while (!threadMain->isFinished())
-    {
-        DateTimeUtils::sleepMilliseconds(100);
-    }
-
-    DaemonUtils::daemonSetRunning(serviceName, false);
-
-    stopLogSubsystem();
-
-    return 0;
 }
+

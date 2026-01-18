@@ -20,7 +20,7 @@ bool startLogSubsystem(const std::string &pathToBin,
         return true;
 
     auto thread = new ThreadLog(pathToBin, consumer, console, level);
-    thread->start();
+    thread->startThread();
 
     return true;
 }
@@ -32,7 +32,7 @@ void stopLogSubsystem()
         return;
 
     logThread->postTerminateEvent();
-    while (!logThread->isFinished())
+    while (!logThread->isThreadFinished())
     {
         DateTimeUtils::sleepMilliseconds(100);
     }

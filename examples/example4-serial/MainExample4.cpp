@@ -9,11 +9,6 @@
 #include "ThreadPing.h"
 #include "ThreadPong.h"
 
-#ifdef QT_SUPPORT
-#include <QtConcurrent/QtConcurrent>
-#include <QCoreApplication>
-#endif
-
 #include <iostream>
 
 using namespace Threader::Threads;
@@ -22,9 +17,6 @@ void readLine()
 {
     std::string ch;
     std::getline(std::cin, ch);
-#ifdef QT_SUPPORT
-    QCoreApplication::exit(0);
-#endif
 }
 
 constexpr char MESSAGE_START_HINT[] = "Нажмите Enter для завершения программы...\r\n";
@@ -44,12 +36,6 @@ int main(int argc, char *argv[])
     auto line = MESSAGE_START_HINT;
 #endif
 
-#ifdef QT_SUPPORT
-    QCoreApplication a(argc, argv);
-
-    QtConcurrent::run(readLine);
-#endif
-
     std::cout << line;
 
     startLogSubsystem(argv[0], nullptr, true);
@@ -61,7 +47,7 @@ int main(int argc, char *argv[])
                 "/dev/pts/1"
             #endif
                 );
-    threadPing->start();
+    threadPing->startThread();
 
     auto threadPong = new ThreadPong(
             #ifdef WIN32
@@ -70,23 +56,19 @@ int main(int argc, char *argv[])
                 "/dev/pts/0"
             #endif
                 );
-    threadPong->start();
+    threadPong->startThread();
 
-#ifdef QT_SUPPORT
-    a.exec();
-#else
     readLine();
-#endif
 
     threadPing->postTerminateEvent();
     threadPong->postTerminateEvent();
 
-    while (!threadPing->isFinished())
+    while (!threadPing->isThreadFinished())
     {
         DateTimeUtils::sleepMilliseconds(100);
     }
 
-    while (!threadPong->isFinished())
+    while (!threadPong->isThreadFinished())
     {
         DateTimeUtils::sleepMilliseconds(100);
     }

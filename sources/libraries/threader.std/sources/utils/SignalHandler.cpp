@@ -28,7 +28,7 @@ void handleDeathSignal(int signum);
 
 static std::string threadInfo;
 
-void setThreadInfo(const std::string & info)
+void setThreadInfo(const std::string &info)
 {
     threadInfo = info;
 }

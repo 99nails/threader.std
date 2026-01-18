@@ -68,10 +68,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${
 
 set(LINK_LIBRARIES -lpthread -ludev)
 
-if (QT_SUPPORT)
-    set(LINK_LIBRARIES ${LINK_LIBRARIES} Qt5::Core)
-endif()
-
 target_link_libraries(${PROJECT_NAME}
     ${LINK_LIBRARIES}
 )

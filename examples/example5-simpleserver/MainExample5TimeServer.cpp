@@ -3,5 +3,6 @@
 
 int main(int argc, char *argv[])
 {
-    return AppMain<ThreadMainTimeServer>(argc, argv, "Сервер времени GPS");
+    DaemonApplication<ThreadMainTimeServer> application(argc, argv, "Сервер времени GPS");
+    return application.run();
 }

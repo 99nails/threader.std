@@ -13,7 +13,7 @@ ThreadTimer::ThreadTimer(MessageConsumer *parent,
                          const std::string &timerName,
                          const uint32_t &delayMsecs,
                          const bool multiShot)
-    : ThreadBase(parent, THREAD_NAME_PREFFIX + timerName, ThreadRunMode::Polling)
+    : ThreadBase(parent, THREAD_NAME_PREFFIX + timerName)
     , _timerName(timerName)
     , _delay(delayMsecs)
     , _multiShot(multiShot)

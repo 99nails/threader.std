@@ -1,10 +1,13 @@
 #pragma once
 
+#include <functional>
 #include <mutex>
 #include <thread>
 
 namespace Threader::Utils
 {
+
+using ThreadFunction = std::function<void()>;
 
 class StdThreadWrapper
 {
@@ -12,22 +15,22 @@ public:
     StdThreadWrapper();
     virtual ~StdThreadWrapper();
 
-    bool wasStarted() const;
-    bool isRunning() const;
-    bool isTerminated() const;
-    bool isFinished() const;
+    virtual bool wasStarted() const;
+    virtual bool isThreadRunning() const;
+    virtual bool isThreadTerminated() const;
+    virtual bool isThreadFinished() const;
 
-    void start();
-    void stop();
-    void terminateThread();
+    virtual void startThread();
+    virtual void terminateThread();
 
 protected:
-    void setIsRunning(const bool isRunning);
+    virtual void setIsRunning(const bool isRunning);
 
-    virtual void run() = 0;
+    virtual void execute() = 0;
 private:
     std::thread *_thread = nullptr;
 
+    bool _wasRunning;
     bool _isRunning;
     std::mutex *_mutexIsRunning;
 

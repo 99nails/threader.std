@@ -63,7 +63,7 @@ void ThreadListenConnections::onConnectionRequest(PollerListenSocketConnection *
                                                      ipAddress,
                                                      sender->port(),
                                                      socket);
-            thread->start();
+            thread->startThread();
             auto message = std::make_shared<MessageThread>(MESSAGE_NAME_THREAD, thread);
             parentThread()->postMessage(message);
         }

@@ -3,5 +3,6 @@
 
 int main(int argc, char *argv[])
 {
-    return AppMain<ThreadMainGps>(argc, argv, "Эмуляция GPS");
+    DaemonApplication<ThreadMainGps> application(argc, argv, "Эмуляция GPS");
+    return application.run();
 }

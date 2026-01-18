@@ -2,7 +2,8 @@
 
 #include <ThreadUdevMonitor.h>
 
-ThreadMainWaitDevice::ThreadMainWaitDevice(const std::string &applicationName, const std::string &description)
+ThreadMainWaitDevice::ThreadMainWaitDevice(const std::string &applicationName,
+                                           const std::string &description)
     : ThreadMain(nullptr,
                  applicationName,
                  description,

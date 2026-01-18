@@ -10,7 +10,7 @@ ThreadPing::ThreadPing()
 
 void ThreadPing::setThreadPong(ThreadBase *threadPong)
 {
-    if (isRunning())
+    if (isThreadRunning())
         return;
 
     _threadPong = threadPong;

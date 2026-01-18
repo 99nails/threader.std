@@ -4,7 +4,8 @@ namespace Threader::Utils
 {
 
 StdThreadWrapper::StdThreadWrapper()
-    : _isRunning(false)
+    : _wasRunning(false)
+    , _isRunning(false)
     , _mutexIsRunning(new std::mutex())
     , _isTerminated(false)
     , _mutexIsTerminated(new std::mutex())
@@ -27,24 +28,24 @@ bool StdThreadWrapper::wasStarted() const
     return _thread;
 }
 
-bool StdThreadWrapper::isRunning() const
+bool StdThreadWrapper::isThreadRunning() const
 {
     std::lock_guard<std::mutex> lock(*_mutexIsRunning);
     return _isRunning;
 }
 
-bool StdThreadWrapper::isTerminated() const
+bool StdThreadWrapper::isThreadTerminated() const
 {
     std::lock_guard<std::mutex> lock(*_mutexIsTerminated);
     return _isTerminated;
 }
 
-bool StdThreadWrapper::isFinished() const
+bool StdThreadWrapper::isThreadFinished() const
 {
-    return !isRunning() && _thread;
+    return !isThreadRunning() && (_thread || _wasRunning);
 }
 
-void StdThreadWrapper::start()
+void StdThreadWrapper::startThread()
 {
     if (_thread)
         return;
@@ -52,7 +53,7 @@ void StdThreadWrapper::start()
     auto threadFunction = [this](){
         setIsRunning(true);
 
-        run();
+        execute();
 
         setIsRunning(false);
     };
@@ -71,6 +72,8 @@ void StdThreadWrapper::setIsRunning(const bool isRunning)
 {
     std::lock_guard<std::mutex> lock(*_mutexIsRunning);
     _isRunning = isRunning;
+    if (_isRunning)
+        _wasRunning = true;
 }
 
 }

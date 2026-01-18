@@ -8,4 +8,4 @@ void setErrorSignalHandler(const char* arg0);
 
 std::string demangle(const char* name);
 
-
+void setThreadInfo(const std::string &info);

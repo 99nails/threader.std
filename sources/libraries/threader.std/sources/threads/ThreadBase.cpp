@@ -1,4 +1,4 @@
-#include "ThreadBase.h"
+﻿#include "ThreadBase.h"
 
 #include "ListThreads.h"
 #include "LogMessagesTemplates.h"
@@ -40,14 +40,8 @@ ThreadBase *ThreadBase::_logThread = nullptr;
 int ThreadBase::_logLevel = 9;
 
 ThreadBase::ThreadBase(MessageConsumer *parent,
-                       const std::string &threadName,
-                       const ThreadRunMode &threadRunMode)
-    :
-      #ifdef QT_SUPPORT
-      QThread(nullptr)
-      #else
-      StdThreadWrapper()
-    #endif
+                       const std::string &threadName)
+    : StdThreadWrapper()
     , MessageConsumer()
     , _parentThread(parent)
     , _threadName(threadName)
@@ -59,21 +53,15 @@ ThreadBase::ThreadBase(MessageConsumer *parent,
     , _nextAccumulateStatisticTickCount(DateTimeUtils::getTickCount())
     , _nextCallIdle(0)
 
-    , _threadRunMode(threadRunMode)
-    #ifdef QT_SUPPORT
-    , _eventLoop(nullptr)
-    , _timerEventLoop(nullptr)
-    , _isTerminated(false)
-    #endif
-    , _mutex(new std::mutex())
+    , _mutexTimeout(new std::mutex())
 {
     _polling.setThreadName(threadName);
 }
 
 ThreadBase::~ThreadBase()
 {
-    if (_mutex)
-        delete _mutex;
+    if (_mutexTimeout)
+        delete _mutexTimeout;
 }
 
 MessageConsumer *ThreadBase::parentThread() const
@@ -97,17 +85,7 @@ void ThreadBase::setThreadName(const std::string &threadName)
     _polling.setThreadName(threadName);
 }
 
-ThreadBase::ThreadRunMode ThreadBase::threadRunMode() const { return _threadRunMode; }
-
-void ThreadBase::setThreadRunMode(const ThreadRunMode &threadRunMode)
-{
-    if (isRunning())
-        return;
-
-    _threadRunMode = threadRunMode;
-}
-
- std::string ThreadBase::threadClassName()
+std::string ThreadBase::threadClassName()
  {
 
      return demangle(typeid(*this).name());
@@ -159,48 +137,14 @@ void ThreadBase::initializeThread()
 
     _thisThreadId = 0;
 
-    switch (_threadRunMode) {
-        case ThreadRunMode::Polling:
-            _pollerThread.setSignalHandler(this);
-            _polling.registerPoller(&_pollerThread);
-            break;
-#ifdef QT_SUPPORT
-        case ThreadRunMode::EventLoop:
-             _eventLoop = new QEventLoop();
-             _eventLoop->moveToThread(this);
-
-             _timerEventLoop = new QTimer();
-             _timerEventLoop->moveToThread(this);
-             _timerEventLoop->setInterval(static_cast<int>(timeout()));
-             connect(_timerEventLoop, &QTimer::timeout,
-                     this, &ThreadBase::slotTimerEventLoop, Qt::AutoConnection);
-             _timerEventLoop->start();
-
-             connect(this, &ThreadBase::signalTerminate, this, &ThreadBase::slotTerminateThread,
-                     Qt::AutoConnection);
-
-             connect(this, &ThreadBase::signalTerminateChildThreads,
-                     this, &ThreadBase::slotTerminateChildThreads, Qt::AutoConnection);
-
-             connect(this, &ThreadBase::signalWakeUp,
-                     this, &ThreadBase::slotWakeUpThread, Qt::AutoConnection);
-        break;
-#endif
-    }
+    _pollerThread.setSignalHandler(this);
+    _polling.registerPoller(&_pollerThread);
 }
 
 void ThreadBase::finalizeThread()
 {
     if (ThreadsStaticticCollector::instance())
         ThreadsStaticticCollector::instance()->unregisterThread(this);
-
-#ifdef QT_SUPPORT
-     if (_eventLoop)
-         delete _eventLoop;
-
-     if (_timerEventLoop)
-         delete _timerEventLoop;
-#endif
 }
 
 void ThreadBase::onThreadStarted() {}
@@ -217,20 +161,27 @@ void ThreadBase::onAfterWaitEvents()
 {
     destroyTerminatedChildThreads(false);
 
-#ifdef QT_SUPPORT
-    if (ThreadRunMode::EventLoop == _threadRunMode)
-        onIdle();
-#endif
-
     accumulateStatistic();
 }
 
-void ThreadBase::run()
+void ThreadBase::runEventLoop()
+{
+    while (!isThreadTerminated())
+    {
+        onBeforeWaitEvents();
+
+        waitEvents();
+
+        onAfterWaitEvents();
+    }
+}
+
+void ThreadBase::execute()
 {
     initializeThread();
 
     _startedTickCount = DateTimeUtils::getTickCount();
-    _startedUtc       = DateTimeUtils::msecsSinceEpochLocal();
+    _startedUtc = DateTimeUtils::msecsSinceEpochLocal();
 
     _thisThreadId = threadId();
 
@@ -240,23 +191,7 @@ void ThreadBase::run()
 
     startChildThreads();
 
-    switch (_threadRunMode) {
-    case ThreadRunMode::Polling:
-        while (!isTerminated())
-        {
-            onBeforeWaitEvents();
-
-            waitEvents();
-
-            onAfterWaitEvents();
-        }
-        break;
-#ifdef QT_SUPPORT
-    case ThreadRunMode::EventLoop:
-        _eventLoop->exec();
-        break;
-#endif
-    }
+    runEventLoop();
 
     onThreadFinishing();
 
@@ -294,7 +229,7 @@ bool ThreadBase::accumulateStatistic()
                               nowTickCount,
                               polling()->waitCount(),
                               queue()->count(),
-                              isTerminated()
+                              isThreadTerminated()
                               );
     return true;
 }
@@ -316,8 +251,8 @@ ThreadBase *ThreadBase::registerAndStartChildThread(ThreadBase *thread,
         return nullptr;
 
     _childThreadsList.push_back(thread);
-    if (!thread->isRunning() && startNow)
-        thread->start();
+    if (!thread->isThreadRunning() && startNow)
+        thread->startThread();
 
     return thread;
 }
@@ -327,10 +262,10 @@ bool ThreadBase::terminateChildThread(ThreadBase *thread)
     if (!thread)
         return false;
 
-    if (thread->isRunning())
+    if (thread->isThreadRunning())
     {
         thread->postTerminateEvent();
-        while (!thread->isFinished()) {
+        while (!thread->isThreadFinished()) {
             processMessages();
             DateTimeUtils::sleepMilliseconds(0);
         }
@@ -373,7 +308,7 @@ void ThreadBase::destroyTerminatedChildThreads(bool rightNow)
         auto iterator = _childThreadsList.begin();
         while (iterator != _childThreadsList.end())
         {
-            if ((*iterator)->isFinished())
+            if ((*iterator)->isThreadFinished())
             {
                 onDestroyTerminatedChildThread(*iterator);
                 iterator = _childThreadsList.erase(iterator);
@@ -394,7 +329,7 @@ void ThreadBase::waitEvents()
 
 void ThreadBase::waitEvents(uint32_t timeout)
 {
-    if (isTerminated())
+    if (isThreadTerminated())
         return;
 
     // ожидание голосования
@@ -571,40 +506,18 @@ void ThreadBase::signalProcess(Signal signal)
 {
     switch (signal) {
     case (Signal)ThreadSignals::SignalTerminate:
-        slotTerminateThread();
+        terminateThread();
         break;
     case (Signal)ThreadSignals::SignalWakeUp:
-        slotWakeUpThread();
+        processMessages();
         break;
     case (Signal)ThreadSignals::SignalTerminateChildThreads:
-        slotTerminateChildThreads();
+        destroyTerminatedChildThreads(true);
         break;
     default:
         break;
     }
 }
-
-#ifdef QT_SUPPORT
-QEventLoop *ThreadBase::eventLoop() const
-{
-    return _eventLoop;
-}
-
-bool ThreadBase::isTerminated()
-{
-    return _isTerminated;
-}
-
-void ThreadBase::terminateThread()
-{
-    _isTerminated = true;
-}
-
-bool ThreadBase::wasStarted()
-{
-    return _thisThreadId > 0;
-}
-#endif
 
 ThreadBase * ThreadBase::startThreadTimer(const std::string &timerName,
                                          const int &delayMsecs,
@@ -653,103 +566,38 @@ int ThreadBase::stopAllTimers()
 
 void ThreadBase::signalEventWakeUp()
 {
-    if (this->isFinished())
+    if (this->isThreadFinished())
         return;
 
-    switch (_threadRunMode) {
-        case ThreadRunMode::Polling:
-            _pollerThread.sendSignalWakeUp();
-            break;
-#ifdef QT_SUPPORT
-        case ThreadRunMode::EventLoop:
-             emit signalWakeUp();
-            break;
-#endif
-    }
+    _pollerThread.sendSignalWakeUp();
 }
 
 void ThreadBase::signalEventTerminate()
 {
-    if (isFinished())
+    if (isThreadFinished())
         return;
 
-    switch (_threadRunMode) {
-        case ThreadRunMode::Polling:
-        _pollerThread.sendSignalTerminate();
-            break;
-#ifdef QT_SUPPORT
-        case ThreadRunMode::EventLoop:
-             emit signalTerminate();
-            break;
-#endif
-    }
+    _pollerThread.sendSignalTerminate();
 }
 
 void ThreadBase::signalEventChildThreadTerminated()
 {
-    if (isFinished())
+    if (isThreadFinished())
         return;
 
-    switch (_threadRunMode) {
-        case ThreadRunMode::Polling:
-        _pollerThread.sendSignalTerminateChildThreads();
-            break;
-#ifdef QT_SUPPORT
-        case ThreadRunMode::EventLoop:
-             emit signalTerminateChildThreads();
-            break;
-#endif
-    }
+    _pollerThread.sendSignalTerminateChildThreads();
 }
 
 uint32_t ThreadBase::timeout() const
 {
-    std::lock_guard<std::mutex> lock(*_mutex);
+    std::lock_guard<std::mutex> lock(*_mutexTimeout);
     return _timeout;
 }
 
 void ThreadBase::setTimeout(uint32_t timeout)
 {
-    std::lock_guard<std::mutex> lock(*_mutex);
+    std::lock_guard<std::mutex> lock(*_mutexTimeout);
     _timeout = timeout;
-}
-
-void ThreadBase::slotTerminateThread()
-{
-#ifdef QT_SUPPORT
-     if (ThreadRunMode::EventLoop == _threadRunMode && _eventLoop)
-     {
-         _eventLoop->exit();
-     }
-     else
-     {
-         terminateThread();
-     }
-#else
-     terminateThread();
-#endif
-
-}
-
-void ThreadBase::slotTerminateChildThreads()
-{
-    destroyTerminatedChildThreads(true);
-}
-
-void ThreadBase::slotWakeUpThread()
-{
-#ifdef QT_SUPPORT
-    if (threadRunMode() == ThreadRunMode::EventLoop)
-    {
-        DateTimeUtils::sleepMilliseconds(0);
-    }
-#endif
-    processMessages();
-}
-
-void ThreadBase::slotTimerEventLoop()
-{
-    onAfterWaitEvents();
 }
 
 }

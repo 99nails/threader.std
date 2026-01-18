@@ -7,18 +7,13 @@ using namespace Threader::Threads;
 
 int main(int argc, char *argv[])
 {
-#ifdef QT_SUPPORT
-    // this example doesn't works with QT_SUPPORT option
-    return 1;
-#endif
-
     (void)argc;
     (void)argv;
 
     std::cout << "Starting thread..." << std::endl;
 
     auto thread = new ThreadTest();
-    thread->start();
+    thread->startThread();
 
     for (int i = 0; i < 8192; i++)
     {
@@ -30,7 +25,7 @@ int main(int argc, char *argv[])
     }
 
     thread->terminateThread();
-    while (!thread->isFinished())
+    while (!thread->isThreadFinished())
     {
         DateTimeUtils::sleepMilliseconds(100);
     }
