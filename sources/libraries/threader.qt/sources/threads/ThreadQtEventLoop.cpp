@@ -16,6 +16,8 @@ ThreadQtEventLoop::ThreadQtEventLoop(MessageConsumer *parent,
 void ThreadQtEventLoop::startThread()
 {
     QThread::start();
+    // такая странная хуйня
+    this->moveToThread(this);
 }
 
 void ThreadQtEventLoop::initializeThread()

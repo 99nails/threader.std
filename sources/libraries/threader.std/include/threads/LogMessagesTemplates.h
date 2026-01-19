@@ -64,7 +64,7 @@ MESSAGE_TEMPLATE(22, 0, MessageType::Error,
 #define LOG_SUBSYSTEM "Error"
 
 
-MESSAGE_TEMPLATE(99999, 0, MessageType::Error, "%s: %d - %s");
+MESSAGE_TEMPLATE(99999, 0, MessageType::Error, "%s: %d - %s")
 
 
 #undef LOG_SUBSYSTEM

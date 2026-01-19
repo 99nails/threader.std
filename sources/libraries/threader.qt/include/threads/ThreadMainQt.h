@@ -18,6 +18,7 @@ namespace Threader::Threads::QtEventLoop
 
 class ThreadMainQt : public ThreadQtEventLoop
 {
+    Q_OBJECT
 public:
     explicit ThreadMainQt(MessageConsumer *parent = nullptr,
                           const std::string &applicationBinaryName = std::string(),

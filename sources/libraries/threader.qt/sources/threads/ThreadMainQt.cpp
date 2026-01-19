@@ -3,7 +3,10 @@
 namespace Threader::Threads::QtEventLoop
 {
 
-ThreadMainQt::ThreadMainQt(MessageConsumer *parent, const std::string &applicationBinaryName, const std::string &applicationFriendlyName, const std::string &threadName)
+ThreadMainQt::ThreadMainQt(MessageConsumer *parent,
+                           const std::string &applicationBinaryName,
+                           const std::string &applicationFriendlyName,
+                           const std::string &threadName)
     : ThreadQtEventLoop(parent,
                         (threadName.empty()) ? "Thread.Main" : threadName)
     , _applicationBinaryName(applicationBinaryName)
