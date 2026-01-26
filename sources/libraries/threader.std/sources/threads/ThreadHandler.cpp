@@ -87,16 +87,6 @@ void ThreadHandler::setHandler(HandlerBase *handler)
         if (!_handler->consumer())
                 _handler->setConsumer(this);
 
-#ifdef USE_QT
-        connect(_handler, &HandlerBase::signalOnConnectionStateChanged,
-                this, &ThreadHandler::slotOnConnectionStateChanged, Qt::DirectConnection);
-        connect(_handler, &HandlerBase::signalOnError,
-                this, &ThreadHandler::slotOnError, Qt::DirectConnection);
-        connect(_handler, &HandlerBase::signalOnReadyRead,
-                this, &ThreadHandler::slotOnReadyToRead, Qt::DirectConnection);
-        connect(_handler, &HandlerBase::signalOnReadyWrite,
-                this, &ThreadHandler::slotOnReadyToWrite, Qt::DirectConnection);
-#endif
         polling()->registerPoller(_handler);
     }
 }

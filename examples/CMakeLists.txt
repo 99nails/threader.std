@@ -160,3 +160,20 @@ target_link_libraries(example7-qteventloop
   threader-qt
   Qt5::Core
 )
+
+#example8-udpsender
+add_executable(example8-udpsender
+    example8-udpfiletranser/Example8Common.h
+    example8-udpfiletranser/MainExample8-UdpSender.cpp
+    example8-udpfiletranser/ThreadMainUdpSender.cpp example8-udpfiletranser/ThreadMainUdpSender.h
+    example8-udpfiletranser/ThreadUdpReceiver.cpp example8-udpfiletranser/ThreadUdpReceiver.h
+)
+
+target_compile_features(example8-udpsender PUBLIC cxx_std_17)
+
+target_link_libraries(example8-udpsender
+  pthread
+  threader-std
+#  threader-qt
+#  Qt5::Core
+)

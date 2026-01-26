@@ -3,6 +3,22 @@
 START_LOCATION=$(pwd)
 echo "Started from: ${START_LOCATION}"
 
+buildType="-DCMAKE_BUILD_TYPE=Debug"
+
+for parameter in "$@"
+do
+    if [[ "$parameter" == "release" ]]; then
+        echo "Using RELEASE configuration!"
+        buildType="-DCMAKE_BUILD_TYPE=Release"
+    fi
+    if [[ "$parameter" == "debug" ]]; then
+        echo "Using DEBUG configuration!"
+        buildType="-DCMAKE_BUILD_TYPE=Debug"
+    fi
+done
+
+#exit
+
 function terminate() {
     echo "Returning to start location.................................................................."
     cd ${START_LOCATION}
@@ -18,7 +34,7 @@ echo "Change folder to ./build..................................................
 cd build
 
 echo "Running cmake................................................................................"
-cmake .. || terminate
+cmake .. "$buildType" || terminate
 
 echo "Making threader.............................................................................."
 make -j`nproc` || terminate

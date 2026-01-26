@@ -34,7 +34,8 @@ HandlerUdpSocket::HandlerUdpSocket(HandlerDataConsumer *consumer,
     _remoteAddress = SocketUtils::ipAddressStringToAddress(_ipAddress, port);
 
     _socketType = (_remoteAddress.sin_addr.s_addr == INADDR_ANY)
-            ? UdpSocketType::Listener : UdpSocketType::Sender;
+            ? UdpSocketType::Receiver
+            : UdpSocketType::Sender;
 
     if ( UdpSocketType::Sender == _socketType)
         _localAddress.sin_port = 0;
@@ -63,6 +64,7 @@ UdpSocketType HandlerUdpSocket::socketType() const
 bool HandlerUdpSocket::open()
 {
     int errorCode;
+
     auto descriptor = SocketUtils::createUdpSocket(_port,
                                                    _localAddress,
                                                    errorCode);

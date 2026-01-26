@@ -9,8 +9,6 @@ namespace Threader::Utils {
 class FileUtils
 {
 public:
-    static char DELIMITER;
-
     static Descriptor fileOpenOrCreate(const std::string &fileName);
     static Descriptor fileCreate(const std::string &fileName);
     static void fileClose(Descriptor descriptor);
@@ -28,6 +26,15 @@ public:
     static std::string extractFilePath(const std::string &fileName);
     static std::string extractFileName(const std::string &fileName);
     static std::string extractFileExtension(const std::string &fileName);
+
+    static constexpr char DELIMITER =
+#ifdef linux
+        '/';
+#endif
+#ifdef WIN32
+        '\';'
+#endif
+
 };
 
 }

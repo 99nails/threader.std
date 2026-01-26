@@ -35,6 +35,6 @@ enum class TcpSocketType
 
 enum class UdpSocketType
 {
-    Listener,
+    Receiver,
     Sender
 };

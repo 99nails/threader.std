@@ -2,8 +2,6 @@
 
 #include <string.h>
 
-#include <iostream>
-
 namespace Threader::Utils {
 
 MemoryBlock::MemoryBlock()
@@ -14,14 +12,18 @@ MemoryBlock::MemoryBlock()
 }
 
 MemoryBlock::MemoryBlock(size_t capacity)
-    : _size(0)
+    : _capacity(0)
+    , _size(0)
+    , _data(nullptr)
 {
     clear(true);
     (void)capacity;
 }
 
 MemoryBlock::MemoryBlock(const void *data, const size_t size)
-    : _size(size)
+    : _capacity(0)
+    , _size(size)
+    , _data(nullptr)
 {
     setCapacity(size);
     if (_data)
@@ -29,6 +31,9 @@ MemoryBlock::MemoryBlock(const void *data, const size_t size)
 }
 
 MemoryBlock::MemoryBlock(MemoryBlock &other)
+    : _capacity(0)
+    , _size(0)
+    , _data(nullptr)
 {
     append(other.data(), other.size());
 }

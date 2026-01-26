@@ -16,15 +16,6 @@
 
 namespace Threader::Utils {
 
-char FileUtils::DELIMITER =
-#ifdef linux
-        '/';
-#endif
-#ifdef WIN32
-        '\';'
-#endif
-
-
 Descriptor FileUtils::fileOpenOrCreate(const std::string &fileName)
 {
 #ifdef linux

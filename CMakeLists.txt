@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
 set(VER_MAJ 0)
-set(VER_MIN 0)
-set(VER_PAT 5)
+set(VER_MIN 1)
+set(VER_PAT 0)
 set(VER_BLD 0)
 
 set(VERSION ${VER_MAJ}.${VER_MIN}.${VER_PAT})
