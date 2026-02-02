@@ -1,13 +1,24 @@
 #include "SocketUtils.h"
 
+#include <ifaddrs.h>
+#include <string.h>
+
 namespace Threader {
 
 namespace Utils {
 
-#include <string.h>
 
 bool SocketUtils::_isSocketsInitialized = false;
 
+
+InterfaceInfo::InterfaceInfo(std::string interfaceName_,
+                             sa_family_t addressFamily_,
+                             std::string ipAddress_)
+    : interfaceName(interfaceName_)
+    , addressFamily(addressFamily_)
+    , ipAddress(ipAddress_)
+{
+}
 
 bool SocketUtils::initializeSockets()
 {
@@ -111,6 +122,80 @@ std::string SocketUtils::hostToIpAddressString(const std::string &host)
 #endif
     return result;
 }
+
+#ifdef linux
+
+InterfaceInfoList SocketUtils::interfacesInfo(const std::string &adapterName, const ProtocolFamilySet protocolFamilySet)
+{
+    struct ifaddrs* interfaceAdressesList = nullptr;
+    InterfaceInfoList result;
+
+    auto r = getifaddrs(&interfaceAdressesList);
+    if (r != 0)
+        return result;
+
+    for(struct ifaddrs* interfaceAddress = interfaceAdressesList;
+        interfaceAddress != nullptr;
+        interfaceAddress = interfaceAddress->ifa_next)
+    {
+        std::string ipaddress_human_readable_form;
+        std::string interfaceName = std::string(interfaceAddress->ifa_name);
+
+        if (interfaceName == adapterName || adapterName.empty())
+        {
+            if (!interfaceAddress->ifa_addr)
+                continue;
+
+            sa_family_t addressFamily = interfaceAddress->ifa_addr->sa_family;
+
+            bool processEntry = protocolFamilySet.empty()
+                    || protocolFamilySet.count(addressFamily) > 0;
+            if (!processEntry)
+                continue;
+
+            switch (addressFamily) {
+            case AF_INET:
+            {
+                char buffer[INET_ADDRSTRLEN] = {0, };
+                inet_ntop(addressFamily,
+                          &((struct sockaddr_in*)(interfaceAddress->ifa_addr))->sin_addr,
+                          buffer,
+                          INET_ADDRSTRLEN);
+                result.push_back(InterfaceInfo(interfaceName, addressFamily, std::string(buffer)));
+                break;
+            }
+            case AF_INET6:
+            {
+                char buffer[INET6_ADDRSTRLEN] = {0, };
+                inet_ntop(addressFamily,
+                          &((struct sockaddr_in6*)(interfaceAddress->ifa_addr))->sin6_addr,
+                          buffer,
+                          INET6_ADDRSTRLEN);
+
+                result.push_back(InterfaceInfo(interfaceName, addressFamily, std::string(buffer)));
+                break;
+            }
+            default:
+                break;
+            }
+        }
+    }
+
+    freeifaddrs(interfaceAdressesList);
+
+    return result;
+
+}
+
+InterfaceInfo SocketUtils::interfaceInfo(const std::string &adapterName, const uint8_t protocolFamily)
+{
+    auto interfaces = interfacesInfo(adapterName, {protocolFamily});
+    if (interfaces.empty())
+        return InterfaceInfo();
+    return interfaces.front();
+}
+
+#endif
 
 int SocketUtils::lastError()
 {

@@ -28,39 +28,43 @@ void ThreadPong::onThreadFinished()
     writeLog(Message202);
 }
 
-void ThreadPong::onConnecting()
+void ThreadPong::onConnecting(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message210, handler()->deviceName().c_str());
+    writeLog(Message210, handler->deviceName().c_str());
 }
 
-void ThreadPong::onConnected()
+void ThreadPong::onConnected(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message211, handler()->deviceName().c_str());
+    writeLog(Message211, handler->deviceName().c_str());
 }
 
-void ThreadPong::onDisconnected()
+void ThreadPong::onDisconnected(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message213, handler()->deviceName().c_str());
+    writeLog(Message213, handler->deviceName().c_str());
 }
 
-void ThreadPong::onReadData(const void *, const int &count)
+void ThreadPong::onReadData(const HandlerBase *handler,
+                            const void *,
+                            const int &count)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message214, count, handler()->deviceName().c_str());
+    writeLog(Message214, count, handler->deviceName().c_str());
 }
 
-void ThreadPong::onWriteData(const void *, const int &count)
+void ThreadPong::onWriteData(const HandlerBase *handler,
+                             const void *,
+                             const int &count)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message215, count, handler()->deviceName().c_str());
+    writeLog(Message215, count, handler->deviceName().c_str());
 }
 
 void ThreadPong::onError(HandlerBase *handler,

@@ -17,11 +17,17 @@ protected:
     void onThreadFinishing() override;
     void onThreadFinished() override;
 
-    void onConnecting() override;
-    void onConnected() override;
-    void onDisconnected() override;
-    void onReadData(const void *, const int &count) override;
-    void onWriteData(const void *, const int &count) override;
+    void onConnecting(const HandlerBase *handler) override;
+    void onConnected(const HandlerBase *handler) override;
+    void onDisconnected(const HandlerBase *handler) override;
+
+    void onReadData(const HandlerBase *handler,
+                    const void *,
+                    const int &count) override;
+    void onWriteData(const HandlerBase *handler,
+                     const void *,
+                     const int &count) override;
+
     void onError(HandlerBase *handler,
                  const int errorCode,
                  const std::string &errorDescription) override;

@@ -11,11 +11,7 @@
 #include "PollingWindows.h"
 #endif
 
-// #include "../threader_global.h"
-
-// #include <QObject>
-// #include <QtGlobal>
-
+#include <list>
 #include <string>
 #include <vector>
 
@@ -28,7 +24,6 @@ class HandlerDataConsumer;
 
 class HandlerBase : public PollerBase
 {
-    // Q_OBJECT
 public:
     /**
      * @brief ConnectionState состояние подключения
@@ -131,16 +126,15 @@ private:
 };
 
 
+using HandlerList = std::list<HandlerBase*>;
 using HandlerVector = std::vector<HandlerBase*>;
-
 
 class HandlerDataConsumer
 {
 public:
     virtual void onConnectionStateChanged(HandlerBase *sender,
                                           const HandlerBase::ConnectionState oldState,
-                                          const HandlerBase::ConnectionState newState)
-        = 0;
+                                          const HandlerBase::ConnectionState newState) = 0;
 
     virtual void onReadyRead(HandlerBase *sender) = 0;
 
@@ -148,8 +142,7 @@ public:
 
     virtual void onError(HandlerBase *sender,
                          const int errorCode,
-                         const std::string &errorDescription = std::string())
-        = 0;
+                         const std::string &errorDescription = std::string()) = 0;
 };
 
 }

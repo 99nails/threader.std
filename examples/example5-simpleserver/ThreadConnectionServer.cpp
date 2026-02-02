@@ -42,27 +42,35 @@ void ThreadConnectionServer::onError(HandlerBase *sender,
              errorCode, errorString(errorCode).c_str());
 }
 
-void ThreadConnectionServer::onConnected()
+void ThreadConnectionServer::onConnected(const HandlerBase *handler)
 {
-    writeLog(Message210, handler()->deviceName().c_str());
+    if (handler)
+        return;
+
+    writeLog(Message210, handler->deviceName().c_str());
 }
 
-void ThreadConnectionServer::onDisconnected()
+void ThreadConnectionServer::onDisconnected(const HandlerBase *handler)
 {
-    writeLog(Message211, handler()->deviceName().c_str());
+    if (!handler)
+        return;
+
+    writeLog(Message211, handler->deviceName().c_str());
+
     terminateThread();
 }
 
-void ThreadConnectionServer::onReadData(const void *,
+void ThreadConnectionServer::onReadData(const HandlerBase *handler, const void *,
                                         const int &count)
 {
-    writeLog(Message212, count, handler()->deviceName().c_str());
+    writeLog(Message212, count, handler->deviceName().c_str());
 }
 
-void ThreadConnectionServer::onWriteData(const void *,
+void ThreadConnectionServer::onWriteData(const HandlerBase *handler,
+                                         const void *,
                                          const int &count)
 {
-    writeLog(Message213, count, handler()->deviceName().c_str());
+    writeLog(Message213, count, handler->deviceName().c_str());
 }
 
 bool ThreadConnectionServer::onPacketReceived(const PacketBase::Ptr &packet)

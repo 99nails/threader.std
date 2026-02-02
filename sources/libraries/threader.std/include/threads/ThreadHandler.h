@@ -56,12 +56,17 @@ protected:
     void terminateChildThreads() override;
     void onBeforeWaitEvents() override;
 
-    virtual void onConnecting(){}
-    virtual void onConnected(){}
-    virtual void onDisconnected(){}
+    virtual void onConnecting(const HandlerBase *handler);
+    virtual void onConnected(const HandlerBase *handler);
+    virtual void onDisconnected(const HandlerBase *handler);
 
-    virtual void onReadData(const void *, const int &){}
-    virtual void onWriteData(const void *, const int &){}
+    virtual void onReadData(const HandlerBase *handler,
+                            const void *data,
+                            const int &size);
+
+    virtual void onWriteData(const HandlerBase *handler,
+                             const void *data,
+                             const int &size);
 
     virtual bool onPacketReceived(const PacketBase::Ptr &) = 0;
     virtual bool onPacketSent(const PacketBase::Ptr &) = 0;

@@ -32,11 +32,6 @@ ThreadHandler::ThreadHandler(MessageConsumer *parent,
     , _openDateTime(DateTimeUtils::msecsSinceEpochLocal())
     , _closedDateTime(_openDateTime)
 {
-#ifdef USE_QT
-    // перенос обработчика в контекст текущего потока
-    handler->moveToThread(this);
-#endif
-
     // установка обработчика
     setHandler(handler);
     // создание буферов
@@ -66,12 +61,17 @@ void ThreadHandler::initializeThread()
     if (!_handler)
         return;
 
-    if (_handler->descriptor() != INVALID_DESCRIPTOR && _handler->connectionState() == HandlerBase::ConnectionState::Disconnected)
+    if (_handler->descriptor() != INVALID_DESCRIPTOR
+            && _handler->connectionState() == HandlerBase::ConnectionState::Disconnected)
+    {
         _handler->setDescriptor(_handler->descriptor());
+    }
     else if (_handler->connectionState() != HandlerBase::ConnectionState::Disconnected)
+    {
         onConnectionStateChanged(_handler,
                                  HandlerBase::ConnectionState::Disconnected,
                                  _handler->connectionState());
+    }
 }
 
 HandlerBase *ThreadHandler::handler()
@@ -139,6 +139,37 @@ void ThreadHandler::onBeforeWaitEvents()
     }
 }
 
+void ThreadHandler::onConnecting(const HandlerBase *handler)
+{
+    (void)handler;
+}
+
+void ThreadHandler::onConnected(const HandlerBase *handler)
+{
+    (void)handler;
+}
+
+void ThreadHandler::onDisconnected(const HandlerBase *handler)
+{
+    (void)handler;
+}
+
+void ThreadHandler::onReadData(const HandlerBase *handler,
+                               const void *data,
+                               const int &size)
+{
+    (void)data;
+    (void)size;
+}
+
+void ThreadHandler::onWriteData(const HandlerBase *handler,
+                                const void *data,
+                                const int &size)
+{
+    (void)data;
+    (void)size;
+}
+
 bool ThreadHandler::sendPacket(const PacketBase::Ptr &packet)
 {
     if (!packet || !_handler->isConnected())
@@ -198,7 +229,7 @@ void ThreadHandler::onConnectionStateChanged(HandlerBase *handler,
         _openDateTime = DateTimeUtils::msecsSinceEpochLocal();
         _connectedTickCount = 0;
 
-        onConnecting();
+        onConnecting(handler);
         break;
     case HandlerBase::ConnectionState::Connected:
         _lastPacketSent = DateTimeUtils::getTickCount();
@@ -211,21 +242,20 @@ void ThreadHandler::onConnectionStateChanged(HandlerBase *handler,
         _openDateTime = DateTimeUtils::msecsSinceEpochLocal();
         _closedDateTime = 0;
 
-        onConnected();
+        onConnected(handler);
         break;
     case HandlerBase::ConnectionState::Disconnected:
         // вызов метода отключения только в случае, если подключение было установлено
         if (HandlerBase::ConnectionState::Connected == oldState)
         {
             _closedDateTime = DateTimeUtils::msecsSinceEpochLocal();
-            onDisconnected();
+            onDisconnected(handler);
         }
 
         _nextTryToConnect = DateTimeUtils::getNextTickCount(_reconnectTimeout);
         _connectedTickCount = 0;
         break;
     }
-    (void)handler;
 }
 
 void ThreadHandler::onReadyRead(HandlerBase *sender)
@@ -254,7 +284,7 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
             // если обмен данными происходит фиксированными порциями как в UDP
             if (sender->portionedIO())
             {
-                onReadData(buffer, readCount);
+                onReadData(sender, buffer, readCount);
             }
             else
             {
@@ -275,7 +305,7 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
     if (!sender->portionedIO())
     {
         // вызов заглушки события приема данных
-        onReadData(_localInputBuffer.data(), _localInputBuffer.size());
+        onReadData(sender, _localInputBuffer.data(), _localInputBuffer.size());
 
         // если фабрика пакетов не определена
         if (!_packetFactory)
@@ -331,7 +361,7 @@ void ThreadHandler::onReadyWrite(HandlerBase *sender)
         _outputTrafficCounter.append(DateTimeUtils::msecsSinceEpochLocal(),
                                      written);
         // вызов заглушки протоколирования отправки
-        onWriteData(_outputBuffer->data(), written);
+        onWriteData(sender, _outputBuffer->data(), written);
 
         // удаление отправленных данных из буфера
         _outputBuffer->remove(0, written);

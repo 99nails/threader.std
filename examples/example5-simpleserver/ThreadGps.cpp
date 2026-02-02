@@ -48,39 +48,45 @@ void ThreadGps::onThreadFinished()
     writeLog(Message402, handler()->deviceName().c_str());
 }
 
-void ThreadGps::onConnecting()
+void ThreadGps::onConnecting(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message410, handler()->deviceName().c_str());
+    writeLog(Message410, handler->deviceName().c_str());
 }
 
-void ThreadGps::onConnected()
+void ThreadGps::onConnected(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message411, handler()->deviceName().c_str());
+    writeLog(Message411, handler->deviceName().c_str());
 }
 
-void ThreadGps::onDisconnected()
+void ThreadGps::onDisconnected(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message413, handler()->deviceName().c_str());
+    writeLog(Message413, handler->deviceName().c_str());
 }
 
-void ThreadGps::onReadData(const void *, const int &count)
+void ThreadGps::onReadData(const HandlerBase *handler,
+                           const void *,
+                           const int &count)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message414, count, handler()->deviceName().c_str());
+
+    writeLog(Message414, count, handler->deviceName().c_str());
 }
 
-void ThreadGps::onWriteData(const void *, const int &count)
+void ThreadGps::onWriteData(const HandlerBase *handler,
+                            const void *,
+                            const int &count)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message415, count, handler()->deviceName().c_str());
+
+    writeLog(Message415, count, handler->deviceName().c_str());
 }
 
 void ThreadGps::onError(HandlerBase *handler,

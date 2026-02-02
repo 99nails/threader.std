@@ -97,7 +97,7 @@ typedef struct DeviceInfo
     PropertyVector properties;
 } DeviceInfo;
 
-using UdevEnumerationCallback = std::function<bool(DeviceInfo)>;
+using UdevEnumerationCallback = std::function<bool(const DeviceInfo &)>;
 
 class UdevEnumerator
 {

@@ -50,43 +50,49 @@ void ThreadGpsEmulator::onThreadFinished()
     writeLog(Message302, handler()->deviceName().c_str());
 }
 
-void ThreadGpsEmulator::onConnecting()
+void ThreadGpsEmulator::onConnecting(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message310, handler()->deviceName().c_str());
+    writeLog(Message310, handler->deviceName().c_str());
 }
 
-void ThreadGpsEmulator::onConnected()
+void ThreadGpsEmulator::onConnected(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message311, handler()->deviceName().c_str());
+    writeLog(Message311, handler->deviceName().c_str());
 
     startThreadTimer(MESSAGE_NAME_TIMER, 2000, true);
 }
 
-void ThreadGpsEmulator::onDisconnected()
+void ThreadGpsEmulator::onDisconnected(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message313, handler()->deviceName().c_str());
+    writeLog(Message313, handler->deviceName().c_str());
 
     stopThreadTimer(MESSAGE_NAME_TIMER);
 }
 
-void ThreadGpsEmulator::onReadData(const void *, const int &count)
+void ThreadGpsEmulator::onReadData(const HandlerBase *handler,
+                                   const void *,
+                                   const int &count)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message314, count, handler()->deviceName().c_str());
+
+    writeLog(Message314, count, handler->deviceName().c_str());
 }
 
-void ThreadGpsEmulator::onWriteData(const void *, const int &count)
+void ThreadGpsEmulator::onWriteData(const HandlerBase *handler,
+                                    const void *,
+                                    const int &count)
 {
-    if (!handler())
+    if (!handler)
         return;
-    writeLog(Message315, count, handler()->deviceName().c_str());
+
+    writeLog(Message315, count, handler->deviceName().c_str());
 }
 
 void ThreadGpsEmulator::onError(HandlerBase *handler,

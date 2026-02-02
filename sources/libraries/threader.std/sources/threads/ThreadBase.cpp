@@ -106,7 +106,10 @@ uint64_t ThreadBase::startedUtc() const
     return _startedUtc;
 }
 
-Polling *ThreadBase::polling() { return &_polling; }
+Polling *ThreadBase::polling()
+{
+    return &_polling;
+}
 
 void ThreadBase::postMessage(const MessageBase::Ptr &message)
 {

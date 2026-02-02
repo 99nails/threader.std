@@ -8,6 +8,7 @@ include_directories(
 )
 
 set(THREADER_SOURCES
+    include/threads/Connection.h sources/threads/Connection.cpp
     include/threads/HandlerBase.h sources/threads/HandlerBase.cpp
     include/threads/HandlerSerialPort.h sources/threads/HandlerSerialPort.cpp
     include/threads/HandlerTcpSocket.h sources/threads/HandlerTcpSocket.cpp
@@ -28,6 +29,7 @@ set(THREADER_SOURCES
     include/threads/PollingPosix.h sources/threads/PollingPosix.cpp
     include/threads/QueueMessages.h sources/threads/QueueMessages.cpp
     include/threads/ThreadBase.h sources/threads/ThreadBase.cpp
+    include/threads/ThreadConnections.h sources/threads/ThreadConnections.cpp
     include/threads/ThreadHandler.h sources/threads/ThreadHandler.cpp
     include/threads/ThreadListenSocketConnection.h sources/threads/ThreadListenSocketConnection.cpp
     include/threads/ThreadLog.h sources/threads/ThreadLog.cpp

@@ -18,9 +18,28 @@
 #include "windows.h"
 #endif
 
+#include <list>
+#include <set>
 #include <string>
 
 namespace Threader::Utils {
+
+typedef struct InterfaceInfo
+{
+    InterfaceInfo(std::string interfaceName_ = std::string(),
+                  sa_family_t addressFamily_ = 0,
+                  std::string ipAddress_ = std::string());
+
+    std::string interfaceName;
+    sa_family_t addressFamily;
+    std::string ipAddress;
+
+} InterfaceInfo;
+
+
+using InterfaceInfoList = std::list<InterfaceInfo>;
+using ProtocolFamilySet = std::set<uint8_t>;
+
 
 class SocketUtils
 {
@@ -36,6 +55,13 @@ public:
                                                 const uint16_t &port);
 
     static std::string hostToIpAddressString(const std::string &host);
+
+#ifdef linux
+    static InterfaceInfoList interfacesInfo(const std::string &adapterName = std::string(),
+                                            const ProtocolFamilySet protocolFamilySet = {});
+    static InterfaceInfo interfaceInfo(const std::string &adapterName,
+                                       const uint8_t protocolFamily);
+#endif
 
     static int lastError();
     static void closeSocket(Descriptor socket);

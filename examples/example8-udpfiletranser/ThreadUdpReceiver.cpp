@@ -54,36 +54,42 @@ void ThreadUdpReceiver::processMessage(const MessageBase::Ptr &)
 {
 }
 
-void ThreadUdpReceiver::onConnecting()
+void ThreadUdpReceiver::onConnecting(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
 
-    writeLog(Message1010, handler()->deviceName().c_str());
+    writeLog(Message1010, handler->deviceName().c_str());
 }
 
-void ThreadUdpReceiver::onConnected()
+void ThreadUdpReceiver::onConnected(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
 
-    writeLog(Message1011, handler()->deviceName().c_str());
+    writeLog(Message1011, handler->deviceName().c_str());
 }
 
-void ThreadUdpReceiver::onDisconnected()
+void ThreadUdpReceiver::onDisconnected(const HandlerBase *handler)
 {
-    if (!handler())
+    if (!handler)
         return;
 
-    writeLog(Message1012, handler()->deviceName().c_str());
+    writeLog(Message1012, handler->deviceName().c_str());
 }
 
-void ThreadUdpReceiver::onReadData(const void *, const int &)
+void ThreadUdpReceiver::onReadData(const HandlerBase *handler,
+                                   const void *,
+                                   const int &)
 {
+    (void)handler;
 }
 
-void ThreadUdpReceiver::onWriteData(const void *, const int &)
+void ThreadUdpReceiver::onWriteData(const HandlerBase *handler,
+                                    const void *,
+                                    const int &)
 {
+    (void)handler;
 }
 
 bool ThreadUdpReceiver::onPacketReceived(const PacketBase::Ptr &)

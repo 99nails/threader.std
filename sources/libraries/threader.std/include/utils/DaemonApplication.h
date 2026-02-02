@@ -158,12 +158,12 @@ bool DaemonApplication<ThreadMainType>::initialize()
 
     chdir(_binaryPath.c_str());
 
-    auto result = signal(SIGINT, DaemonApplication<ThreadMainType>::signalHandler);
-    result = signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler);
-    result = signal(SIGTERM, DaemonApplication<ThreadMainType>::signalHandler);
+    auto result = signal(SIGINT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
+    result &= signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
+    result &= signal(SIGTERM, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     // signal(SIGHUP, handleTerminateSignal);
 
-    return true;
+    return result;
 }
 
 template<class ThreadMainType>
@@ -181,7 +181,7 @@ void DaemonApplication<ThreadMainType>::runMainLoop()
         int result;
         do
         {
-            pollfd fds{.fd = _pipeDescriptors[0], .events = POLLIN};
+            pollfd fds{.fd = _pipeDescriptors[0], .events = POLLIN, .revents = 0};
             result = poll(&fds, 1,  -1);
         }
         while (result < 0 && EINTR == errno);

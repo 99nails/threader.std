@@ -25,11 +25,15 @@ protected:
     void onThreadFinishing() override;
     void onThreadFinished() override;
 
-    void onConnected() override;
-    void onDisconnected() override;
+    void onConnected(const HandlerBase *handler) override;
+    void onDisconnected(const HandlerBase *handler) override;
 
-    void onReadData(const void *, const int &count) override;
-    void onWriteData(const void *, const int &count) override;
+    void onReadData(const HandlerBase *handler,
+                    const void *,
+                    const int &count) override;
+    void onWriteData(const HandlerBase *handler,
+                     const void *,
+                     const int &count) override;
 
     bool onPacketReceived(const PacketBase::Ptr &packet) override;
     bool onPacketSent(const PacketBase::Ptr &packet) override;
