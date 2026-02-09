@@ -66,6 +66,9 @@ public:
     void setNeedsToWrite(const bool value);
 
     bool portionedIO();
+
+    bool operator == (const HandlerBase &handler) const;
+    bool operator != (const HandlerBase &handler) const;
 protected:
     void setPortionedIO(const bool value);
 public:
@@ -132,15 +135,15 @@ using HandlerVector = std::vector<HandlerBase*>;
 class HandlerDataConsumer
 {
 public:
-    virtual void onConnectionStateChanged(HandlerBase *sender,
+    virtual void onConnectionStateChanged(HandlerBase &sender,
                                           const HandlerBase::ConnectionState oldState,
                                           const HandlerBase::ConnectionState newState) = 0;
 
-    virtual void onReadyRead(HandlerBase *sender) = 0;
+    virtual void onReadyRead(HandlerBase &sender) = 0;
 
-    virtual void onReadyWrite(HandlerBase *sender) = 0;
+    virtual void onReadyWrite(HandlerBase &sender) = 0;
 
-    virtual void onError(HandlerBase *sender,
+    virtual void onError(HandlerBase &sender,
                          const int errorCode,
                          const std::string &errorDescription = std::string()) = 0;
 };

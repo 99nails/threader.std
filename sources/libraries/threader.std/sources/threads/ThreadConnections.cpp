@@ -76,11 +76,11 @@ ConnectionList ThreadConnections::connections() const
     return _connections;
 }
 
-void ThreadConnections::onConnectionStateChanged(ConnectionBase *connection,
-                                                     HandlerBase::ConnectionState oldState,
-                                                     HandlerBase::ConnectionState newState)
+void ThreadConnections::onConnectionStateChanged(const ConnectionBase &connection,
+                                                 const HandlerBase::ConnectionState oldState,
+                                                 const HandlerBase::ConnectionState newState)
 {
-    if (!connection || !connection->handler())
+    if (!connection.handler())
         return;
 
     switch (newState) {
@@ -92,48 +92,48 @@ void ThreadConnections::onConnectionStateChanged(ConnectionBase *connection,
         break;
     case HandlerBase::ConnectionState::Disconnected:
         if (HandlerBase::ConnectionState::Connected == oldState)
-        onDisconnected(connection);
+            onDisconnected(connection);
         break;
     }
 }
 
-void ThreadConnections::onError(ConnectionBase *connection,
-                                    const int &errorCode,
-                                    const std::string &errorDescription)
+void ThreadConnections::onError(const ConnectionBase &connection,
+                                const int &errorCode,
+                                const std::string &errorDescription)
 {
-    if (!connection || !connection->handler())
+    if (!connection.handler())
         return;
 
     onError(connection, errorCode, errorDescription);
 }
 
-void ThreadConnections::onReadData(ConnectionBase *connection,
-                                       const char *data,
-                                       const int &size)
+void ThreadConnections::onReadData(const ConnectionBase &connection,
+                                   const char *data,
+                                   const int &size)
 {
-    if (!connection || !connection->handler())
+    if (!connection.handler())
         return;
     onReadData(connection, data, size);
 }
 
-void ThreadConnections::onWriteData(ConnectionBase *connection,
-                                        const char *data,
-                                        const int &size)
+void ThreadConnections::onWriteData(const ConnectionBase &connection,
+                                    const char *data,
+                                    const int &size)
 {
-    if (!connection || !connection->handler())
+    if (!connection.handler())
         return;
 
     onWriteData(connection, data, size);
 }
 
-void ThreadConnections::onPacketReceived(ConnectionBase *connection,
-                                             const PacketBase::Ptr &packet)
+void ThreadConnections::onPacketReceived(const ConnectionBase &connection,
+                                         const PacketBase::Ptr &packet)
 {
     onPacketReceived(connection, packet);
 }
 
-void ThreadConnections::onPacketSent(ConnectionBase *connection,
-                                         const PacketBase::Ptr &packet)
+void ThreadConnections::onPacketSent(const ConnectionBase &connection,
+                                     const PacketBase::Ptr &packet)
 {
     onPacketSent(connection, packet);
 }

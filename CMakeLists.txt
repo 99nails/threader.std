@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 set(VER_MAJ 0)
-set(VER_MIN 1)
+set(VER_MIN 2)
 set(VER_PAT 0)
 set(VER_BLD 0)
 
@@ -27,7 +27,7 @@ string(TOLOWER ${OS_SUFFIX} OS_SUFFIX)
 
 message("Target system name - [" ${OS_SUFFIX} "]")
 message("Version [" ${VERSION4} "]")
-message("Root project path: ${CMAKE_CURRENT_SOURCE_DIR}")
+message("Root project path: [" ${CMAKE_CURRENT_SOURCE_DIR} "]")
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
     set(BUILD_SUFFIX release)

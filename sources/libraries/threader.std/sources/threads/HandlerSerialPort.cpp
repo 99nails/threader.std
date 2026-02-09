@@ -76,7 +76,7 @@ bool HandlerSerialPort::open()
     if (!result)
     {
         if (consumer())
-            consumer()->onError(this, errno);
+            consumer()->onError(*this, errno);
     }
     else
     {

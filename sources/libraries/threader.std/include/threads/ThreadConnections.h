@@ -33,34 +33,36 @@ protected:
     void terminateChildThreads() override;
     void onBeforeWaitEvents() override;
 
-    virtual void onConnecting(ConnectionBase*){}
-    virtual void onConnected(ConnectionBase*){}
-    virtual void onDisconnected(ConnectionBase*){}
+    virtual void onConnecting(const ConnectionBase&){}
+    virtual void onConnected(const ConnectionBase&){}
+    virtual void onDisconnected(const ConnectionBase&){}
 
 private:
     PacketFactoryBase *_factory;
     ConnectionList _connections;
 
 public:
-    void onConnectionStateChanged(Threader::Threads::ConnectionBase *connection,
-                                      HandlerBase::ConnectionState oldState,
-                                      HandlerBase::ConnectionState newState) override;
+    void onConnectionStateChanged(const ConnectionBase &connection,
+                                  const HandlerBase::ConnectionState oldState,
+                                  const HandlerBase::ConnectionState newState) override;
 
-    void onError(Threader::Threads::ConnectionBase *connection,
-                     const int &errorCode,
-                     const std::string &errorDescription) override;
+    void onError(const ConnectionBase &connection,
+                 const int &errorCode,
+                 const std::string &errorDescription) override;
 
-    void onReadData(Threader::Threads::ConnectionBase *connection,
-                        const char *data, const int &size) override;
+    void onReadData(const ConnectionBase &connection,
+                    const char *data,
+                    const int &size) override;
 
-    void onWriteData(Threader::Threads::ConnectionBase *connection,
-                         const char *data, const int &size) override;
+    void onWriteData(const ConnectionBase &connection,
+                     const char *data,
+                     const int &size) override;
 
-    void onPacketReceived(Threader::Threads::ConnectionBase *connection,
-                              const PacketBase::Ptr &packet) override;
-
-    void onPacketSent(Threader::Threads::ConnectionBase *connection,
+    void onPacketReceived(const ConnectionBase &connection,
                           const PacketBase::Ptr &packet) override;
+
+    void onPacketSent(const ConnectionBase &connection,
+                      const PacketBase::Ptr &packet) override;
 };
 
 }

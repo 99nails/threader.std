@@ -15,7 +15,7 @@ public:
 
     // HandlerDataConsumer interface
 public:
-    void onError(HandlerBase *sender,
+    void onError(HandlerBase &sender,
                  const int errorCode,
                  const std::string &errorDescription) override;
 
@@ -25,13 +25,13 @@ protected:
     void onThreadFinishing() override;
     void onThreadFinished() override;
 
-    void onConnected(const HandlerBase *handler) override;
-    void onDisconnected(const HandlerBase *handler) override;
+    void onConnected(const HandlerBase &handler) override;
+    void onDisconnected(const HandlerBase &handler) override;
 
-    void onReadData(const HandlerBase *handler,
+    void onReadData(const HandlerBase &handler,
                     const void *,
                     const int &count) override;
-    void onWriteData(const HandlerBase *handler,
+    void onWriteData(const HandlerBase &handler,
                      const void *,
                      const int &count) override;
 

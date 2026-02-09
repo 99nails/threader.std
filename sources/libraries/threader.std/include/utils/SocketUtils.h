@@ -75,8 +75,7 @@ public:
                                           int &errorCode,
                                           const int = 0);
 
-    static Descriptor createUdpSocket(const uint16_t &port,
-                                      sockaddr_in &addr,
+    static Descriptor createUdpSocket(sockaddr_in &bindAddress,
                                       int &errorCode);
 
     static bool setBlockingMode(Descriptor socket,

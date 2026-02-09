@@ -5,13 +5,11 @@
 
 #include <iostream>
 #include <unistd.h>
-#include <limits.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 
 #ifdef linux
 #include <fcntl.h>
-//#include <linux/limits.h>
 #include <sys/stat.h>
 #endif
 
@@ -200,7 +198,7 @@ bool Logger::snapshot(const std::string &fileName,
     {
         bool result = FileUtils::fileWrite(descriptor, content) == content.length();
         FileUtils::fileClose(descriptor);
-        return true;
+        return result;
     }
     return false;
 }
@@ -213,7 +211,7 @@ bool Logger::append(const std::string &fileName,
     {
         bool result = FileUtils::fileWrite(descriptor, content) == content.length();
         FileUtils::fileClose(descriptor);
-        return true;
+        return result;
     }
     return false;
 }

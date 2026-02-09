@@ -48,9 +48,9 @@ int main(int argc, char *argv[])
     UdevEnumerationCallback callback = handler;
     // UdevEnumerationCallback callback = handlerRadioLookup;
 
-    auto enumerator = UdevEnumerator({"tty"});
+    auto enumerator = UdevEnumerator({UDEV_SUBSYSTEM_TTY});
 
-    // auto enumerator = UdevEnumerator({"tty"},
+    // auto enumerator = UdevEnumerator({SUBSYSTEM_TTY},
     //                                  {},
     //                                  {{"ID_VENDOR_ID", "10c4"},
     //                                   {"ID_MODEL_ID", "ea60"}});

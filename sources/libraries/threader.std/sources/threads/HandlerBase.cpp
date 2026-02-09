@@ -9,7 +9,7 @@ namespace Threader::Threads {
 
 HandlerBase::HandlerBase(HandlerDataConsumer *consumer,
                          const std::string &deviceName,
-                         const Descriptor descriptor, 
+                         const Descriptor descriptor,
                          const bool portionedIO)
 #ifdef _WIN32
     : PollerBase()
@@ -108,6 +108,16 @@ bool HandlerBase::portionedIO()
     return _portionedIO;
 }
 
+bool HandlerBase::operator ==(const HandlerBase &handler) const
+{
+    return this->descriptor() == handler.descriptor();
+}
+
+bool HandlerBase::operator !=(const HandlerBase &handler) const
+{
+    return !(*this == handler);
+}
+
 void HandlerBase::setPortionedIO(const bool value)
 {
     _portionedIO = value;
@@ -195,26 +205,26 @@ void HandlerBase::setConnectionState(HandlerBase::ConnectionState value)
         auto oldState = _connectionState;
         _connectionState = value;
         if (consumer())
-            consumer()->onConnectionStateChanged(this, oldState,  _connectionState);
+            consumer()->onConnectionStateChanged(*this, oldState,  _connectionState);
     }
 }
 
 void HandlerBase::doReadyRead()
 {
     if (consumer())
-        consumer()->onReadyRead(this);
+        consumer()->onReadyRead(*this);
 }
 
 void HandlerBase::doReadyWrite()
 {
     if (consumer())
-        consumer()->onReadyWrite(this);
+        consumer()->onReadyWrite(*this);
 }
 
 void HandlerBase::doError(int errorCode, std::string errorDescription)
 {
     if (consumer())
-        consumer()->onError(this, errorCode, errorDescription);
+        consumer()->onError(*this, errorCode, errorDescription);
 }
 
 }

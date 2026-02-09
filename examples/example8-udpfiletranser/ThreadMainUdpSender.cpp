@@ -1,6 +1,7 @@
 #include "ThreadMainUdpSender.h"
 
 #include "ThreadUdpReceiver.h"
+#include "SocketUtils.h"
 
 ThreadMainUdpSender::ThreadMainUdpSender(const std::string &applicationBinaryName,
                                          const std::string &applicationFriendlyName)
@@ -14,5 +15,10 @@ ThreadMainUdpSender::ThreadMainUdpSender(const std::string &applicationBinaryNam
 
 void ThreadMainUdpSender::startChildThreads()
 {
-    _threadReceiver = registerAndStartChildThread(new ThreadUdpReceiver(this));
+    auto info = SocketUtils::interfaceInfo("tap0", AF_INET);
+    if (!info.ipAddress.empty())
+    {
+        _threadReceiver = registerAndStartChildThread(new ThreadUdpReceiver(this,
+                                                                            info.ipAddress));
+    }
 }

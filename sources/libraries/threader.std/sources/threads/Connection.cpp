@@ -87,18 +87,36 @@ void ConnectionBase::onBeforeWaitEvents()
 
 void ConnectionBase::sendPacket(const PacketBase::Ptr &packet)
 {
-    if (!packet)
+    if (!packet || !_handler)
         return;
 
     if (packet->write(_outputBuffer))
     {
-        onReadyWrite(handler());
+        onReadyWrite(*handler());
 
         _lastPacketSent = DateTimeUtils::getTickCount();
 
         if (_consumer)
-            _consumer->onPacketSent(this, packet);
+            _consumer->onPacketSent(*this, packet);
     }
+}
+
+void ConnectionBase::sendData(const void *data, const size_t size)
+{
+    if (!data || size == 0 || !_handler )
+        return;
+
+    _outputBuffer->append(data, size);
+    onReadyWrite(*handler());
+}
+
+void ConnectionBase::sendString(const std::string &data)
+{
+    if (data.empty() || !_handler)
+        return;
+
+    _outputBuffer->append(data.c_str(), data.size());
+    onReadyWrite(*handler());
 }
 
 uint64_t ConnectionBase::lastPacketSent() const
@@ -139,13 +157,13 @@ const uint64_t &ConnectionBase::disconnectedDateTime() const
 void ConnectionBase::onReadData(const char *data, const int &size)
 {
     if (_consumer)
-        _consumer->onReadData(this, data, size);
+        _consumer->onReadData(*this, data, size);
 }
 
 void ConnectionBase::onWriteData(const char *data, const int &size)
 {
     if (_consumer)
-        _consumer->onWriteData(this, data, size);
+        _consumer->onWriteData(*this, data, size);
 }
 
 void ConnectionBase::clearBuffers()
@@ -159,11 +177,11 @@ PacketFactoryBase *ConnectionBase::packetFactory() const
     return _packetFactory;
 }
 
-void ConnectionBase::onConnectionStateChanged(HandlerBase *sender,
+void ConnectionBase::onConnectionStateChanged(HandlerBase &sender,
                                               const HandlerBase::ConnectionState oldState,
                                               const HandlerBase::ConnectionState newState)
 {
-    if (!sender || sender != _handler)
+    if (!_handler || sender != *_handler)
         return;
 
     clearBuffers();
@@ -193,14 +211,15 @@ void ConnectionBase::onConnectionStateChanged(HandlerBase *sender,
         break;
     }
 
-//    emit signalOnConnectionStateChanged(this, oldState, newState);
+    if (_consumer)
+        _consumer->onConnectionStateChanged(*this, oldState, newState);
 }
 
 
-void ConnectionBase::onReadyRead(HandlerBase *sender)
+void ConnectionBase::onReadyRead(HandlerBase &sender)
 {
-    if (!sender || sender != _handler
-            || sender->connectionState() == HandlerBase::ConnectionState::Disconnected)
+    if (!_handler || sender != *_handler
+            || sender.connectionState() == HandlerBase::ConnectionState::Disconnected)
         return;
 
     // чтение данных из входного буфера
@@ -217,7 +236,7 @@ void ConnectionBase::onReadyRead(HandlerBase *sender)
         memset(buffer, 0, sizeof(buffer));
 
         // чтение данных
-        readCount = sender->read(buffer, sizeof(buffer));
+        readCount = sender.read(buffer, sizeof(buffer));
 
         if (readCount > 0) {
             // если обмен данными происходит фиксированными порциями как в UDP
@@ -261,7 +280,7 @@ void ConnectionBase::onReadyRead(HandlerBase *sender)
                 {
                     _lastPacketReceived = DateTimeUtils::getTickCount();
                     if (_consumer)
-                        _consumer->onPacketReceived(this, packet);
+                        _consumer->onPacketReceived(*this, packet);
                 }
                 else
                 {
@@ -274,9 +293,9 @@ void ConnectionBase::onReadyRead(HandlerBase *sender)
     }
 }
 
-void ConnectionBase::onReadyWrite(HandlerBase *sender)
+void ConnectionBase::onReadyWrite(HandlerBase &sender)
 {
-    if (!sender || sender != _handler)
+    if (!_handler || sender != *_handler)
         return;
 
     // идем лесом если нечего отправить в устройство
@@ -284,7 +303,7 @@ void ConnectionBase::onReadyWrite(HandlerBase *sender)
         return;
 
     // непосредственно отправка данных
-    int written = sender->write(_outputBuffer->data(), size_t(_outputBuffer->size()));
+    int written = sender.write(_outputBuffer->data(), size_t(_outputBuffer->size()));
 
     // если хоть что-то ушло в устройство
     if (written > 0) {
@@ -298,11 +317,11 @@ void ConnectionBase::onReadyWrite(HandlerBase *sender)
     }
 }
 
-void ConnectionBase::onError(HandlerBase *sender,
+void ConnectionBase::onError(HandlerBase &sender,
                              const int errorCode,
                              const std::string &errorDescription)
 {
-    if (!sender || sender != _handler)
+    if (!_handler || sender != *_handler)
         return;
 
     //    emit signalOnError(this, errorCode);

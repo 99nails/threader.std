@@ -6,6 +6,9 @@
 #include <ws2tcpip.h>
 #endif
 
+#include <limits>
+#include <string.h>
+
 namespace Threader {
 
 namespace Threads {
@@ -13,11 +16,13 @@ namespace Threads {
 
 using namespace Threader::Utils;
 
-// const int MAXIMUM_DATA_SIZE = 65507;
+constexpr int MAXIMUM_DATA_SIZE = std::numeric_limits<uint16_t>::max();
 
 HandlerUdpSocket::HandlerUdpSocket(HandlerDataConsumer *consumer,
                                    const std::string &host,
-                                   const uint16_t port)
+                                   const uint16_t port,
+                                   const UdpSocketType udpSocketType,
+                                   const std::string &bindIpAddress)
 
     : HandlerBase(consumer,
                   host + ":" + std::to_string(port),
@@ -25,20 +30,19 @@ HandlerUdpSocket::HandlerUdpSocket(HandlerDataConsumer *consumer,
                   true)
     , _host(host)
     , _port(port)
+    , _socketType(udpSocketType)
 {
     _ipAddress = _host;
     if (!SocketUtils::isIpAddressString(_host))
         _ipAddress = SocketUtils::hostToIpAddressString(_host);
 
-    _localAddress = SocketUtils::ipAddressStringToAddress("0.0.0.0", port);
-    _remoteAddress = SocketUtils::ipAddressStringToAddress(_ipAddress, port);
+    _bindAddress = SocketUtils::ipAddressStringToAddress(bindIpAddress, _port);
+    _remoteAddress = SocketUtils::ipAddressStringToAddress(_ipAddress, _port);
 
-    _socketType = (_remoteAddress.sin_addr.s_addr == INADDR_ANY)
-            ? UdpSocketType::Receiver
-            : UdpSocketType::Sender;
+    memset(&_readAddress, 0, sizeof(_readAddress));
 
-    if ( UdpSocketType::Sender == _socketType)
-        _localAddress.sin_port = 0;
+    if (UdpSocketType::Sender == _socketType)
+        _bindAddress.sin_port = 0;
 }
 
 std::string HandlerUdpSocket::host() const
@@ -65,8 +69,7 @@ bool HandlerUdpSocket::open()
 {
     int errorCode;
 
-    auto descriptor = SocketUtils::createUdpSocket(_port,
-                                                   _localAddress,
+    auto descriptor = SocketUtils::createUdpSocket(_bindAddress,
                                                    errorCode);
 
     if (errorCode != 0 && errorCode != EINPROGRESS)
@@ -295,8 +298,13 @@ int HandlerUdpSocket::read(char *data, int count)
         return -1;
 
 #ifdef linux
-    socklen_t addrSize = sizeof(_remoteAddress);
-    return recvfrom(descriptor(), data, count, 0, reinterpret_cast<struct sockaddr*>(&_remoteAddress), &addrSize);
+    socklen_t addrSize = sizeof(_readAddress);
+    return recvfrom(descriptor(),
+                    data,
+                    count,
+                    0,
+                    reinterpret_cast<struct sockaddr*>(&_readAddress),
+                    &addrSize);
 #endif
 #ifdef WIN32
     int addrSize = sizeof(_remoteAddress);
@@ -308,27 +316,68 @@ int HandlerUdpSocket::read(char *data, int count)
 
 int HandlerUdpSocket::write(const void *data, int count)
 {
-    if (descriptor() == INVALID_DESCRIPTOR
-        // || count > MAXIMUM_DATA_SIZE
-        )
+    if (descriptor() == INVALID_DESCRIPTOR || count > MAXIMUM_DATA_SIZE)
         return -1;
 
+    return writeTo(_remoteAddress, data, count);
+
+}
+
+int HandlerUdpSocket::writeTo(const sockaddr_in &address,
+                              const void *data,
+                              int count)
+{
 #ifdef linux
-    return sendto(descriptor(), data, (size_t)count, 0, reinterpret_cast<struct sockaddr*>(&_remoteAddress), (int)sizeof(_remoteAddress));
+    return sendto(descriptor(),
+                  data,
+                  (size_t)count,
+                  0,
+                  reinterpret_cast<struct sockaddr*>(const_cast<struct sockaddr_in*>(&address)),
+                  (int)sizeof(address));
 #endif
-#ifdef WIN32
-    return sendto((SOCKET)descriptor(), data, count, 0,
-                  reinterpret_cast<struct sockaddr*>(&_remoteAddress), (int)sizeof(_remoteAddress));
+#ifdef WIN
+    return sendto((SOCKET)descriptor(),
+                  data,
+                  count,
+                  0,
+                  reinterpret_cast<struct sockaddr*>(const_cast<struct sockaddr_in*>(&address)),
+                  (int)sizeof(address));
 #endif
     return -1;
 }
 
-sockaddr_in HandlerUdpSocket::remoteAddress() const
+int HandlerUdpSocket::writeTo(const std::string &ipAddress,
+                              const void *data,
+                              int count)
+{
+    if (descriptor() == INVALID_DESCRIPTOR || count > MAXIMUM_DATA_SIZE)
+        return -1;
+
+    sockaddr_in address;
+    if (_addressesMap.count(ipAddress) > 0)
+    {
+        address = _addressesMap[ipAddress];
+    }
+    else
+    {
+        address = SocketUtils::ipAddressStringToAddress(ipAddress, _port);
+        _addressesMap[ipAddress] = address;
+    }
+
+    return writeTo(address, data, count);
+}
+
+const sockaddr_in HandlerUdpSocket::remoteAddress() const
 {
     return _remoteAddress;
 }
 
-#ifdef Q_OS_WIN
+const sockaddr_in &HandlerUdpSocket::readAddress() const
+{
+    return _readAddress;
+}
+
+#ifdef WIN
 
 void HandlerUdpSocket::registerEvent()
 {

@@ -9,9 +9,10 @@
 namespace Threader::Utils
 {
 
-constexpr char SUBSYSTEM_GPIO[] = "gpio";
-constexpr char SUBSYSTEM_WLAN[] = "net/wl";
-constexpr char SUBSYSTEM_TTY[] = "tty";
+constexpr char UDEV_SUBSYSTEM_GPIO[] = "gpio";
+constexpr char UDEV_SUBSYSTEM_NET[] = "net";
+constexpr char UDEV_SUBSYSTEM_TTY[] = "tty";
+constexpr char UDEV_SUBSYSTEM_WLAN[] = "net/wl";
 
 using PropertyEntry = std::pair<std::string, std::string>;
 using PropertyVector = std::vector<PropertyEntry>;

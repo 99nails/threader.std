@@ -519,22 +519,13 @@ Descriptor SocketUtils::openTcpClientSocket(const std::string &ipAddress,
 
 #endif
 
-Descriptor SocketUtils::createUdpSocket(const uint16_t &port,
-                                        sockaddr_in &addr,
+Descriptor SocketUtils::createUdpSocket(sockaddr_in &bindAddress,
                                         int &errorCode)
 {
     errorCode= 0;
 #ifdef WIN
     if (!checkSocketsInitialization())
         return (Descriptor)INVALID_SOCKET;
-#endif
-
-//    memset(&addr.sin_zero, 0, sizeof(addr.sin_zero));
-//    addr.sin_family = AF_INET;
-//    addr.sin_addr.s_addr = INADDR_ANY;
-//    addr.sin_port = htons(port);
-
-#ifdef WIN
     Descriptor result = (Descriptor)socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 #endif
 #ifdef linux
@@ -549,11 +540,14 @@ Descriptor SocketUtils::createUdpSocket(const uint16_t &port,
     }
 
 #ifdef WIN
-    auto callResult = bind((SOCKET)result, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+    auto callResult = bind((SOCKET)result,
+                           reinterpret_cast<sockaddr*>(&bindAddress),
+                           sizeof(bindAddress));
 #endif
 #ifdef linux
-    auto callResult = bind(result, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
-    (void)port;
+    auto callResult = bind(result,
+                           reinterpret_cast<sockaddr*>(&bindAddress),
+                           sizeof(bindAddress));
 #endif
     if (callResult < 0)
     {

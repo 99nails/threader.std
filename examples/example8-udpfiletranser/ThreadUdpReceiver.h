@@ -1,18 +1,19 @@
 #pragma once
 
-#include <ThreadHandler.h>
+#include <ThreadConnections.h>
 
 using namespace Threader::Threads;
 
-class ThreadUdpReceiver : public ThreadHandler
+class ThreadUdpReceiver : public ThreadConnections
 {
 public:
-    explicit ThreadUdpReceiver(MessageConsumer *parent);
+    explicit ThreadUdpReceiver(MessageConsumer *parent,
+                               const std::string bindIpAddress);
 
     // HandlerDataConsumer interface
 public:
-    void onError(HandlerBase *sender,
-                 const int errorCode,
+    void onError(const ConnectionBase &connection,
+                 const int &errorCode,
                  const std::string &errorDescription) override;
 
     // ThreadBase interface
@@ -27,16 +28,24 @@ protected:
     void processMessage(const MessageBase::Ptr &) override;
 
 protected:
-    void onConnecting(const HandlerBase *handler) override;
-    void onConnected(const HandlerBase *handler) override;
-    void onDisconnected(const HandlerBase *handler) override;
-    void onReadData(const HandlerBase *handler,
-                    const void *,
-                    const int &) override;
-    void onWriteData(const HandlerBase *handler,
-                     const void *,
-                     const int &) override;
-    bool onPacketReceived(const PacketBase::Ptr &) override;
-    bool onPacketSent(const PacketBase::Ptr &) override;
+    void onConnecting(const ConnectionBase &connection) override;
+    void onConnected(const ConnectionBase &connection) override;
+    void onDisconnected(const ConnectionBase &connection) override;
+
+    void onReadData(const ConnectionBase &connection,
+                    const char *,
+                    const int &size) override;
+    void onWriteData(const ConnectionBase &connection,
+                     const char *,
+                     const int &size) override;
+    void onPacketReceived(const ConnectionBase &connection,
+                          const PacketBase::Ptr &) override;
+    void onPacketSent(const ConnectionBase &connection,
+                      const PacketBase::Ptr &) override;
+
+private:
+    std::string _bindIpAddress;
+    ConnectionBase *_connectionIn;
+    ConnectionBase *_connectionOut;
 };
 

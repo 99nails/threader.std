@@ -68,7 +68,7 @@ void ThreadHandler::initializeThread()
     }
     else if (_handler->connectionState() != HandlerBase::ConnectionState::Disconnected)
     {
-        onConnectionStateChanged(_handler,
+        onConnectionStateChanged(*_handler,
                                  HandlerBase::ConnectionState::Disconnected,
                                  _handler->connectionState());
     }
@@ -139,22 +139,22 @@ void ThreadHandler::onBeforeWaitEvents()
     }
 }
 
-void ThreadHandler::onConnecting(const HandlerBase *handler)
+void ThreadHandler::onConnecting(const HandlerBase &handler)
 {
     (void)handler;
 }
 
-void ThreadHandler::onConnected(const HandlerBase *handler)
+void ThreadHandler::onConnected(const HandlerBase &handler)
 {
     (void)handler;
 }
 
-void ThreadHandler::onDisconnected(const HandlerBase *handler)
+void ThreadHandler::onDisconnected(const HandlerBase &handler)
 {
     (void)handler;
 }
 
-void ThreadHandler::onReadData(const HandlerBase *handler,
+void ThreadHandler::onReadData(const HandlerBase &handler,
                                const void *data,
                                const int &size)
 {
@@ -162,7 +162,7 @@ void ThreadHandler::onReadData(const HandlerBase *handler,
     (void)size;
 }
 
-void ThreadHandler::onWriteData(const HandlerBase *handler,
+void ThreadHandler::onWriteData(const HandlerBase &handler,
                                 const void *data,
                                 const int &size)
 {
@@ -176,7 +176,7 @@ bool ThreadHandler::sendPacket(const PacketBase::Ptr &packet)
         return false;
 
     bool result = packet->write(_outputBuffer);
-    onReadyWrite(handler());
+    onReadyWrite(*handler());
 
     _lastPacketSent = DateTimeUtils::getTickCount();
     onPacketSent(packet);
@@ -218,7 +218,7 @@ uint64_t ThreadHandler::closedDateTime() const
     return _closedDateTime;
 }
 
-void ThreadHandler::onConnectionStateChanged(HandlerBase *handler,
+void ThreadHandler::onConnectionStateChanged(HandlerBase &handler,
                                              HandlerBase::ConnectionState oldState,
                                              HandlerBase::ConnectionState newState)
 {
@@ -258,9 +258,9 @@ void ThreadHandler::onConnectionStateChanged(HandlerBase *handler,
     }
 }
 
-void ThreadHandler::onReadyRead(HandlerBase *sender)
+void ThreadHandler::onReadyRead(HandlerBase &sender)
 {
-    if (!sender || sender->connectionState() == HandlerBase::ConnectionState::Disconnected)
+    if (sender.connectionState() == HandlerBase::ConnectionState::Disconnected)
         return;
 
     // чтение данных из входного буфера
@@ -278,11 +278,11 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
         memset(buffer, 0, sizeof(buffer));
 
         // чтение данных
-        readCount = sender->read(buffer, sizeof(buffer));
+        readCount = sender.read(buffer, sizeof(buffer));
 
         if (readCount > 0) {
             // если обмен данными происходит фиксированными порциями как в UDP
-            if (sender->portionedIO())
+            if (sender.portionedIO())
             {
                 onReadData(sender, buffer, readCount);
             }
@@ -302,7 +302,7 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
     _inputBuffer->append(_localInputBuffer.data(), _localInputBuffer.size());
 
     // если обмен данными не происходит фиксированными порциями как в UDP
-    if (!sender->portionedIO())
+    if (!sender.portionedIO())
     {
         // вызов заглушки события приема данных
         onReadData(sender, _localInputBuffer.data(), _localInputBuffer.size());
@@ -346,14 +346,14 @@ void ThreadHandler::onReadyRead(HandlerBase *sender)
     }
 }
 
-void ThreadHandler::onReadyWrite(HandlerBase *sender)
+void ThreadHandler::onReadyWrite(HandlerBase &sender)
 {
     // идем лесом если нечего отправить в устройство
     if (_outputBuffer->size() == 0)
         return;
 
     // непосредственно отправка данных
-    int written = sender->write((char*)_outputBuffer->data(), _outputBuffer->size());
+    int written = sender.write((char*)_outputBuffer->data(), _outputBuffer->size());
 
     // если хоть что-то ушло в устройство
     if (written > 0) {

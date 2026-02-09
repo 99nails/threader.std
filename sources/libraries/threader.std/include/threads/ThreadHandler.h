@@ -16,7 +16,6 @@ using namespace Threader::Utils;
 class ThreadHandler : public ThreadBase,
                       public HandlerDataConsumer
 {
-    // Q_OBJECT
 public:
     static const std::string MESSAGE_NAME_DEVICE_DATA_INPUT;
     static const std::string MESSAGE_NAME_DEVICE_DATA_OUTPUT;
@@ -56,15 +55,15 @@ protected:
     void terminateChildThreads() override;
     void onBeforeWaitEvents() override;
 
-    virtual void onConnecting(const HandlerBase *handler);
-    virtual void onConnected(const HandlerBase *handler);
-    virtual void onDisconnected(const HandlerBase *handler);
+    virtual void onConnecting(const HandlerBase &handler);
+    virtual void onConnected(const HandlerBase &handler);
+    virtual void onDisconnected(const HandlerBase &handler);
 
-    virtual void onReadData(const HandlerBase *handler,
+    virtual void onReadData(const HandlerBase &handler,
                             const void *data,
                             const int &size);
 
-    virtual void onWriteData(const HandlerBase *handler,
+    virtual void onWriteData(const HandlerBase &handler,
                              const void *data,
                              const int &size);
 
@@ -81,13 +80,13 @@ protected:
 
     uint64_t connectedTickCount() const;
 
-    void onConnectionStateChanged(HandlerBase *handler,
+    void onConnectionStateChanged(HandlerBase &handler,
                                   HandlerBase::ConnectionState oldState,
                                   HandlerBase::ConnectionState newState) override;
 
-    void onReadyRead(HandlerBase *handler) override;
+    void onReadyRead(HandlerBase &handler) override;
 
-    void onReadyWrite(HandlerBase *handler) override;
+    void onReadyWrite(HandlerBase &handler) override;
 
 private:
     HandlerBase *_handler;

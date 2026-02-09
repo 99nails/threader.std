@@ -16,21 +16,20 @@ protected:
 
     // ThreadHandler interface
 protected:
-    void onConnecting(const HandlerBase *handler) override;
-    void onConnected(const HandlerBase *handler) override;
-    void onDisconnected(const HandlerBase *handler) override;
+    void onConnecting(const HandlerBase &handler) override;
+    void onConnected(const HandlerBase &handler) override;
+    void onDisconnected(const HandlerBase &handler) override;
 
-    void onReadData(const HandlerBase *handler,
+    void onReadData(const HandlerBase &handler,
                     const void *,
                     const int &count) override;
 
-    void onWriteData(const HandlerBase *handler,
+    void onWriteData(const HandlerBase &handler,
                      const void *,
                      const int &count) override;
 
-    void onError(HandlerBase *handler,
-                 const int errorCode,
-                 const std::string &errorDescription) override;
+    void onError(HandlerBase &handler,
+                 const int errorCode, const std::string &) override;
 
     bool onPacketReceived(const PacketBase::Ptr &packet) override;
     bool onPacketSent(const PacketBase::Ptr &packet) override;

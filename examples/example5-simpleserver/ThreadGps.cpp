@@ -48,54 +48,40 @@ void ThreadGps::onThreadFinished()
     writeLog(Message402, handler()->deviceName().c_str());
 }
 
-void ThreadGps::onConnecting(const HandlerBase *handler)
+void ThreadGps::onConnecting(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-    writeLog(Message410, handler->deviceName().c_str());
+    writeLog(Message410, handler.deviceName().c_str());
 }
 
-void ThreadGps::onConnected(const HandlerBase *handler)
+void ThreadGps::onConnected(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-    writeLog(Message411, handler->deviceName().c_str());
+    writeLog(Message411, handler.deviceName().c_str());
 }
 
-void ThreadGps::onDisconnected(const HandlerBase *handler)
+void ThreadGps::onDisconnected(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-    writeLog(Message413, handler->deviceName().c_str());
+    writeLog(Message413, handler.deviceName().c_str());
 }
 
-void ThreadGps::onReadData(const HandlerBase *handler,
+void ThreadGps::onReadData(const HandlerBase &handler,
                            const void *,
                            const int &count)
 {
-    if (!handler)
-        return;
-
-    writeLog(Message414, count, handler->deviceName().c_str());
+    writeLog(Message414, count, handler.deviceName().c_str());
 }
 
-void ThreadGps::onWriteData(const HandlerBase *handler,
+void ThreadGps::onWriteData(const HandlerBase &handler,
                             const void *,
                             const int &count)
 {
-    if (!handler)
-        return;
-
-    writeLog(Message415, count, handler->deviceName().c_str());
+    writeLog(Message415, count, handler.deviceName().c_str());
 }
 
-void ThreadGps::onError(HandlerBase *handler,
+void ThreadGps::onError(HandlerBase &handler,
                                 const int errorCode,
                                 const std::string &errorDescription)
 {
-    if (!handler)
-        return;
-    writeLog(Message412, handler->deviceName().c_str(), errorString(errorCode).c_str());
+    writeLog(Message412, handler.deviceName().c_str(), errorString(errorCode).c_str());
 }
 
 bool ThreadGps::onPacketReceived(const PacketBase::Ptr &packet)

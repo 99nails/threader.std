@@ -34,6 +34,10 @@ public:
 
     virtual void sendPacket(const PacketBase::Ptr &packet);
 
+    virtual void sendData(const void* data, const size_t size);
+
+    virtual void sendString(const std::string &data);
+
     uint64_t lastPacketSent() const;
 
     uint64_t lastPacketReceived() const;
@@ -82,10 +86,15 @@ private:
     uint64_t _disconnectedDateTime;
 
 public:
-    void onConnectionStateChanged(HandlerBase *sender, const HandlerBase::ConnectionState oldState, const HandlerBase::ConnectionState newState) override;
-    void onReadyRead(HandlerBase *sender) override;
-    void onReadyWrite(HandlerBase *sender) override;
-    void onError(HandlerBase *sender, const int errorCode, const std::string &errorDescription) override;
+    void onConnectionStateChanged(HandlerBase &sender,
+                                  const HandlerBase::ConnectionState oldState,
+                                  const HandlerBase::ConnectionState newState) override;
+
+    void onReadyRead(HandlerBase &sender) override;
+    void onReadyWrite(HandlerBase &sender) override;
+    void onError(HandlerBase &sender,
+                 const int errorCode,
+                 const std::string &errorDescription) override;
 };
 
 
@@ -96,25 +105,26 @@ using ConnectionList = std::list<ConnectionBase*>;
 class ConnectionDataConsumer
 {
 public:
-    virtual void onConnectionStateChanged(Threader::Threads::ConnectionBase *connection,
-                                          HandlerBase::ConnectionState oldState,
-                                          HandlerBase::ConnectionState newState) = 0;
+    virtual void onConnectionStateChanged(const ConnectionBase &connection,
+                                          const HandlerBase::ConnectionState oldState,
+                                          const HandlerBase::ConnectionState newState) = 0;
 
-    virtual void onError(Threader::Threads::ConnectionBase *connection,
+    virtual void onError(const ConnectionBase &connection,
                          const int &errorCode,
                          const std::string &errorDescription) = 0;
 
-    virtual void onReadData(Threader::Threads::ConnectionBase *connection,
+    virtual void onReadData(const ConnectionBase &connection,
                             const char *data,
                             const int &size) = 0;
 
-    virtual void onWriteData(Threader::Threads::ConnectionBase *connection,
-                             const char *data, const int &size) = 0;
+    virtual void onWriteData(const ConnectionBase &connection,
+                             const char *data,
+                             const int &size) = 0;
 
-    virtual void onPacketReceived(Threader::Threads::ConnectionBase *connection,
+    virtual void onPacketReceived(const ConnectionBase &connection,
                                   const PacketBase::Ptr &packet) = 0;
 
-    virtual void onPacketSent(Threader::Threads::ConnectionBase *connection,
+    virtual void onPacketSent(const ConnectionBase &connection,
                               const PacketBase::Ptr &packet) = 0;
 };
 

@@ -15,5 +15,5 @@ ThreadMainWaitDevice::ThreadMainWaitDevice(const std::string &applicationName,
 
 void ThreadMainWaitDevice::startChildThreads()
 {
-    _threadUdevMonitor = registerAndStartChildThread(new ThreadUdevMonitor(this, {"tty"}));
+    _threadUdevMonitor = registerAndStartChildThread(new ThreadUdevMonitor(this, {UDEV_SUBSYSTEM_TTY}));
 }

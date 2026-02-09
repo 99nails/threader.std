@@ -50,58 +50,44 @@ void ThreadGpsEmulator::onThreadFinished()
     writeLog(Message302, handler()->deviceName().c_str());
 }
 
-void ThreadGpsEmulator::onConnecting(const HandlerBase *handler)
+void ThreadGpsEmulator::onConnecting(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-    writeLog(Message310, handler->deviceName().c_str());
+    writeLog(Message310, handler.deviceName().c_str());
 }
 
-void ThreadGpsEmulator::onConnected(const HandlerBase *handler)
+void ThreadGpsEmulator::onConnected(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-    writeLog(Message311, handler->deviceName().c_str());
+    writeLog(Message311, handler.deviceName().c_str());
 
     startThreadTimer(MESSAGE_NAME_TIMER, 2000, true);
 }
 
-void ThreadGpsEmulator::onDisconnected(const HandlerBase *handler)
+void ThreadGpsEmulator::onDisconnected(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-    writeLog(Message313, handler->deviceName().c_str());
+    writeLog(Message313, handler.deviceName().c_str());
 
     stopThreadTimer(MESSAGE_NAME_TIMER);
 }
 
-void ThreadGpsEmulator::onReadData(const HandlerBase *handler,
+void ThreadGpsEmulator::onReadData(const HandlerBase &handler,
                                    const void *,
                                    const int &count)
 {
-    if (!handler)
-        return;
-
-    writeLog(Message314, count, handler->deviceName().c_str());
+    writeLog(Message314, count, handler.deviceName().c_str());
 }
 
-void ThreadGpsEmulator::onWriteData(const HandlerBase *handler,
+void ThreadGpsEmulator::onWriteData(const HandlerBase &handler,
                                     const void *,
                                     const int &count)
 {
-    if (!handler)
-        return;
-
-    writeLog(Message315, count, handler->deviceName().c_str());
+    writeLog(Message315, count, handler.deviceName().c_str());
 }
 
-void ThreadGpsEmulator::onError(HandlerBase *handler,
+void ThreadGpsEmulator::onError(HandlerBase &handler,
                                 const int errorCode,
                                 const std::string &errorDescription)
 {
-    if (!handler)
-        return;
-    writeLog(Message312, handler->deviceName().c_str(), errorString(errorCode).c_str());
+    writeLog(Message312, handler.deviceName().c_str(), errorString(errorCode).c_str());
 }
 
 bool ThreadGpsEmulator::onPacketReceived(const PacketBase::Ptr &packet)

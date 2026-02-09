@@ -53,59 +53,44 @@ void ThreadPing::processMessage(const MessageBase::Ptr &message)
     }
 }
 
-void ThreadPing::onConnecting(const HandlerBase *handler)
+void ThreadPing::onConnecting(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-    writeLog(Message110, handler->deviceName().c_str());
+    writeLog(Message110, handler.deviceName().c_str());
 }
 
-void ThreadPing::onConnected(const HandlerBase *handler)
+void ThreadPing::onConnected(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-    writeLog(Message111, handler->deviceName().c_str());
+    writeLog(Message111, handler.deviceName().c_str());
 
     startThreadTimer(MESSAGE_NAME_SEND_PING, 5000, true);
 }
 
-void ThreadPing::onDisconnected(const HandlerBase *handler)
+void ThreadPing::onDisconnected(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-    writeLog(Message113, handler->deviceName().c_str());
+    writeLog(Message113, handler.deviceName().c_str());
 
     stopThreadTimer(MESSAGE_NAME_SEND_PING);
 }
 
-void ThreadPing::onReadData(const HandlerBase *handler,
+void ThreadPing::onReadData(const HandlerBase &handler,
                             const void *,
                             const int &count)
 {
-    if (!handler)
-        return;
-    writeLog(Message114, count, handler->deviceName().c_str());
+    writeLog(Message114, count, handler.deviceName().c_str());
 }
 
-void ThreadPing::onWriteData(const HandlerBase *handler,
+void ThreadPing::onWriteData(const HandlerBase &handler,
                              const void *,
                              const int &count)
 {
-    if (!handler)
-        return;
-    writeLog(Message115, count, handler->deviceName().c_str());
+    writeLog(Message115, count, handler.deviceName().c_str());
 }
 
-void ThreadPing::onError(HandlerBase *handler,
+void ThreadPing::onError(HandlerBase &handler,
                          const int errorCode,
-                         const std::string &errorDescription)
+                         const std::string &)
 {
-    if (!handler)
-        return;
-    writeLog(Message112,
-             handler->deviceName().c_str(),
-             errorString(errorCode).c_str());
-    (void)errorDescription;
+    writeLog(Message112, handler.deviceName().c_str(), errorString(errorCode).c_str());
 }
 
 bool ThreadPing::onPacketReceived(const PacketBase::Ptr &packet)

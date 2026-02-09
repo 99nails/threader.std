@@ -26,7 +26,7 @@ ThreadConnectionClient::ThreadConnectionClient(MessageConsumer *parent,
 }
 
 
-void ThreadConnectionClient::onError(HandlerBase *sender,
+void ThreadConnectionClient::onError(HandlerBase &sender,
                                      const int errorCode,
                                      const std::string &errorDescription)
 {
@@ -51,48 +51,33 @@ void ThreadConnectionClient::onThreadFinished()
 }
 
 
-void ThreadConnectionClient::onConnecting(const HandlerBase *handler)
+void ThreadConnectionClient::onConnecting(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-
-    writeLog(Message509, handler->deviceName().c_str());
+    writeLog(Message509, handler.deviceName().c_str());
 }
 
-void ThreadConnectionClient::onConnected(const HandlerBase *handler)
+void ThreadConnectionClient::onConnected(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-
-    writeLog(Message510, handler->deviceName().c_str());
+    writeLog(Message510, handler.deviceName().c_str());
 }
 
-void ThreadConnectionClient::onDisconnected(const HandlerBase *handler)
+void ThreadConnectionClient::onDisconnected(const HandlerBase &handler)
 {
-    if (!handler)
-        return;
-
-    writeLog(Message511, handler->deviceName().c_str());
+    writeLog(Message511, handler.deviceName().c_str());
 }
 
-void ThreadConnectionClient::onReadData(const HandlerBase *handler,
+void ThreadConnectionClient::onReadData(const HandlerBase &handler,
                                         const void *,
                                         const int &count)
 {
-    if (handler)
-        return;
-
-    writeLog(Message512, count, handler->deviceName().c_str());
+    writeLog(Message512, count, handler.deviceName().c_str());
 }
 
-void ThreadConnectionClient::onWriteData(const HandlerBase *handler,
+void ThreadConnectionClient::onWriteData(const HandlerBase &handler,
                                          const void *,
                                          const int &count)
 {
-    if (!handler)
-        return;
-
-    writeLog(Message512, count, handler->deviceName().c_str());
+    writeLog(Message512, count, handler.deviceName().c_str());
 }
 
 bool ThreadConnectionClient::onPacketReceived(const PacketBase::Ptr &packet)
