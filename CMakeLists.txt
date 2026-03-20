@@ -8,14 +8,10 @@ set(VER_BLD 0)
 set(VERSION ${VER_MAJ}.${VER_MIN}.${VER_PAT})
 set(VERSION4 ${VERSION}.${VER_BLD})
 
-set(CPACK_PACKAGE_VERSION_MAJOR ${VER_MAJ})
-set(CPACK_PACKAGE_VERSION_MINOR ${VER_MIN})
-set(CPACK_PACKAGE_VERSION_PATCH ${VER_PAT})
-
 add_compile_definitions(THREADER_VERSION_STRING="${VERSION}")
 add_compile_definitions(THREADER_VERSION4_STRING="${VERSION4}")
 
-project(threader-std VERSION ${VERSION} LANGUAGES C CXX)
+project(libthreader VERSION ${VERSION} LANGUAGES C CXX)
 
 set_target_properties(${TARGET} PROPERTIES
     CXX_STANDARD 17
@@ -49,53 +45,9 @@ link_directories(${CMAKE_SOURCE_DIR}/lib.${OS_SUFFIX})
 include_directories(${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads)
 
 add_subdirectory(sources/libraries/threader.std)
+
 add_subdirectory(sources/libraries/threader.qt)
+
 add_subdirectory(examples)
 
-SET(CMAKE_SKIP_BUILD_RPATH TRUE)
-SET(CMAKE_SKIP_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH ${PROJECT_NAME} "/usr/local/lib/threader.std/")
-
-install(TARGETS ${PROJECT_NAME}
-            LIBRARY
-                DESTINATION /usr/local/lib/threader.std/
-                PERMISSIONS
-                    OWNER_READ OWNER_WRITE
-                    GROUP_READ
-                    WORLD_READ
-                COMPONENT lib
-)
-
-install(FILES ${PROJECT_SOURCE_DIR}/install/threader-std.conf
-        DESTINATION /etc/ld.so.conf.d/
-        COMPONENT lib
-        )
-
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/sources/libraries/threader.std/include/
-            DESTINATION /usr/local/include/threader.std
-            FILE_PERMISSIONS
-            OWNER_READ OWNER_WRITE
-            GROUP_READ
-            WORLD_READ
-            DIRECTORY_PERMISSIONS
-            OWNER_READ OWNER_WRITE OWNER_EXECUTE
-            GROUP_READ GROUP_EXECUTE
-            WORLD_READ WORLD_EXECUTE
-            COMPONENT dev
-            FILES_MATCHING
-            PATTERN "*.h"
-            PATTERN "*.hpp"
-)
-
-
-SET(CPACK_GERATOR "DEB")
-SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Maxim Mazitov <99nails@gmail.com>")
-SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Multithreaded applications framework library")
-set(CPACK_PACKAGE_NAME "libthreaderstd")
-#SET(CPACK_DEBIAN_PACKAGE_MAJOR ${VER_MAJ})
-#SET(CPACK_DEBIAN_PACKAGE_MINOR ${VER_MIN})
-#SET(CPACK_DEBIAN_PACKAGE_PATCH ${VER_PAT})
-set(CPACK_DEB_COMPONENT_INSTALL ON)
-set(CPACK_STRIP_FILES ON)
-set(CPACK_DEBIAN_DEV_PACKAGE_DEPENDS "${CPACK_PACKAGE_NAME}-lib")
-include(CPack)
+include(Common.cmake)

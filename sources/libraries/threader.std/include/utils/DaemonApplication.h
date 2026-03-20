@@ -94,7 +94,48 @@ template<class ThreadMainType>
 int DaemonApplication<ThreadMainType>::run()
 {
     if (!initialize())
-        return 1;
+        return -1;
+
+    if (_install)
+    {
+        ThreadBase::writeLog(Message4, _serviceName.c_str());
+
+        std::string resultString;
+        auto registered = DaemonUtils::daemonRegister(_serviceName,
+                                                      _arguments[0],
+                                                      _description,
+                                                      &resultString);
+        if (registered)
+        {
+            ThreadBase::writeLog(Message5, _serviceName.c_str());
+            stopLogSubsystem();
+            return 0;
+        }
+
+        ThreadBase::writeLog(Message6, _serviceName.c_str(), resultString.c_str());
+        stopLogSubsystem();
+        return -1;
+    }
+
+    if (_uninstall)
+    {
+        ThreadBase::writeLog(Message7, _serviceName.c_str());
+
+        std::string resultString;
+        auto unregistered = DaemonUtils::daemonUnregister(_serviceName,
+                                                          &resultString);
+        if (unregistered)
+        {
+            ThreadBase::writeLog(Message8, _serviceName.c_str());
+            stopLogSubsystem();
+            return 0;
+        }
+
+        ThreadBase::writeLog(Message9, _serviceName.c_str(), resultString.c_str());
+        stopLogSubsystem();
+        return -1;
+    }
+
 
     if (DaemonUtils::daemonIsRunning(_serviceName))
     {
@@ -232,7 +273,7 @@ bool DaemonApplication<ThreadMainType>::parseArguments()
     {
         const auto logLevelString = commandLine.optionValue(PARAMETER_NAME_LOG);
         if (!logLevelString.empty() && logLevelString.find_first_not_of("0123456789") == std::string::npos)
-           _logLevel = std::stoi(logLevelString);
+            _logLevel = std::stoi(logLevelString);
     }
 
     if (commandLine.optionExist(PARAMETER_NAME_INSTALL))

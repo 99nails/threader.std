@@ -23,6 +23,25 @@ MESSAGE_TEMPLATE(3, 0, MessageType::Attention,
                  "Подробность протоколирования: %d")
 
 
+MESSAGE_TEMPLATE(4, 0, MessageType::Attention,
+                 "Регистрация службы [%s]...")
+
+MESSAGE_TEMPLATE(5, 0, MessageType::Attention,
+                 "Регистрация службы [%s] выполнена")
+
+MESSAGE_TEMPLATE(6, 0, MessageType::Attention,
+                 "Ошибка регистрации службы [%s]: %s")
+
+
+MESSAGE_TEMPLATE(7, 0, MessageType::Attention,
+                 "Снятие регистрации службы [%s]...")
+
+MESSAGE_TEMPLATE(8, 0, MessageType::Attention,
+                 "Снятие регистрации службы [%s] выполнено")
+
+MESSAGE_TEMPLATE(9, 0, MessageType::Attention,
+                 "Ошибка снятия регистрации службы [%s]: %s")
+
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Daemon"
 

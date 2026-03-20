@@ -1,7 +1,6 @@
 include_directories(
     ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads
     ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/utils
-    ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
 )
 
 # Использовать запуск утилит Qt в автоматическом режиме
@@ -150,6 +149,10 @@ find_package(Qt5 REQUIRED COMPONENTS Core)
 add_executable(example7-qteventloop
     example7-qteventloop/MainExample7-QtEventLoop.cpp
     example7-qteventloop/ThreadMainQtEventLoop.h example7-qteventloop/ThreadMainQtEventLoop.cpp
+)
+
+target_include_directories(example7-qteventloop PUBLIC
+    ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
 )
 
 target_compile_features(example7-qteventloop PUBLIC cxx_std_17)

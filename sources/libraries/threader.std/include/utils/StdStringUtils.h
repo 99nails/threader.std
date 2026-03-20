@@ -54,7 +54,7 @@ public:
 
 }}
 
-template <size_t STACK_BUFFER_SIZE=64>
+template <size_t STACK_BUFFER_SIZE=256>
 static std::string format(const char * format, ...)
 {
     std::string result;
@@ -90,7 +90,7 @@ static std::string format(const char * format, ...)
     result.assign(choosen_buffer);
 
     if (heap_buffer)
-        delete heap_buffer;
+        delete[] heap_buffer;
 
     return result;
 }

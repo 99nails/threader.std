@@ -10,9 +10,11 @@ class DaemonUtils
 public:
     static bool daemonRegister(const std::string &serviceName,
                                const std::string &binaryFileName,
-                               const std::string &description);
+                               const std::string &description,
+                               std::string *resultString = nullptr);
 
-    static bool daemonUnregister(const std::string &serviceName);
+    static bool daemonUnregister(const std::string &serviceName,
+                                 std::string *resultString = nullptr);
 
     static bool daemonSetRunning(const std::string &serviceName, const bool isRunning);
 

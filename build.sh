@@ -39,6 +39,9 @@ cmake .. "$buildType" || terminate
 echo "Making threader.............................................................................."
 make -j`nproc` || terminate
 
+echo "Building deb packets........................................................................."
+cpack -G DEB || terminate
+
 echo "Installing threader.........................................................................."
 sudo cmake --install . || terminate
 

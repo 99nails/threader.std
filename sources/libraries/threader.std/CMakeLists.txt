@@ -5,7 +5,7 @@ project(threader-std LANGUAGES CXX)
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/threads
     ${CMAKE_CURRENT_SOURCE_DIR}/include/utils
-)
+    )
 
 set(THREADER_SOURCES
     include/threads/Connection.h sources/threads/Connection.cpp
@@ -58,8 +58,8 @@ set(THREADER_SOURCES
     )
 
 if (WIN32)
-   set(THREADER_SOURCES "${THREADER_SOURCES}"
-       ";include/threads/PollingWindows.h;sources/threads/PollingWindows.cpp")
+    set(THREADER_SOURCES "${THREADER_SOURCES}"
+        ";include/threads/PollingWindows.h;sources/threads/PollingWindows.cpp")
 endif()
 
 add_library(${PROJECT_NAME} SHARED ${THREADER_SOURCES})
@@ -68,8 +68,46 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${VER_MAJ})
 
-set(LINK_LIBRARIES -lpthread -ludev)
-
 target_link_libraries(${PROJECT_NAME}
-    ${LINK_LIBRARIES}
-)
+    -lpthread
+    -ludev
+    )
+
+set(LIBRARY_INSTALL_PATH "/usr/local/lib/threader.std/")
+set(HEADERS_INSTALL_PATH  "/usr/local/include/threader.std")
+set(CONFIG_INSTALL_PATH  "/etc/ld.so.conf.d/")
+
+install(TARGETS ${PROJECT_NAME}
+    LIBRARY
+    DESTINATION ${LIBRARY_INSTALL_PATH}
+    PERMISSIONS
+    OWNER_READ OWNER_WRITE
+    GROUP_READ
+    WORLD_READ
+    COMPONENT std-lib
+    )
+
+install(FILES ${ROOT_PROJECT_DIR}/install/threader-std.conf
+    DESTINATION ${CONFIG_INSTALL_PATH}
+    COMPONENT std-lib
+    )
+
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION ${HEADERS_INSTALL_PATH}
+    FILE_PERMISSIONS
+    OWNER_READ OWNER_WRITE
+    GROUP_READ
+    WORLD_READ
+    DIRECTORY_PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE
+    COMPONENT std-dev
+    FILES_MATCHING
+    PATTERN "*.h"
+    PATTERN "*.hpp"
+    )
+
+#include(${ROOT_PROJECT_DIR}/Common.cmake)
+
+include(CPack)
