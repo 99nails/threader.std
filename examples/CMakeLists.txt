@@ -3,13 +3,15 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/utils
 )
 
-# Использовать запуск утилит Qt в автоматическом режиме
-# Автоматическая компиляция .ui файлов с помощью uic
-set(CMAKE_AUTOUIC ON)
-# Автоматический запуск Meta-Object Compiler с помощью moc
-set(CMAKE_AUTOMOC ON)
-# Автоматический запуск Resource Compiler с помощью rcc
-set(CMAKE_AUTORCC ON)
+if(QT_ENABLE)
+    # Использовать запуск утилит Qt в автоматическом режиме
+    # Автоматическая компиляция .ui файлов с помощью uic
+    set(CMAKE_AUTOUIC ON)
+    # Автоматический запуск Meta-Object Compiler с помощью moc
+    set(CMAKE_AUTOMOC ON)
+    # Автоматический запуск Resource Compiler с помощью rcc
+    set(CMAKE_AUTORCC ON)
+endif(QT_ENABLE)
 
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
@@ -143,26 +145,28 @@ target_link_libraries(example6-waitdevice
   threader-std
 )
 
-find_package(Qt5 REQUIRED COMPONENTS Core)
+if(QT_ENABLE)
+    find_package(Qt5 REQUIRED COMPONENTS Core)
 
-# example7-qteventloop
-add_executable(example7-qteventloop
-    example7-qteventloop/MainExample7-QtEventLoop.cpp
-    example7-qteventloop/ThreadMainQtEventLoop.h example7-qteventloop/ThreadMainQtEventLoop.cpp
-)
+    # example7-qteventloop
+    add_executable(example7-qteventloop
+        example7-qteventloop/MainExample7-QtEventLoop.cpp
+        example7-qteventloop/ThreadMainQtEventLoop.h example7-qteventloop/ThreadMainQtEventLoop.cpp
+    )
 
-target_include_directories(example7-qteventloop PUBLIC
-    ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
-)
+    target_include_directories(example7-qteventloop PUBLIC
+        ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
+    )
 
-target_compile_features(example7-qteventloop PUBLIC cxx_std_17)
+    target_compile_features(example7-qteventloop PUBLIC cxx_std_17)
 
-target_link_libraries(example7-qteventloop
-  pthread
-  threader-std
-  threader-qt
-  Qt5::Core
-)
+    target_link_libraries(example7-qteventloop
+        pthread
+        threader-std
+        threader-qt
+        Qt5::Core
+    )
+endif(QT_ENABLE)
 
 #example8-udpsender
 add_executable(example8-udpsender
@@ -177,6 +181,4 @@ target_compile_features(example8-udpsender PUBLIC cxx_std_17)
 target_link_libraries(example8-udpsender
   pthread
   threader-std
-#  threader-qt
-#  Qt5::Core
 )

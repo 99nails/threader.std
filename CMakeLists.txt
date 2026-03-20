@@ -21,6 +21,8 @@ set_target_properties(${TARGET} PROPERTIES
 set(OS_SUFFIX ${CMAKE_SYSTEM_NAME})
 string(TOLOWER ${OS_SUFFIX} OS_SUFFIX)
 
+option(QT_ENABLE "Using Qt" ON)
+
 message("Target system name - [" ${OS_SUFFIX} "]")
 message("Version [" ${VERSION4} "]")
 message("Root project path: [" ${CMAKE_CURRENT_SOURCE_DIR} "]")
@@ -46,7 +48,9 @@ include_directories(${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/t
 
 add_subdirectory(sources/libraries/threader.std)
 
-add_subdirectory(sources/libraries/threader.qt)
+if(QT_ENABLE)
+    add_subdirectory(sources/libraries/threader.qt)
+endif()
 
 add_subdirectory(examples)
 
