@@ -8,6 +8,7 @@ namespace Threader::Threads {
 
 using namespace Threader::Utils;
 
+
 class ThreadUdevMonitor : public ThreadBase,
                           public PollerUdevConsumer
 {
@@ -18,9 +19,11 @@ public:
 protected:
     void initializeThread() override;
 
+    const std::vector<std::string> &matchedSubsystems() const;
+
 public:
     void processDevice(const std::string &action,
-                       const DeviceInfo &deviceInfo) override;
+                       const UdevDeviceInfo &deviceInfo) override;
 private:
     PollerUdev *_poller;
 

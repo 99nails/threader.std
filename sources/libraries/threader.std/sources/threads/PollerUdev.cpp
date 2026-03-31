@@ -52,7 +52,7 @@ bool PollerUdev::process(const pollfd &event)
 
     auto device = udev_monitor_receive_device(_monitor);
 
-    DeviceInfo deviceInfo(device);
+    UdevDeviceInfo deviceInfo(device);
 
     bool processed = false;
     if (_consumer)

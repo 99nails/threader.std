@@ -78,12 +78,12 @@ void UdevEnumerator::enumerate(UdevEnumerationCallback &handler)
 
         // установка правил исключения подсистем из перечисления
         for (const auto &subsystem : _unmatchedSubsystems)
-                udev_enumerate_add_nomatch_subsystem(enumerator, subsystem.c_str());
+            udev_enumerate_add_nomatch_subsystem(enumerator, subsystem.c_str());
 
         for (const auto &property : _matchedProperties)
             udev_enumerate_add_match_property(enumerator,
-                                          property.first.c_str(),
-                                          property.second.c_str());
+                                              property.first.c_str(),
+                                              property.second.c_str());
 
         // сканирование устройств
         udev_enumerate_scan_devices(enumerator);
@@ -127,14 +127,14 @@ void UdevEnumerator::enumerate(UdevEnumerationCallback &handler)
             }
 
             // вызов
-            DeviceInfo deviceInfo(syspath ? syspath : "",
-                                  path ? path : "",
-                                  subsystem ? subsystem : "" ,
-                                  devtype ? devtype : "",
-                                  sysname ? sysname : "",
-                                  sysnum ? sysnum : "",
-                                  devnode ? devnode : "",
-                                  propertyVector);
+            UdevDeviceInfo deviceInfo(syspath ? syspath : "",
+                                      path ? path : "",
+                                      subsystem ? subsystem : "" ,
+                                      devtype ? devtype : "",
+                                      sysname ? sysname : "",
+                                      sysnum ? sysnum : "",
+                                      devnode ? devnode : "",
+                                      propertyVector);
             if (!handler(deviceInfo))
                 break;
         }

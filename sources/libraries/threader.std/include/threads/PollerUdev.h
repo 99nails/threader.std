@@ -20,7 +20,7 @@ class PollerUdevConsumer
 {
 public:
     virtual void processDevice(const std::string &action,
-                               const DeviceInfo &deviceInfo) = 0;
+                               const UdevDeviceInfo &deviceInfo) = 0;
 };
 
 class PollerUdev : public PollerBase

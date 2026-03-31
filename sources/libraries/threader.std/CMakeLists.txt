@@ -54,6 +54,7 @@ set(THREADER_SOURCES
     include/utils/TrafficCounter.h sources/utils/TrafficCounter.cpp
     include/utils/ThreadsCommon.h
     include/utils/ThreadUtils.h sources/utils/ThreadUtils.cpp
+    include/utils/UdevDeviceInfo.h sources/utils/UdevDeviceInfo.cpp
     include/utils/UdevEnumerator.h sources/utils/UdevEnumerator.cpp
     )
 

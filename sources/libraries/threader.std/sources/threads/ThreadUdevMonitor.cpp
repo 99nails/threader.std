@@ -18,8 +18,13 @@ void ThreadUdevMonitor::initializeThread()
     polling()->registerPoller(_poller);
 }
 
+const std::vector<std::string> &ThreadUdevMonitor::matchedSubsystems() const
+{
+    return _matchedSubsystems;
+}
+
 void ThreadUdevMonitor::processDevice(const std::string &action,
-                                      const DeviceInfo &deviceInfo)
+                                      const UdevDeviceInfo &deviceInfo)
 {
 }
 

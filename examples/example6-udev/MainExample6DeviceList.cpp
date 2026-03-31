@@ -5,7 +5,7 @@
 
 using namespace Threader::Utils;
 
-bool handler(DeviceInfo deviceInfo)
+bool handler(UdevDeviceInfo deviceInfo)
 {
     std::cout << "Path: "<< deviceInfo.path.c_str() << std::endl
               << "\tPath value: "<< deviceInfo.syspath.c_str() << std::endl
@@ -24,7 +24,7 @@ bool handler(DeviceInfo deviceInfo)
     return true;
 }
 
-bool handlerRadioLookup(DeviceInfo deviceInfo)
+bool handlerRadioLookup(UdevDeviceInfo deviceInfo)
 {
     auto vendor = std::find(deviceInfo.properties.cbegin(),
                             deviceInfo.properties.cend(),
