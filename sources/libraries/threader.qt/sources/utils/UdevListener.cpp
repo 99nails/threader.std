@@ -15,7 +15,7 @@ class ThreadUdevListener : public ThreadUdevMonitor
 {
 public:
     explicit ThreadUdevListener(UdevListener *listener,
-                                const std::vector<std::__cxx11::string> &matchedSubsystems);
+                                const std::vector<std::string> &matchedSubsystems);
 
     void processDevice(const std::string &action,
                        const UdevDeviceInfo &deviceInfo) override;
