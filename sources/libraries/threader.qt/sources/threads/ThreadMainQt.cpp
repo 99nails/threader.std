@@ -119,7 +119,7 @@ void ThreadMainQt::snapshotThreads(bool rightNow)
 
     if (rightNow || _nextBuildCommonStatisticTickCount <= tickCount)
     {
-        writeLog(Message14, i, memoryUsage);
+        writeLog(Message15, i, memoryUsage);
 
         _nextBuildCommonStatisticTickCount = DateTimeUtils::getNextTickCount(TIMEOUT_BUILD_COMMON_STATISTIC_MILLISECONDS);
     }

@@ -11,8 +11,7 @@ ThreadMainWithouSettings::ThreadMainWithouSettings(MessageConsumer *parent,
                  (threadName.empty()) ? "Thread.Main" : threadName)
     , _applicationBinaryName(applicationBinaryName)
     , _applicationFriendlyName(applicationFriendlyName)
-    , _nextBuildStatisticTickCount(
-          DateTimeUtils::getNextTickCount(TIMEOUT_BUILD_STATISTIC_MILLISECONDS))
+    , _nextBuildStatisticTickCount(0)
     , _nextBuildCommonStatisticTickCount(0)
     , _threadStatisticFileName(applicationBinaryName + ".Threads")
 {
@@ -23,6 +22,8 @@ ThreadMainWithouSettings::ThreadMainWithouSettings(MessageConsumer *parent,
 void ThreadMainWithouSettings::onThreadStarted()
 {
     writeLog(Message10, _applicationFriendlyName.c_str());
+
+    snapshotThreads(true);
 }
 
 void ThreadMainWithouSettings::onThreadFinishing()
@@ -33,6 +34,8 @@ void ThreadMainWithouSettings::onThreadFinishing()
 void ThreadMainWithouSettings::onThreadFinished()
 {
     writeLog(Message12, _applicationFriendlyName.c_str());
+
+    snapshotThreads(true);
 }
 
 void ThreadMainWithouSettings::onIdle()
@@ -119,7 +122,7 @@ void ThreadMainWithouSettings::snapshotThreads(bool rightNow)
 
     if (rightNow || _nextBuildCommonStatisticTickCount <= tickCount)
     {
-        writeLog(Message14, i, memoryUsage);
+        writeLog(Message15, i, memoryUsage);
 
         _nextBuildCommonStatisticTickCount = DateTimeUtils::getNextTickCount(TIMEOUT_BUILD_COMMON_STATISTIC_MILLISECONDS);
     }

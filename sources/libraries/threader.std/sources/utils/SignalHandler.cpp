@@ -14,6 +14,7 @@
 #include "FileUtils.h"
 #include "StdStringUtils.h"
 #include "ThreadLog.h"
+#include "DaemonUtils.h"
 
 #ifndef STACK_LEVEL
 #define STACK_LEVEL 50
@@ -112,6 +113,8 @@ std::string demangleFunctionName(char* line)
 
 void handleDeathSignal(int signum)
 {
+    DaemonUtils::daemonSetRunning(applicationBinaryFileName, false);
+
     if(signum == SIGABRT)
     {
         signal(signum, nullptr);

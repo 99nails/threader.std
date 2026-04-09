@@ -3,7 +3,8 @@
 #include <semaphore.h>
 #include <string>
 
-namespace Threader::Utils {
+namespace Threader::Utils
+{
 
 class DaemonUtils
 {

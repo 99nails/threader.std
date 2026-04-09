@@ -3,11 +3,10 @@
 
 #include "MessageTimer.h"
 
-namespace Threader {
+namespace Threader::Threads
+{
 
-namespace Threads {
-
-const std::string ThreadTimer::THREAD_NAME_PREFFIX = "ThreadTimer.";
+const std::string ThreadTimer::THREAD_NAME_PREFFIX = "Thread.Timer.";
 
 ThreadTimer::ThreadTimer(MessageConsumer *parent,
                          const std::string &timerName,
@@ -19,15 +18,23 @@ ThreadTimer::ThreadTimer(MessageConsumer *parent,
     , _multiShot(multiShot)
     , _shotCount(0)
 {
-    // Q_ASSERT(parent);
     setTimeout(_delay);
 }
 
-std::string ThreadTimer::timerName() const { return _timerName; }
+std::string ThreadTimer::timerName() const
+{
+    return _timerName;
+}
 
-int ThreadTimer::delay() const { return _delay; }
+int ThreadTimer::delay() const
+{
+    return _delay;
+}
 
-bool ThreadTimer::multiShot() const { return _multiShot; }
+bool ThreadTimer::multiShot() const
+{
+    return _multiShot;
+}
 
 void ThreadTimer::asyncSetTimeout(const int &delayMsecs)
 {
@@ -57,5 +64,4 @@ void ThreadTimer::sendTimerMessage()
     _shotCount++;
 }
 
-} // namespace Threads
-} // namespace Threader
+}

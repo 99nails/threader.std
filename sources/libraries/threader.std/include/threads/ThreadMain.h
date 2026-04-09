@@ -21,9 +21,9 @@ class ThreadMainWithouSettings : public ThreadBase
 {
 public:
     explicit ThreadMainWithouSettings(MessageConsumer *parent = nullptr,
-                        const std::string &applicationBinaryName = std::string(),
-                        const std::string &applicationFriendlyName = std::string(),
-                        const std::string &threadName = std::string());
+                                      const std::string &applicationBinaryName = std::string(),
+                                      const std::string &applicationFriendlyName = std::string(),
+                                      const std::string &threadName = std::string());
 
     const std::string &applicationBinaryName() const;
 

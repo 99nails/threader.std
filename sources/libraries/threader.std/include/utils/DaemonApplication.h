@@ -51,7 +51,7 @@ private:
     int _argc;
     std::vector<std::string> _arguments;
     std::string _description;
-    std::string _serviceName;
+    static std::string _serviceName;
     std::string _binaryFileName;
     std::string _binaryPath;
 
@@ -64,6 +64,9 @@ private:
 };
 
 template<class ThreadMainType>
+std::string DaemonApplication<ThreadMainType>::_serviceName = std::string();
+
+template<class ThreadMainType>
 DaemonApplication<ThreadMainType> *DaemonApplication<ThreadMainType>::_instance = nullptr;
 
 template<class ThreadMainType>
@@ -74,12 +77,12 @@ DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
     : _threadMain(nullptr)
     , _argc(argc)
     , _description(description)
-    , _serviceName(serviceName)
     , _console(false)
     , _install(false)
     , _uninstall(false)
     , _logLevel(9)
 {
+    _serviceName = serviceName;
     _instance = this;
     _console = false;
     _arguments.reserve(argc);
@@ -139,7 +142,7 @@ int DaemonApplication<ThreadMainType>::run()
 
     if (DaemonUtils::daemonIsRunning(_serviceName))
     {
-        ThreadBase::writeLog(Message16, _serviceName.c_str());
+        ThreadBase::writeLog(Message17, _serviceName.c_str());
     }
 
     DaemonUtils::daemonSetRunning(_serviceName, true);
@@ -297,7 +300,9 @@ bool DaemonApplication<ThreadMainType>::parseArguments()
 template<class ThreadMainType>
 void DaemonApplication<ThreadMainType>::signalHandler(int signal)
 {
-    ThreadBase::writeLog(Message15, signal);
+    ThreadBase::writeLog(Message16, signal);
+
+    DaemonUtils::daemonSetRunning(_serviceName, false);
 
     if (!_instance)
         return;

@@ -1,0 +1,3 @@
+#!/bin/bash
+rm -f /usr/local/lib/threader.std/libthreader-std.so*
+ldconfig

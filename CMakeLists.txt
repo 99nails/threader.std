@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 set(VER_MAJ 0)
 set(VER_MIN 2)
-set(VER_PAT 0)
+set(VER_PAT 1)
 set(VER_BLD 0)
 
 set(VERSION ${VER_MAJ}.${VER_MIN}.${VER_PAT})
@@ -55,3 +55,20 @@ endif()
 add_subdirectory(examples)
 
 include(Common.cmake)
+
+add_custom_target(additional-files SOURCES
+    README.md
+    TODO.md
+    )
+
+add_custom_target(install-files SOURCES
+    install/threader-qt.conf
+    install/threader-std.conf
+    install/threader.std/postinst
+    install/threader.std/postrm
+    install/threader.std/preinst
+    install/threader.qt/postinst
+    install/threader.qt/postrm
+    install/threader.qt/preinst
+#    bin/config/config.template.ini
+    )

@@ -2,9 +2,8 @@
 
 #include "MessageBase.h"
 
-namespace Threader {
-
-namespace Threads {
+namespace Threader::Threads
+{
 
 /**
  * @brief MessageTimer - Класс сообщения таймера
@@ -37,7 +36,8 @@ class MessageTimer : public MessageBase {
 /**
  * @brief MessageTimer - Класс сообщения таймеру о необходимости изменения задержки срабатывания
  */
-class MessageTimerSetTimeout : public MessageBase {
+class MessageTimerSetTimeout : public MessageBase
+{
   public:
     using Ptr = std::shared_ptr<MessageTimerSetTimeout>;
 
@@ -47,12 +47,16 @@ class MessageTimerSetTimeout : public MessageBase {
      * @param name - Имя сообщения таймера
      * @param shotCount - Счетчик сообщения
      */
-      explicit MessageTimerSetTimeout(const std::string &name, const int &newDelay);
+      explicit MessageTimerSetTimeout(const std::string &name,
+                                      const int &newDelay);
 
     /**
-     * @brief shotCount - Получение ного значения задержки
+     * @brief shotCount - Значение задержки
      */
-    int delay() const { return _delay; }
+    int delay() const
+    {
+        return _delay;
+    }
 
   private:
     /**
@@ -61,5 +65,4 @@ class MessageTimerSetTimeout : public MessageBase {
     int _delay;
 };
 
-} // namespace Threads
-} // namespace Threader
+}

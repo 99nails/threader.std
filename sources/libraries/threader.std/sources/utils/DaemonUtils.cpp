@@ -83,6 +83,9 @@ bool DaemonUtils::daemonUnregister(const std::string &serviceName,
 bool DaemonUtils::daemonSetRunning(const std::string &serviceName,
                                    const bool isRunning)
 {
+    if (serviceName.empty())
+        return false;
+
     auto semaphoreName = format("semaphore.daemon.%s", serviceName.c_str());
     if (isRunning)
     {
