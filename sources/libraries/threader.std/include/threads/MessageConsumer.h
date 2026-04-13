@@ -3,9 +3,7 @@
 #include "MessageBase.h"
 #include "QueueMessages.h"
 
-namespace Threader {
-
-namespace Threads {
+namespace Threader::Threads {
 
 class MessageConsumer
 {
@@ -80,5 +78,4 @@ private:
 
 using MessageConsumerVector = std::vector<MessageConsumer>;
 
-} // namespace Threads
-} // namespace Threader
+}

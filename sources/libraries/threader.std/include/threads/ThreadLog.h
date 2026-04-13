@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Logger.h"
-#include "LogMessagesTemplates.h"
 #include "MessageBase.h"
 #include "MessageWriteToFile.h"
 #include "ThreadBase.h"
@@ -9,14 +8,6 @@
 using namespace Threader::Threads;
 
 namespace Threader::Threads {
-
-
-bool startLogSubsystem(const std::string &pathToBin,
-                       MessageConsumer *consumer = nullptr,
-                       bool console = false,
-                       int level = 9);
-
-void stopLogSubsystem();
 
 class ThreadLog : public ThreadBase
 {

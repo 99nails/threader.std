@@ -1,8 +1,8 @@
 #pragma once
 
 #include <algorithm>
-#include <functional>
-#include <optional>
+// #include <functional>
+// #include <optional>
 #include <string>
 #include <vector>
 
@@ -12,24 +12,28 @@ namespace Threader::Threads
 class CommandLineParser
 {
 public:
+    CommandLineParser()
+    {
+    }
+
     CommandLineParser(int argc, char** argv)
     {
-        _tokens.reserve(argc);
+        _token.reserve(argc);
         for (int i = 1; i < argc; i++)
         {
-            _tokens.push_back(std::string(argv[i]));
+            _token.push_back(std::string(argv[i]));
         }
     }
 
     CommandLineParser(const std::vector<std::string> &arguments)
-        : _tokens(arguments)
+        : _token(arguments)
     {
     }
 
     const std::string& optionValue(const std::string& option) const
     {
-        auto iterator = std::find(this->_tokens.begin(), this->_tokens.end(), option);
-        if (iterator != this->_tokens.end() && ++iterator != this->_tokens.end())
+        auto iterator = std::find(this->_token.begin(), this->_token.end(), option);
+        if (iterator != this->_token.end() && ++iterator != this->_token.end())
         {
             return *iterator;
         }
@@ -39,12 +43,24 @@ public:
 
     bool optionExist(const std::string& option) const
     {
-        auto it = std::find(this->_tokens.begin(), this->_tokens.end(), option);
-        return (it != this->_tokens.end());
+        auto it = std::find(this->_token.begin(), this->_token.end(), option);
+        return (it != this->_token.end());
+    }
+
+    size_t tokenCount() const
+    {
+        return _token.size();
+    }
+
+    std::string token(const size_t index) const
+    {
+        if (index >= _token.size())
+            return std::string();
+        return _token[index];
     }
 
 private:
-    std::vector<std::string> _tokens;
+    std::vector<std::string> _token;
 };
 
 }

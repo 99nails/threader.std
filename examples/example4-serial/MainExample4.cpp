@@ -5,7 +5,7 @@
 #include "DateTimeUtils.h"
 #include "SignalHandler.h"
 
-#include "ThreadLog.h"
+#include "Log.h"
 #include "ThreadPing.h"
 #include "ThreadPong.h"
 

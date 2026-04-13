@@ -1,7 +1,7 @@
 #include "ThreadLog.h"
 
 #include "DateTimeUtils.h"
-#include "FileUtils.h"
+#include "LogMessagesTemplates.h"
 #include "MessageLog.h"
 #include "StdStringUtils.h"
 
@@ -10,34 +10,6 @@ namespace Threader::Threads {
 using namespace Threader::Utils;
 
 constexpr char MESSAGE_NAME_LOG_LEVEL[] = "Message.Log.Level";
-
-bool startLogSubsystem(const std::string &pathToBin,
-                       MessageConsumer *consumer,
-                       bool console,
-                       int level)
-{
-    if (ThreadBase::logThread())
-        return true;
-
-    auto thread = new ThreadLog(pathToBin, consumer, console, level);
-    thread->startThread();
-
-    return true;
-}
-
-void stopLogSubsystem()
-{
-    auto logThread = ThreadBase::logThread();
-    if (!logThread)
-        return;
-
-    logThread->postTerminateEvent();
-    while (!logThread->isThreadFinished())
-    {
-        DateTimeUtils::sleepMilliseconds(100);
-    }
-}
-
 
 ThreadLog *ThreadLog::_instance = nullptr;
 

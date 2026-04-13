@@ -44,6 +44,7 @@ set(THREADER_SOURCES
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
     include/utils/FileUtils.h sources/utils/FileUtils.cpp
     include/utils/IniFile.h sources/utils/IniFile.cpp
+    include/utils/Log.h sources/utils/Log.cpp
     include/utils/Logger.h sources/utils/Logger.cpp
     include/utils/MemoryBlock.h sources/utils/MemoryBlock.cpp
     include/utils/SerialUtils.h sources/utils/SerialUtils.cpp

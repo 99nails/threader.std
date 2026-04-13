@@ -8,6 +8,7 @@
 #include "DateTimeUtils.h"
 #include "ThreadUtils.h"
 #include "SignalHandler.h"
+#include "StdStringUtils.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -408,7 +409,8 @@ ThreadBase *ThreadBase::logThread()
     return _logThread;
 }
 
-void ThreadBase::writeLog(MessageLog::Ptr message, MessageConsumer *receiver)
+void ThreadBase::writeLog(MessageLog::Ptr message,
+                          MessageConsumer *receiver)
 {
     if (!message)
         return;
@@ -460,18 +462,9 @@ void ThreadBase::writeLog(const MessageLogTemplate messageTemplate, ...)
 
     va_list args;
     va_start(args, messageTemplate);
-    char resultPtr[1024];
-    memset(resultPtr, 0, sizeof(resultPtr));
-    auto resultCount = vsnprintf(resultPtr, sizeof(resultPtr), STRLOG(messageTemplate.text), args);
+    auto messageText = format(messageTemplate.text.c_str(), args);
     va_end(args);
 
-    std::string messageText;
-    if (resultCount > 0) {
-        messageText = std::string(resultPtr);
-    }
-    else {
-        messageText = "Не удалось выполнить форматирование строки";
-    }
     auto message = std::make_shared<MessageLog>(messageText,
                                                 messageTemplate.number,
                                                 messageTemplate.level,
@@ -484,18 +477,8 @@ void ThreadBase::outputDebug(const char *templateString, ...)
 {
     va_list args;
     va_start(args, templateString);
-    char resultPtr[1024];
-    memset(resultPtr, 0, sizeof(resultPtr));
-    auto resultCount = vsnprintf(resultPtr, sizeof(resultPtr), templateString, args);
+    auto messageText = format(templateString, args);
     va_end(args);
-
-    std::string messageText;
-    if (resultCount > 0) {
-        messageText = std::string(resultPtr);
-    }
-    else {
-        messageText = "Не удалось выполнить форматирование строки";
-    }
     std::cout << "\r\n" << messageText << "\r\n";
 }
 

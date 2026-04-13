@@ -1,8 +1,7 @@
 #include "MessageConsumer.h"
 
-namespace Threader {
-
-namespace Threads {
+namespace Threader::Threads
+{
 
 MessageConsumer::MessageConsumer()
 {
@@ -41,5 +40,4 @@ QueueMessages *MessageConsumer::queue()
     return &_queue;
 }
 
-} // namespace Threads
-} // namespace Threader
+}
