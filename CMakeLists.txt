@@ -56,7 +56,7 @@ add_subdirectory(examples)
 
 include(Common.cmake)
 
-add_custom_target(additional-files SOURCES
+add_custom_target(doc-files SOURCES
     README.md
     TODO.md
     )

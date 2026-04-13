@@ -1,15 +1,15 @@
 
 # TODO list
 
-- [*] UDP support
+- [x] UDP support
 - [ ] UDP brodcast/multicast
 - [ ] SSL support
-- [*] Daemonizing
+- [x] Daemonizing
 - [ ] Log output targets - file & console
-- [*] Log level in log subsystem start
-- [*] Thread id in thread termination
-- [*] Optimize thread statistic updates
-- [*] Erase semaphore on signal
-- [*] Erase old library versions in postinst script
+- [x] Log level in log subsystem start
+- [x] Thread id in thread termination
+- [x] Optimize thread statistic updates
+- [x] Erase semaphore on signal
+- [x] Erase old library versions in postinst script
 - [ ] Windows build
 - [ ] Application info class

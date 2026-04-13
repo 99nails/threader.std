@@ -149,18 +149,18 @@ if(QT_ENABLE)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 
     # example7-qteventloop
-    add_executable(example7-qteventloop
+    add_executable(example7-1-qteventloop
         example7-qteventloop/MainExample7-QtEventLoop.cpp
         example7-qteventloop/ThreadMainQtEventLoop.h example7-qteventloop/ThreadMainQtEventLoop.cpp
         )
 
-    target_include_directories(example7-qteventloop PUBLIC
+    target_include_directories(example7-1-qteventloop PUBLIC
         ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
         )
 
-    target_compile_features(example7-qteventloop PUBLIC cxx_std_17)
+    target_compile_features(example7-1-qteventloop PUBLIC cxx_std_17)
 
-    target_link_libraries(example7-qteventloop
+    target_link_libraries(example7-1-qteventloop
         pthread
         threader-std
         threader-qt
@@ -168,28 +168,23 @@ if(QT_ENABLE)
         )
 
     #example7-udevlistener
-    add_executable(example7-udevlistener
+    add_executable(example7-2-udevlistener
         example7-qteventloop/MainExample7-UdevListener.cpp
-
-#        example7-qteventloop/MainWindow.cpp
-#        example7-qteventloop/MainWindow.h
-#        example7-qteventloop/MainWindow.ui
-
         example7-qteventloop/MainWindowUdevListener.cpp
         example7-qteventloop/MainWindowUdevListener.h
         example7-qteventloop/MainWindowUdevListener.ui
         )
 
-    target_include_directories(example7-udevlistener PUBLIC
+    target_include_directories(example7-2-udevlistener PUBLIC
         ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads
         ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/utils
         ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
         ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/utils
         )
 
-    target_compile_features(example7-udevlistener PUBLIC cxx_std_17)
+    target_compile_features(example7-2-udevlistener PUBLIC cxx_std_17)
 
-    target_link_libraries(example7-udevlistener
+    target_link_libraries(example7-2-udevlistener
         pthread
         threader-std
         threader-qt
