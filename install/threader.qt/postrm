@@ -1,0 +1,3 @@
+#!/bin/bash
+rm -f /usr/local/lib/threader.qt/libthreader-qt.so*
+ldconfig

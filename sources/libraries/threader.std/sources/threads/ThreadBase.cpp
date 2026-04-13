@@ -50,7 +50,7 @@ ThreadBase::ThreadBase(MessageConsumer *parent,
     , _waitCount(0)
     , _nextDestroyTerminatedThreadsTickCount(
           DateTimeUtils::getNextTickCount(TIMEOUT_COLLECT_TERMINATED_THREADS_MILLISECONDS))
-    , _nextAccumulateStatisticTickCount(DateTimeUtils::getTickCount())
+    , _nextAccumulateStatisticTickCount(0)
     , _nextCallIdle(0)
 
     , _mutexTimeout(new std::mutex())
@@ -142,6 +142,8 @@ void ThreadBase::initializeThread()
 
     _pollerThread.setSignalHandler(this);
     _polling.registerPoller(&_pollerThread);
+
+    accumulateStatistic();
 }
 
 void ThreadBase::finalizeThread()
@@ -209,6 +211,8 @@ void ThreadBase::execute()
     auto *ownerThread = parentThread();
     if (ownerThread)
         ownerThread->postEventChildThreadTerminated();
+
+    writeLog(Message14, STRLOG(threadName()), threadId());
 }
 
 bool ThreadBase::accumulateStatistic()
@@ -337,7 +341,7 @@ void ThreadBase::waitEvents(uint32_t timeout)
 
     // ожидание голосования
     // результаты положительного голосования обрабатыватся внутри функции
-    // и вызываются соответствующие слоты
+    // и вызываются соответствующие методы обработчиков головосования
     // остальные результаты отдаются на обработку снаружи
     auto pollResult = _polling.poll(timeout);
 
@@ -348,7 +352,8 @@ void ThreadBase::waitEvents(uint32_t timeout)
 
     // если выход по таймауту или нужно вызывать Idle
     if (0 == pollResult || _nextCallIdle < DateTimeUtils::getTickCount()) {
-        onIdle();
+        if (!isThreadTerminated())
+            onIdle();
         _nextCallIdle = DateTimeUtils::getNextTickCount(timeout);
     }
     _aliveCheckedUtc = DateTimeUtils::msecsSinceEpochLocal();

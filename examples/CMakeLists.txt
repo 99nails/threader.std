@@ -211,6 +211,17 @@ target_compile_features(example8-udpsender PUBLIC cxx_std_17)
 target_link_libraries(example8-udpsender
     pthread
     threader-std
-    #  threader-qt
-    #  Qt5::Core
+    )
+
+#example9-threadtimer
+add_executable(example9-threadtimer
+    example9-threadtimer/MainExample9-ThreadTimer.cpp
+    example9-threadtimer/ThreadMainTimer.h example9-threadtimer/ThreadMainTimer.cpp
+    )
+
+target_compile_features(example9-threadtimer PUBLIC cxx_std_17)
+
+target_link_libraries(example9-threadtimer
+    pthread
+    threader-std
     )

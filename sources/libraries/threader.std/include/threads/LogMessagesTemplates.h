@@ -56,16 +56,19 @@ MESSAGE_TEMPLATE(12, 0, MessageType::Attention,
                  "Главный поток службы [%s] завершен")
 
 MESSAGE_TEMPLATE(13, 0, Debug,
-                 "Идентификатор потока [%s]: %d")
+                 "Запуск потока [%s]: %d")
 
-MESSAGE_TEMPLATE(14, 0, Message,
+MESSAGE_TEMPLATE(14, 0, Debug,
+                 "Остановлен поток [%s]: %d")
+
+MESSAGE_TEMPLATE(15, 0, Message,
                  "Статистика выполнения - потоков: %d шт., используемая память: %d Kb.")
 
-MESSAGE_TEMPLATE(15, 0, MessageType::Attention,
+MESSAGE_TEMPLATE(16, 0, MessageType::Warning,
                  "Получен сигнал завершения службы: %d")
 
-MESSAGE_TEMPLATE(16, 0, MessageType::Warning,
-                 "Служба [%s] уже запущена. Возможно некорректное выполнение приложения!")
+MESSAGE_TEMPLATE(17, 0, MessageType::Warning,
+                 "Служба [%s] уже запущена или была завершена ранее с критической ошибкой. Возможно некорректное выполнение приложения!")
 
 
 MESSAGE_TEMPLATE(20, 0, MessageType::Message,
