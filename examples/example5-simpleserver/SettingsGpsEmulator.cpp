@@ -18,9 +18,9 @@ SettingsGpsEmulator::SettingsGpsEmulator(std::string portName, uint64_t period, 
 
 bool SettingsGpsEmulator::readFromIniFile(IniFile &iniFile)
 {
-    _latitude = iniFile.valueOf(SECTION_NAME, "Latitude", _latitude);
-    _longitude = iniFile.valueOf(SECTION_NAME, "Longitude", _longitude);
-    _period = iniFile.valueOf(SECTION_NAME, "Period", _period) * 1000;
+    _latitude = iniFile.value(SECTION_NAME, "Latitude", _latitude);
+    _longitude = iniFile.value(SECTION_NAME, "Longitude", _longitude);
+    _period = iniFile.value(SECTION_NAME, "Period", _period) * 1000;
     _port = iniFile.value(SECTION_NAME, "Port", "");
 
     return true;

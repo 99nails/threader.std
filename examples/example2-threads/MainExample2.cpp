@@ -17,11 +17,9 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < 8192; i++)
     {
-        thread->postMessage(std::make_shared<MessageString>("Message.String",
-                                                            "Some text" + std::to_string(i)));
+        thread->postMessage1<MessageString>("Message.String",
+                                            "Some text" + std::to_string(i));
 
-        // if (i % 10 == 0)
-        //     DateTimeUtils::sleepMilliseconds(1);
     }
 
     thread->terminateThread();

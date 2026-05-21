@@ -52,9 +52,6 @@ public:
 #endif
 };
 
-}}
-
-
 template <size_t STACK_BUFFER_SIZE=256>
 static std::string format(const char * format, va_list &vl_original)
 {
@@ -93,14 +90,7 @@ static std::string format(const char * format, va_list &vl_original)
     return result;
 }
 
-static std::string format(const char * formatString, ...)
-{
-    va_list list;
-    va_start(list, formatString);
-    auto result = format(formatString, list);
-    va_end(list);
-    return result;
-}
+std::string format(const char * formatString, ...);
 
 template <typename T>
 bool vtonum(const std::string &view, T& value)
@@ -140,3 +130,6 @@ inline bool vtonum<bool>(const std::string &view, bool &value)
     value = (view == "true" || view == "1");
     return true;
 }
+
+}}
+

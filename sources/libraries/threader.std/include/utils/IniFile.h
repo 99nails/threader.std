@@ -145,16 +145,12 @@ public:
     std::string sectionParameterNameByIndex(const std::string &sectionName,
                                         const int index) const;
 
-    std::string value(const std::string &sectionName,
-                      const std::string &parameterName,
-                      const std::string &defaultValue);
-
     template <typename ValueType>
-    ValueType valueOf(const std::string &sectionName,
+    ValueType value(const std::string &sectionName,
                       const std::string &parameterName,
                       const ValueType &defaultValue)
     {
-        auto valueString = value(sectionName, parameterName, "");
+        auto valueString = value(sectionName, parameterName, std::string());
         if (valueString.empty())
             return defaultValue;
 
@@ -163,6 +159,25 @@ public:
             return result;
 
         return defaultValue;
+    }
+
+    std::string value(const std::string &sectionName,
+                      const std::string &parameterName,
+                      const std::string &defaultValue)
+    {
+        if (!_sectionHash.count(sectionName))
+            return defaultValue;
+
+        auto section = _sectionHash[sectionName];
+        if (!section)
+            return defaultValue;
+
+        auto parameter = section->parameterByName(parameterName);
+        if (!parameter)
+            return defaultValue;
+
+        auto valueString = parameter->value();
+        return valueString;
     }
 
     StdStringList comments(const std::string &sectionName,

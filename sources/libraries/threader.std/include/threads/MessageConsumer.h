@@ -18,6 +18,14 @@ public:
      */
     virtual void postMessage(const MessageBase::Ptr &message);
 
+    template <typename MessageType, typename... _Args>
+    inline void postMessage1(_Args&&... __args)
+    {
+        auto message = std::make_shared<MessageType>(__args...);
+//        auto message = std::make_shared<MessageType>(std::forward<_Args>(__args)...);
+        postMessage(message);
+    }
+
     /**
      * @brief postMessages - Отправка потоку группы сообщений
      * @param messageList - Группа сообщений

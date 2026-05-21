@@ -46,7 +46,7 @@ void ThreadLog::setLevel(const int level)
     if (!_instance)
         return;
 
-    _instance->postMessage(std::make_shared<MessageInt>(MESSAGE_NAME_LOG_LEVEL, level));
+    _instance->postMessage1<MessageInt>(MESSAGE_NAME_LOG_LEVEL, level);
 }
 
 void ThreadLog::flush()

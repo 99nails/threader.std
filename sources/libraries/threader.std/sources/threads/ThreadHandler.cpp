@@ -312,12 +312,10 @@ void ThreadHandler::onReadyRead(HandlerBase &sender)
         {
             if (parentThread())
             {
-                // создание сообщения с бинарными данными
-                auto message = std::make_shared<MessageBinary>(MESSAGE_NAME_DEVICE_DATA_INPUT,
-                                                               _inputBuffer->data(),
-                                                               _inputBuffer->size());
-                // отправка сообщения с бинарными данными
-                parentThread()->postMessage(message);
+                // создание и отправка сообщения с бинарными данными
+                parentThread()->postMessage1<MessageBinary>(MESSAGE_NAME_DEVICE_DATA_INPUT,
+                                                            _inputBuffer->data(),
+                                                            _inputBuffer->size());
             }
             _inputBuffer->clear();
         }

@@ -45,12 +45,11 @@ void writeLog(const MessageLogTemplate messageTemplate, ...)
     auto messageText = format(messageTemplate.text.c_str(), list);
     va_end(list);
 
-    auto message = std::make_shared<MessageLog>(messageText,
-                                                messageTemplate.number,
-                                                messageTemplate.level,
-                                                messageTemplate.subSystem,
-                                                messageTemplate.messageType);
-    logThread->postMessage(message);
+    logThread->postMessage1<MessageLog>(messageText,
+                                        messageTemplate.number,
+                                        messageTemplate.level,
+                                        messageTemplate.subSystem,
+                                        messageTemplate.messageType);
 }
 
 }

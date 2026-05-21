@@ -93,6 +93,15 @@ std::string StdStringUtils::trim(const std::string &s)
     return ltrim(rtrim(s));
 }
 
+std::string format(const char *formatString, ...)
+{
+    va_list list;
+    va_start(list, formatString);
+    auto result = format(formatString, list);
+    va_end(list);
+    return result;
+}
+
 #ifdef WIN32
 
 std::string StdStringUtils::ConvertCP1251ToUTF8(const std::string &str)
@@ -132,3 +141,4 @@ std::string StdStringUtils::ConvertUTF8ToCP1251(const std::string &str)
 #endif
 
 }}
+

@@ -1,3 +1,14 @@
 #!/bin/bash
-rm -f /usr/local/lib/threader.std/libthreader-std.so*
+echo "Скрипт [$0] с параметрами [$1] [$2] запущен"
+
+if [[ "$1" == "upgrade" ]]; then
+    echo "Удаление предыдущих версий..."
+    rm -fv /usr/local/lib/threader.std/libthreader-std.so*
+    echo "Удаление предыдущих версий выполнено"
+fi
+
+echo "Обновление списка библиотек..."
 ldconfig
+echo "Обновление списка библиотек выполнено"
+
+echo "Скрипт [$0] с параметрами [$1] [$2] завершен"

@@ -62,9 +62,7 @@ void ThreadMainTimeServer::doMessageDateTime(const MessageString::Ptr &message)
 
     for (auto thread : _threads)
     {
-        auto messageBroadcast = std::make_shared<MessageString>(message->name(),
-                                                                message->value());
-        thread->postMessage(messageBroadcast);
+        thread->postMessage1<MessageString>(message->name(), message->value());
     }
 }
 

@@ -1,4 +1,5 @@
 #include "UdevEnumerator.h"
+#include "StdStringUtils.h"
 
 #include <algorithm>
 #include <iostream>
@@ -7,6 +8,10 @@ using namespace Threader::Utils;
 
 bool handler(UdevDeviceInfo deviceInfo)
 {
+    if (!StdStringUtils::startWith(deviceInfo.sysname, "ttyUSB")
+            && !StdStringUtils::startWith(deviceInfo.sysname, "ttyACM"))
+        return true;
+
     std::cout << "Path: "<< deviceInfo.path.c_str() << std::endl
               << "\tPath value: "<< deviceInfo.syspath.c_str() << std::endl
               << "\tSubsystem: "<< deviceInfo.subsystem.c_str() << std::endl

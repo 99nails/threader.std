@@ -16,6 +16,7 @@
 #include <poll.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 namespace Threader::Threads {
 
@@ -87,10 +88,6 @@ DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
     _serviceName = serviceName;
     _instance = this;
     _console = false;
-
-    // _arguments.reserve(argc);
-    // for (int i = 0; i < argc; i++)
-    //     _arguments.push_back(argv[i]);
 
     _pipeDescriptors[0] = INVALID_DESCRIPTOR;
     _pipeDescriptors[1] = INVALID_DESCRIPTOR;
@@ -268,8 +265,6 @@ bool DaemonApplication<ThreadMainType>::parseArguments()
     constexpr char PARAMETER_NAME_INSTALL[] = "--install";
     constexpr char PARAMETER_NAME_LOG[] = "--log";
     constexpr char PARAMETER_NAME_UNINSTALL[] = "--uninstall";
-
-    // CommandLineParser commandLine(_arguments);
 
     _console = appInfo().commandLine().optionExist(PARAMETER_NAME_CONSOLE);
 
