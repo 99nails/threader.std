@@ -49,11 +49,15 @@ public:
     void setData(const void *data, const size_t size);
     void setData(const MemoryBlock::Ptr &data);
 
+    size_t size() const;
+
     virtual bool write(MemoryBlock::Ptr &data) const = 0;
+
 private:
     uint64_t _createdUtc;
     uint64_t _createdTickCount;
     void* _data;
+    size_t _size;
 };
 
 class PacketFactoryBase
