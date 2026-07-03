@@ -114,10 +114,9 @@ void ThreadMainWithouSettings::snapshotThreads(bool rightNow)
     ThreadBase *logThreadInstance = logThread();
     if (logThreadInstance)
     {
-        logThreadInstance->postMessage(std::make_shared<MessageWriteToFile>(
-                                           _threadStatisticFileName,
-                                           statisticString,
-                                           MessageWriteToFile::WriteMode::Truncate));
+        logThreadInstance->postMessage1<MessageWriteToFile>(_threadStatisticFileName,
+                                                            statisticString,
+                                                            MessageWriteToFile::WriteMode::Truncate);
     }
 
     if (rightNow || _nextBuildCommonStatisticTickCount <= tickCount)

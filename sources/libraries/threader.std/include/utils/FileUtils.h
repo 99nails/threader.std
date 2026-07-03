@@ -2,15 +2,20 @@
 
 #include "ThreadsCommon.h"
 
+#include <dirent.h>
+#include <list>
 #include <string>
 
 namespace Threader::Utils {
+
+using DirentList = std::list<dirent>;
 
 class FileUtils
 {
 public:
     static Descriptor fileOpenOrCreate(const std::string &fileName);
     static Descriptor fileCreate(const std::string &fileName);
+    static Descriptor fileOpen(const std::string &fileName);
     static void fileClose(Descriptor descriptor);
     static void fileSeek(Descriptor descriptor, int mode, int offset);
     static size_t fileWrite(const Descriptor &descriptor,
@@ -26,6 +31,8 @@ public:
     static std::string extractFilePath(const std::string &fileName);
     static std::string extractFileName(const std::string &fileName);
     static std::string extractFileExtension(const std::string &fileName);
+
+    static DirentList scanFiles(const std::string &path);
 
     static constexpr char DELIMITER =
 #ifdef linux

@@ -41,7 +41,7 @@ void ThreadPing::processMessage(const MessageBase::Ptr &message)
     {
         if (_threadPong)
         {
-            _threadPong->postMessage(std::make_shared<MessageBase>(MESSAGE_NAME_PING));
+            _threadPong->postMessage1<MessageBase>(MESSAGE_NAME_PING);
             writeLog(Message123, MESSAGE_NAME_PING);
         }
     }

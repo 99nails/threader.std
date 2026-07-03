@@ -64,7 +64,7 @@ bool DaemonUtils::daemonUnregister(const std::string &serviceName,
     if (!FileUtils::isFileExists(serviceFileName))
     {
         if (resultString)
-            *resultString = format("Ошибка снятия регистрации службы: файл %s не найден", serviceFileName.c_str());
+            *resultString = format("файл %s не найден", serviceFileName.c_str());
         return false;
     }
 

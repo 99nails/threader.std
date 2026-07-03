@@ -148,7 +148,7 @@ target_link_libraries(example6-waitdevice
 if(QT_ENABLE)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 
-    # example7-qteventloop
+    # example7-1-qteventloop
     add_executable(example7-1-qteventloop
         example7-qteventloop/MainExample7-QtEventLoop.cpp
         example7-qteventloop/ThreadMainQtEventLoop.h example7-qteventloop/ThreadMainQtEventLoop.cpp
@@ -167,7 +167,7 @@ if(QT_ENABLE)
         Qt5::Core
         )
 
-    #example7-udevlistener
+    #example7-2-udevlistener
     add_executable(example7-2-udevlistener
         example7-qteventloop/MainExample7-UdevListener.cpp
         example7-qteventloop/MainWindowUdevListener.cpp

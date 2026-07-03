@@ -136,9 +136,9 @@ void ThreadGps::doGpsCommandGNZDA(const StdStringVector &words)
     if (dateTime > 0)
     {
         writeLog(Message430, dateTimeString.c_str());
+
         if (parentThread())
-            parentThread()->postMessage(std::make_shared<MessageString>(MESSAGE_NAME_DATETIME,
-                                                                        dateTimeString));
+            parentThread()->postMessage1<MessageString>(MESSAGE_NAME_DATETIME, dateTimeString);
     }
 }
 

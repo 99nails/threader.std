@@ -1,20 +1,26 @@
 #pragma once
 
 #include "CommandLineParser.h"
+#include "DaemonApplicationInfo.h"
 #include "DaemonUtils.h"
 #include "DateTimeUtils.h"
-#include "FileUtils.h"
+#include "LogMessagesTemplates.h"
 #include "SignalHandler.h"
 
-#include "ThreadLog.h"
+#include "Log.h"
 
 #include <csignal>
 #include <iostream>
 
+#include <fcntl.h>
+#include <poll.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-using namespace Threader::Threads;
+namespace Threader::Threads {
+
+using namespace Threader::Utils;
 
 void readLine()
 {
@@ -49,11 +55,8 @@ private:
     ThreadMainType *_threadMain;
     bool _isRunning = true;
     int _argc;
-    std::vector<std::string> _arguments;
     std::string _description;
     static std::string _serviceName;
-    std::string _binaryFileName;
-    std::string _binaryPath;
 
     Descriptor _pipeDescriptors[2];
 
@@ -85,12 +88,11 @@ DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
     _serviceName = serviceName;
     _instance = this;
     _console = false;
-    _arguments.reserve(argc);
-    for (int i = 0; i < argc; i++)
-        _arguments.push_back(argv[i]);
 
     _pipeDescriptors[0] = INVALID_DESCRIPTOR;
     _pipeDescriptors[1] = INVALID_DESCRIPTOR;
+
+    appInfo().setArguments(argc, argv);
 }
 
 template<class ThreadMainType>
@@ -101,40 +103,42 @@ int DaemonApplication<ThreadMainType>::run()
 
     if (_install)
     {
-        ThreadBase::writeLog(Message4, _serviceName.c_str());
+        writeLog(Message50, _serviceName.c_str());
 
         std::string resultString;
+        auto applicationBinaryFile = appInfo().binaryPath() + appInfo().binaryFileName();
         auto registered = DaemonUtils::daemonRegister(_serviceName,
-                                                      _arguments[0],
+                                                      applicationBinaryFile,
+//                                                      appInfo().commandLine().token(0),
                                                       _description,
                                                       &resultString);
         if (registered)
         {
-            ThreadBase::writeLog(Message5, _serviceName.c_str());
+            writeLog(Message51, _serviceName.c_str());
             stopLogSubsystem();
             return 0;
         }
 
-        ThreadBase::writeLog(Message6, _serviceName.c_str(), resultString.c_str());
+        writeLog(Message52, _serviceName.c_str(), resultString.c_str());
         stopLogSubsystem();
         return -1;
     }
 
     if (_uninstall)
     {
-        ThreadBase::writeLog(Message7, _serviceName.c_str());
+        writeLog(Message60, _serviceName.c_str());
 
         std::string resultString;
         auto unregistered = DaemonUtils::daemonUnregister(_serviceName,
                                                           &resultString);
         if (unregistered)
         {
-            ThreadBase::writeLog(Message8, _serviceName.c_str());
+            writeLog(Message61, _serviceName.c_str());
             stopLogSubsystem();
             return 0;
         }
 
-        ThreadBase::writeLog(Message9, _serviceName.c_str(), resultString.c_str());
+        writeLog(Message62, _serviceName.c_str(), resultString.c_str());
         stopLogSubsystem();
         return -1;
     }
@@ -142,7 +146,7 @@ int DaemonApplication<ThreadMainType>::run()
 
     if (DaemonUtils::daemonIsRunning(_serviceName))
     {
-        ThreadBase::writeLog(Message17, _serviceName.c_str());
+        writeLog(Message17, _serviceName.c_str());
     }
 
     DaemonUtils::daemonSetRunning(_serviceName, true);
@@ -169,8 +173,7 @@ template<class ThreadMainType>
 bool DaemonApplication<ThreadMainType>::initialize()
 {
 #ifdef linux
-    if (_arguments.size() > 0)
-        setErrorSignalHandler(_arguments[0].c_str());
+    setErrorSignalHandler(appInfo().commandLine().token(0).c_str());
 
     setlocale(LC_ALL, "ru_RU.UTF-8");
     setlocale(LC_NUMERIC, "C");
@@ -183,7 +186,9 @@ bool DaemonApplication<ThreadMainType>::initialize()
     setlocale(LC_ALL, "russian_Russia.1251");
     auto line = StdStringUtils::ConvertUTF8ToCP1251(MESSAGE_START_HINT);
 #endif
-    if (_arguments.size() < 1)
+    chdir(appInfo().binaryPath().c_str());
+
+    if (appInfo().commandLine().tokenCount() < 1)
         return false;
 
     if (!parseArguments())
@@ -192,15 +197,15 @@ bool DaemonApplication<ThreadMainType>::initialize()
     if (_console)
         std::cout << line;
 
-    startLogSubsystem(_arguments[0].c_str(), nullptr, _console, _logLevel);
+    bool clearHistory = !_install && !_uninstall;
+    if (!clearHistory)
+        _console = true;
 
-    _binaryFileName = FileUtils::extractFileName(_arguments[0]);
-    _binaryPath = FileUtils::extractFilePath(FileUtils::absolutePath(_arguments[0]));
+    startLogSubsystem(appInfo().binaryPath() + appInfo().binaryFileName(),
+                      nullptr, _console, _logLevel, clearHistory);
 
     if (_serviceName.empty())
-        _serviceName = _binaryFileName;
-
-    chdir(_binaryPath.c_str());
+        _serviceName = appInfo().binaryFileName();
 
     auto result = signal(SIGINT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     result &= signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
@@ -268,27 +273,25 @@ bool DaemonApplication<ThreadMainType>::parseArguments()
     constexpr char PARAMETER_NAME_LOG[] = "--log";
     constexpr char PARAMETER_NAME_UNINSTALL[] = "--uninstall";
 
-    CommandLineParser commandLine(_arguments);
+    _console = appInfo().commandLine().optionExist(PARAMETER_NAME_CONSOLE);
 
-    _console = commandLine.optionExist(PARAMETER_NAME_CONSOLE);
-
-    if (commandLine.optionExist(PARAMETER_NAME_LOG))
+    if (appInfo().commandLine().optionExist(PARAMETER_NAME_LOG))
     {
-        const auto logLevelString = commandLine.optionValue(PARAMETER_NAME_LOG);
+        const auto logLevelString = appInfo().commandLine().optionValue(PARAMETER_NAME_LOG);
         if (!logLevelString.empty() && logLevelString.find_first_not_of("0123456789") == std::string::npos)
             _logLevel = std::stoi(logLevelString);
     }
 
-    if (commandLine.optionExist(PARAMETER_NAME_INSTALL))
+    if (appInfo().commandLine().optionExist(PARAMETER_NAME_INSTALL))
     {
-        if (_arguments.size() != 2)
+        if (appInfo().commandLine().tokenCount() != 2)
             return false;
 
         _install = true;
     }
-    else if (commandLine.optionExist(PARAMETER_NAME_UNINSTALL))
+    else if (appInfo().commandLine().optionExist(PARAMETER_NAME_UNINSTALL))
     {
-        if (_arguments.size() != 2)
+        if (appInfo().commandLine().tokenCount() != 2)
             return false;
 
         _uninstall = true;
@@ -300,7 +303,7 @@ bool DaemonApplication<ThreadMainType>::parseArguments()
 template<class ThreadMainType>
 void DaemonApplication<ThreadMainType>::signalHandler(int signal)
 {
-    ThreadBase::writeLog(Message16, signal);
+    writeLog(Message16, signal);
 
     DaemonUtils::daemonSetRunning(_serviceName, false);
 
@@ -319,3 +322,4 @@ void DaemonApplication<ThreadMainType>::signalHandler(int signal)
     }
 }
 
+}

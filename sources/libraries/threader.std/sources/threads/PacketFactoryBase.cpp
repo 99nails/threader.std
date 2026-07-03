@@ -14,6 +14,7 @@ PacketBase::PacketBase(const char *data,
     : _createdUtc(DateTimeUtils::msecsSinceEpochLocal())
     , _createdTickCount(DateTimeUtils::getTickCount())
     , _data(nullptr)
+    , _size(0)
 {
     setData(data, size);
 }
@@ -22,6 +23,7 @@ PacketBase::PacketBase(int size)
     : _createdUtc(DateTimeUtils::msecsSinceEpochLocal())
     , _createdTickCount(DateTimeUtils::getTickCount())
     , _data(nullptr)
+    , _size(size)
 {
     _data = calloc(1, size);
 }
@@ -30,11 +32,13 @@ PacketBase::PacketBase(const MemoryBlock::Ptr &data)
     : _createdUtc(DateTimeUtils::msecsSinceEpochLocal())
     , _createdTickCount(DateTimeUtils::getTickCount())
     , _data(nullptr)
+    , _size(0)
 {
     if (data)
     {
-        _data = calloc(1, data->size());
-        memcpy(_data, data->data(), data->size());
+        _size = data->size();
+        _data = calloc(1, _size);
+        memcpy(_data, data->data(), _size);
     }
 }
 
@@ -50,6 +54,7 @@ void PacketBase::clear()
         free(_data);
         _data = nullptr;
     }
+    _size = 0;
 }
 
 uint64_t PacketBase::created() const
@@ -73,6 +78,7 @@ void PacketBase::setData(const void *data, const size_t size)
 
     if (data)
     {
+        _size = size;
         _data = calloc(1, size);
         memcpy(_data, data, size);
     }
@@ -87,6 +93,12 @@ void PacketBase::setData(const MemoryBlock::Ptr &data)
         setData(data->data(), data->size());
     }
 }
+
+size_t PacketBase::size() const
+{
+    return _size;
+}
+
 
 void PacketFactoryBase::setLastResult(int value)
 {

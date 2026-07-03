@@ -52,21 +52,17 @@ public:
 #endif
 };
 
-}}
-
 template <size_t STACK_BUFFER_SIZE=256>
-static std::string format(const char * format, ...)
+static std::string format(const char * format, va_list &vl_original)
 {
     std::string result;
     char stack_buffer[STACK_BUFFER_SIZE];
     char *heap_buffer = nullptr;
     char *choosen_buffer = stack_buffer;
 
-    va_list vl_original;
     va_list vl_working;
     va_list vl_working_2;
 
-    va_start(vl_original, format);
     va_copy(vl_working, vl_original);
     va_copy(vl_working_2, vl_original);
 
@@ -85,7 +81,6 @@ static std::string format(const char * format, ...)
 
     va_end(vl_working);
     va_end(vl_working_2);
-    va_end(vl_original);
 
     result.assign(choosen_buffer);
 
@@ -94,6 +89,8 @@ static std::string format(const char * format, ...)
 
     return result;
 }
+
+std::string format(const char * formatString, ...);
 
 template <typename T>
 bool vtonum(const std::string &view, T& value)
@@ -133,3 +130,6 @@ inline bool vtonum<bool>(const std::string &view, bool &value)
     value = (view == "true" || view == "1");
     return true;
 }
+
+}}
+

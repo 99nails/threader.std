@@ -10,6 +10,8 @@
 
 using namespace Threader::Threads;
 
+DECLARE_MESSAGE_NAMED(NamedString, "Message.Named.String", std::string)
+
 class MessageConsumerThread : public MessageConsumer
 {
 public:
@@ -104,8 +106,11 @@ int main (int argc, char *argv[])
 
     for (int i = 0; i < 8192; i++)
     {
-        thread.postMessage(std::make_shared<MessageString>("Message.String",
-                                                           "Some text"));
+//        thread.postMessage(std::make_shared<MessageString>("Message.String",
+//                                                           "Some text"));
+        thread.postMessage1<MessageNamedString>("Some text");
+
+
         if (i % 1000 == 0)
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }

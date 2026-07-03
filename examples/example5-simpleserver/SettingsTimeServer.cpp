@@ -20,9 +20,9 @@ SettingsTimeServer::SettingsTimeServer(const uint32_t &aliveTimeout,
 
 bool SettingsTimeServer::readFromIniFile(IniFile &iniFile)
 {
-    _aliveTimeout = iniFile.valueOf(SECTION_NAME, PARAMETER_NAME_ALIVE_TIMEOUT, _aliveTimeout);
-    _port = iniFile.valueOf(SECTION_NAME, PARAMETER_NAME_PORT, _port);
-    _reconnectTimeout = iniFile.valueOf(SECTION_NAME, PARAMETER_NAME_RECONNECT_TIMEOUT, _reconnectTimeout);
+    _aliveTimeout = iniFile.value(SECTION_NAME, PARAMETER_NAME_ALIVE_TIMEOUT, _aliveTimeout);
+    _port = iniFile.value(SECTION_NAME, PARAMETER_NAME_PORT, _port);
+    _reconnectTimeout = iniFile.value(SECTION_NAME, PARAMETER_NAME_RECONNECT_TIMEOUT, _reconnectTimeout);
     return true;
 }
 

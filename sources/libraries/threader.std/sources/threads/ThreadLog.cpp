@@ -1,9 +1,10 @@
 #include "ThreadLog.h"
 
 #include "DateTimeUtils.h"
-#include "FileUtils.h"
+#include "LogMessagesTemplates.h"
 #include "MessageLog.h"
 #include "StdStringUtils.h"
+#include "ThreadLogCleaner.h"
 
 namespace Threader::Threads {
 
@@ -11,48 +12,32 @@ using namespace Threader::Utils;
 
 constexpr char MESSAGE_NAME_LOG_LEVEL[] = "Message.Log.Level";
 
-bool startLogSubsystem(const std::string &pathToBin,
-                       MessageConsumer *consumer,
-                       bool console,
-                       int level)
-{
-    if (ThreadBase::logThread())
-        return true;
-
-    auto thread = new ThreadLog(pathToBin, consumer, console, level);
-    thread->startThread();
-
-    return true;
-}
-
-void stopLogSubsystem()
-{
-    auto logThread = ThreadBase::logThread();
-    if (!logThread)
-        return;
-
-    logThread->postTerminateEvent();
-    while (!logThread->isThreadFinished())
-    {
-        DateTimeUtils::sleepMilliseconds(100);
-    }
-}
-
-
 ThreadLog *ThreadLog::_instance = nullptr;
 
 ThreadLog::ThreadLog(const std::string &pathToBin,
                      MessageConsumer *consumer,
                      const bool console,
-                     const int level)
+                     const int level,
+                     const bool clearHistory,
+                     const int historyDepth,
+                     const bool pack,
+                     const int packDepth)
     : ThreadBase(nullptr, "Thread.Log")
     , _logger(nullptr)
     , _consumer(consumer)
 {
     _instance = this;
     _logger = new Logger(console, pathToBin, level, logDetailsAllWithoutDate);
-
     ThreadBase::setLogThread(this, _logger->level());
+
+    if (clearHistory)
+    {
+        _threadLogCleaner =  new ThreadLogCleaner(this,
+                                                  _logger->pathToLog(),
+                                                  historyDepth,
+                                                  pack,
+                                                  packDepth);
+    }
 
     setTimeout(2000);
 }
@@ -74,7 +59,7 @@ void ThreadLog::setLevel(const int level)
     if (!_instance)
         return;
 
-    _instance->postMessage(std::make_shared<MessageInt>(MESSAGE_NAME_LOG_LEVEL, level));
+    _instance->postMessage1<MessageInt>(MESSAGE_NAME_LOG_LEVEL, level);
 }
 
 void ThreadLog::flush()
@@ -94,6 +79,9 @@ void ThreadLog::onThreadStarted()
                             format(Message0.text.c_str(),
                                    _logger->level(),
                                    _logger->pathToLog().c_str()));
+
+    if (_threadLogCleaner)
+        registerAndStartChildThread(_threadLogCleaner);
 }
 
 void ThreadLog::onThreadFinishing()

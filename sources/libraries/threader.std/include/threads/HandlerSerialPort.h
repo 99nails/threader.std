@@ -2,8 +2,6 @@
 
 #include "HandlerBase.h"
 
-// #include <QObject>
-
 #ifdef WIN32
 #include <windows.h>
 #endif

@@ -38,7 +38,7 @@ bool ThreadTimer::multiShot() const
 
 void ThreadTimer::asyncSetTimeout(const int &delayMsecs)
 {
-    postMessage(std::make_shared<MessageTimerSetTimeout>("WakeUp", delayMsecs));
+    postMessage1<MessageTimerSetTimeout>("WakeUp", delayMsecs);
 }
 
 void ThreadTimer::processMessage(const MessageBase::Ptr &message)
@@ -60,7 +60,7 @@ void ThreadTimer::sendTimerMessage()
 {
     if (!parentThread())
         return;
-    parentThread()->postMessage(std::make_shared<MessageTimer>(_timerName, _shotCount));
+    parentThread()->postMessage1<MessageTimer>(_timerName, _shotCount);
     _shotCount++;
 }
 

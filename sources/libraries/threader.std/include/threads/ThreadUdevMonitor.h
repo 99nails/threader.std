@@ -2,7 +2,6 @@
 
 #include "PollerUdev.h"
 #include "ThreadBase.h"
-#include "UdevEnumerator.h"
 
 namespace Threader::Threads {
 
