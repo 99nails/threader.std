@@ -109,7 +109,6 @@ int DaemonApplication<ThreadMainType>::run()
         auto applicationBinaryFile = appInfo().binaryPath() + appInfo().binaryFileName();
         auto registered = DaemonUtils::daemonRegister(_serviceName,
                                                       applicationBinaryFile,
-//                                                      appInfo().commandLine().token(0),
                                                       _description,
                                                       &resultString);
         if (registered)
