@@ -50,6 +50,23 @@ Descriptor FileUtils::fileCreate(const std::string &fileName)
     return descriptor;
 }
 
+Descriptor FileUtils::fileOpen(const std::string &fileName)
+{
+#ifdef linux
+    Descriptor descriptor = ::open(fileName.c_str(), O_RDWR, S_IWUSR | S_IRUSR | S_IROTH);
+#endif
+#ifdef WIN32
+    Descriptor descriptor = CreateFileA((LPCSTR)fileName.c_str(),
+                                        GENERIC_READ | GENERIC_WRITE,
+                                        FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                        nullptr,
+                                        OPEN_EXISTING,
+                                        0, 0);
+
+#endif
+    return descriptor;
+}
+
 void FileUtils::fileClose(Descriptor descriptor)
 {
 #ifdef linux
@@ -78,9 +95,9 @@ size_t FileUtils::fileWrite(const Descriptor &descriptor, const std::string &dat
 
 #endif
 #ifdef _WIN32
-        DWORD writtenCount;
-        WriteFile(_descriptor, idata.c_str(), data.length(), &writtenCount, nullptr);
-        return writtenCount;
+    DWORD writtenCount;
+    WriteFile(_descriptor, idata.c_str(), data.length(), &writtenCount, nullptr);
+    return writtenCount;
 #endif
 }
 
@@ -104,7 +121,7 @@ bool FileUtils::isFileExists(const std::string &fileName)
 #ifdef linux
     struct stat sb;
     return stat(fileName.c_str(), &sb) == 0
-           && S_ISREG(sb.st_mode);
+            && S_ISREG(sb.st_mode);
 #endif
 #ifdef WIN32
     _finddata_t data;
@@ -133,9 +150,9 @@ std::string FileUtils::absolutePath(const std::string &relativePath)
 bool FileUtils::makeDir(const std::string &path)
 {
     return mkdir(path.c_str()
-#ifdef linux
-                        , S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
-#endif
+             #ifdef linux
+                 , S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
+             #endif
                  ) == 0;
 }
 
@@ -166,7 +183,30 @@ std::string FileUtils::extractFileExtension(const std::string &fileName)
     auto shortName = extractFileName(fileName);
     auto pointIndex = shortName.rfind('.');
     return (std::string::npos == pointIndex) ? ""
-                                             : fileName.substr(pointIndex);
+                                             : shortName.substr(pointIndex);
+}
+
+int filter_file(const struct dirent *entry) {
+    return (entry->d_type != DT_DIR);
+}
+
+DirentList FileUtils::scanFiles(const std::string &path)
+{
+    struct dirent **namelist;
+    int n = scandir(path.c_str(), &namelist, filter_file, alphasort);
+    DirentList result;
+
+    if (n >= 0)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            result.push_back(*namelist[i]);
+            free(namelist[i]);
+        }
+        free(namelist);
+    }
+
+    return result;
 }
 
 }

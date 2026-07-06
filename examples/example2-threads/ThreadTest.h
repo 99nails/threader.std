@@ -4,6 +4,8 @@
 
 using namespace Threader::Threads;
 
+DECLARE_MESSAGE_NAMED(NamedString, "Message.Named.String", std::string)
+
 class ThreadTest : public ThreadBase
 {
 public:

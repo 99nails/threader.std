@@ -9,8 +9,12 @@ using namespace Threader::Threads;
 
 bool startLogSubsystem(const std::string &pathToBin,
                        MessageConsumer *consumer = nullptr,
-                       bool console = false,
-                       int level = 9);
+                       const bool console = false,
+                       const int level = 9,
+                       const bool clearHistory = true,
+                       const int historyDepth = 30,
+                       const bool pack = true,
+                       const int packDepth = 2);
 
 void stopLogSubsystem();
 

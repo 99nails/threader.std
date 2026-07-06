@@ -1,6 +1,7 @@
 #include "Log.h"
 
 #include "ThreadLog.h"
+#include "ThreadLogCleaner.h"
 #include "StdStringUtils.h"
 
 #include <cstdarg>
@@ -9,13 +10,24 @@ namespace Threader::Utils {
 
 bool startLogSubsystem(const std::string &pathToBin,
                        MessageConsumer *consumer,
-                       bool console,
-                       int level)
+                       const bool console,
+                       const int level,
+                       const bool clearHistory,
+                       const int historyDepth,
+                       const bool pack,
+                       const int packDepth)
 {
     if (ThreadBase::logThread())
         return true;
 
-    auto thread = new ThreadLog(pathToBin, consumer, console, level);
+    auto thread = new ThreadLog(pathToBin,
+                                consumer,
+                                console,
+                                level,
+                                clearHistory,
+                                historyDepth,
+                                pack,
+                                packDepth);
     thread->startThread();
 
     return true;

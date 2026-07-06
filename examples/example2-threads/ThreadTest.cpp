@@ -1,4 +1,5 @@
 #include "ThreadTest.h"
+#include "SignalHandler.h"
 
 #include <iostream>
 
@@ -16,8 +17,14 @@ void ThreadTest::processMessage(const MessageBase::Ptr &message)
 
     _count++;
 
-    const auto messageName = message->name();
-    std::cout << _count << ". " << message->toString() << std::endl;
+    auto messageNamedString = std::dynamic_pointer_cast<MessageNamedString>(message);
+    if (!messageNamedString)
+        return;
+
+    const auto messageName = messageNamedString->name();
+    std::cout << _count << ". " << message->toString()
+              << " content: " << messageNamedString->value()
+              << std::endl;
 }
 
 

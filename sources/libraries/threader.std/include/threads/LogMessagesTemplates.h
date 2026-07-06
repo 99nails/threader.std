@@ -4,7 +4,8 @@
 
 using namespace Threader::Utils;
 
-namespace Threader::Threads {
+namespace Threader::Threads
+{
 
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Log"
@@ -22,25 +23,20 @@ MESSAGE_TEMPLATE(2, 0, MessageType::Attention,
 MESSAGE_TEMPLATE(3, 0, MessageType::Attention,
                  "Подробность протоколирования: %d")
 
-
 MESSAGE_TEMPLATE(4, 0, MessageType::Attention,
-                 "Регистрация службы [%s]...")
+                 "Запуск очистки протоколов работы за %d дней...");
 
 MESSAGE_TEMPLATE(5, 0, MessageType::Attention,
-                 "Регистрация службы [%s] выполнена")
+                 "Очистка протоколов работы за %d дней завершена");
 
-MESSAGE_TEMPLATE(6, 0, MessageType::Attention,
-                 "Ошибка регистрации службы [%s]: %s")
-
+MESSAGE_TEMPLATE(6, 0, MessageType::Message,
+                 "Очистка протоколов работы, файл [%s], операция [%s]...");
 
 MESSAGE_TEMPLATE(7, 0, MessageType::Attention,
-                 "Снятие регистрации службы [%s]...")
+                 "Очистка протоколов работы, файл [%s], операция [%s] выполнена");
 
-MESSAGE_TEMPLATE(8, 0, MessageType::Attention,
-                 "Снятие регистрации службы [%s] выполнено")
-
-MESSAGE_TEMPLATE(9, 0, MessageType::Attention,
-                 "Ошибка снятия регистрации службы [%s]: %s")
+MESSAGE_TEMPLATE(8, 0, MessageType::Error,
+                 "Ошибка очистки протоколов работы, файл [%s], операция [%s]: %s");
 
 #undef LOG_SUBSYSTEM
 #define LOG_SUBSYSTEM "Daemon"
@@ -79,6 +75,26 @@ MESSAGE_TEMPLATE(21, 0, MessageType::Message,
 
 MESSAGE_TEMPLATE(22, 0, MessageType::Error,
                  "Ошибка чтения настроек службы [%s] из файла [%s]. Используются настройки по умолчанию")
+
+
+MESSAGE_TEMPLATE(50, 0, MessageType::Message,
+                 "Регистрация службы [%s]...")
+
+MESSAGE_TEMPLATE(51, 0, MessageType::Attention,
+                 "Регистрация службы [%s] выполнена")
+
+MESSAGE_TEMPLATE(52, 0, MessageType::Error,
+                 "Ошибка регистрации службы [%s]: %s")
+
+
+MESSAGE_TEMPLATE(60, 0, MessageType::Message,
+                 "Снятие регистрации службы [%s]...")
+
+MESSAGE_TEMPLATE(61, 0, MessageType::Attention,
+                 "Снятие регистрации службы [%s] выполнено")
+
+MESSAGE_TEMPLATE(62, 0, MessageType::Error,
+                 "Ошибка снятия регистрации службы [%s]: %s")
 
 
 

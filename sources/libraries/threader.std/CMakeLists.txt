@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+find_package(ZLIB)
+
 project(threader-std LANGUAGES CXX)
 
 include_directories(
@@ -33,6 +35,7 @@ set(THREADER_SOURCES
     include/threads/ThreadHandler.h sources/threads/ThreadHandler.cpp
     include/threads/ThreadListenSocketConnection.h sources/threads/ThreadListenSocketConnection.cpp
     include/threads/ThreadLog.h sources/threads/ThreadLog.cpp
+    include/threads/ThreadLogCleaner.h sources/threads/ThreadLogCleaner.cpp
     include/threads/ThreadMain.h sources/threads/ThreadMain.cpp
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
     include/threads/ThreadUdevMonitor.h sources/threads/ThreadUdevMonitor.cpp
@@ -74,6 +77,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${
 target_link_libraries(${PROJECT_NAME}
     -lpthread
     -ludev
+    ZLIB::ZLIB
     )
 
 set(LIBRARY_INSTALL_PATH "/usr/local/lib/threader.std/")

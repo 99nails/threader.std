@@ -53,7 +53,8 @@ public:
     using Ptr = std::shared_ptr<MessageValue<ValueType>>;
 
 public:
-    explicit MessageValue(const std::string &name, const ValueType &value)
+    explicit MessageValue(const std::string &name,
+                          const ValueType &value)
         : MessageBase(name)
         , _value(value)
     {}
@@ -72,6 +73,31 @@ public:
 
 private:
     ValueType _value;
+};
+
+
+template<class ValueType, const char* name_ptr>
+class MessageValueNamed : public MessageValue<ValueType>
+{
+public:
+    using Ptr = std::shared_ptr<MessageValueNamed<ValueType, name_ptr>>;
+
+    constexpr static auto MESSAGE_NAME = name_ptr;
+public:
+    explicit MessageValueNamed(const ValueType &value)
+        : MessageValue<ValueType>(MESSAGE_NAME, value)
+    {
+    }
+};
+
+#define DECLARE_MESSAGE_NAMED(NAME, NAME_STRING, BASETYPE) \
+    constexpr char NAMED_MESSAGE_NAME_##NAME[] = NAME_STRING; \
+    class Message##NAME : public MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME> \
+{ \
+    public: \
+    using Ptr = std::shared_ptr<MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME>>; \
+    explicit Message##NAME(const BASETYPE &value) \
+    : MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME>(value) {} \
 };
 
 template<class ReferenceType>

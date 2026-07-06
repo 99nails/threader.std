@@ -103,40 +103,41 @@ int DaemonApplication<ThreadMainType>::run()
 
     if (_install)
     {
-        writeLog(Message4, _serviceName.c_str());
+        writeLog(Message50, _serviceName.c_str());
 
         std::string resultString;
+        auto applicationBinaryFile = appInfo().binaryPath() + appInfo().binaryFileName();
         auto registered = DaemonUtils::daemonRegister(_serviceName,
-                                                      appInfo().commandLine().token(0),
+                                                      applicationBinaryFile,
                                                       _description,
                                                       &resultString);
         if (registered)
         {
-            writeLog(Message5, _serviceName.c_str());
+            writeLog(Message51, _serviceName.c_str());
             stopLogSubsystem();
             return 0;
         }
 
-        writeLog(Message6, _serviceName.c_str(), resultString.c_str());
+        writeLog(Message52, _serviceName.c_str(), resultString.c_str());
         stopLogSubsystem();
         return -1;
     }
 
     if (_uninstall)
     {
-        writeLog(Message7, _serviceName.c_str());
+        writeLog(Message60, _serviceName.c_str());
 
         std::string resultString;
         auto unregistered = DaemonUtils::daemonUnregister(_serviceName,
                                                           &resultString);
         if (unregistered)
         {
-            writeLog(Message8, _serviceName.c_str());
+            writeLog(Message61, _serviceName.c_str());
             stopLogSubsystem();
             return 0;
         }
 
-        writeLog(Message9, _serviceName.c_str(), resultString.c_str());
+        writeLog(Message62, _serviceName.c_str(), resultString.c_str());
         stopLogSubsystem();
         return -1;
     }
@@ -184,6 +185,8 @@ bool DaemonApplication<ThreadMainType>::initialize()
     setlocale(LC_ALL, "russian_Russia.1251");
     auto line = StdStringUtils::ConvertUTF8ToCP1251(MESSAGE_START_HINT);
 #endif
+    chdir(appInfo().binaryPath().c_str());
+
     if (appInfo().commandLine().tokenCount() < 1)
         return false;
 
@@ -193,12 +196,15 @@ bool DaemonApplication<ThreadMainType>::initialize()
     if (_console)
         std::cout << line;
 
-    startLogSubsystem(appInfo().commandLine().token(0).c_str(), nullptr, _console, _logLevel);
+    bool clearHistory = !_install && !_uninstall;
+    if (!clearHistory)
+        _console = true;
+
+    startLogSubsystem(appInfo().binaryPath() + appInfo().binaryFileName(),
+                      nullptr, _console, _logLevel, clearHistory);
 
     if (_serviceName.empty())
         _serviceName = appInfo().binaryFileName();
-
-    chdir(appInfo().binaryPath().c_str());
 
     auto result = signal(SIGINT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     result &= signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;

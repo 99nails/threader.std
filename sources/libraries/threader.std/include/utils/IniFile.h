@@ -163,22 +163,7 @@ public:
 
     std::string value(const std::string &sectionName,
                       const std::string &parameterName,
-                      const std::string &defaultValue)
-    {
-        if (!_sectionHash.count(sectionName))
-            return defaultValue;
-
-        auto section = _sectionHash[sectionName];
-        if (!section)
-            return defaultValue;
-
-        auto parameter = section->parameterByName(parameterName);
-        if (!parameter)
-            return defaultValue;
-
-        auto valueString = parameter->value();
-        return valueString;
-    }
+                      const std::string &defaultValue);
 
     StdStringList comments(const std::string &sectionName,
                           const std::string &parameterName);

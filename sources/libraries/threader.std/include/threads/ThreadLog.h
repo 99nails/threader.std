@@ -5,9 +5,8 @@
 #include "MessageWriteToFile.h"
 #include "ThreadBase.h"
 
-using namespace Threader::Threads;
-
-namespace Threader::Threads {
+namespace Threader::Threads
+{
 
 class ThreadLog : public ThreadBase
 {
@@ -15,7 +14,11 @@ public:
     explicit ThreadLog(const std::string &pathToBin,
                        MessageConsumer *consumer = nullptr,
                        const bool console = false,
-                       const int level = 9);
+                       const int level = 9,
+                       const bool clearHistory = true,
+                       const int historyDepth = 30,
+                       const bool pack = true,
+                       const int packDepth = 2);
     virtual ~ThreadLog();
 
     static void setLevel(const int level);
@@ -37,6 +40,7 @@ private:
     static ThreadLog *_instance;
     Logger *_logger;
     MessageConsumer *_consumer;
+    ThreadBase *_threadLogCleaner;
 };
 
 } // namespace Threader::Threads

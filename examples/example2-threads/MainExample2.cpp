@@ -5,6 +5,7 @@
 
 using namespace Threader::Threads;
 
+
 int main(int argc, char *argv[])
 {
     (void)argc;
@@ -17,9 +18,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < 8192; i++)
     {
-        thread->postMessage1<MessageString>("Message.String",
-                                            "Some text" + std::to_string(i));
-
+        thread->postMessage1<MessageNamedString>("Some text in message #" + std::to_string(i));
     }
 
     thread->terminateThread();
