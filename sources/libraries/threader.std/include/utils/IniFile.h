@@ -5,7 +5,6 @@
 #include <map>
 #include <list>
 #include <string>
-// #include <QVariant>
 
 using namespace Threader::Utils;
 
@@ -130,25 +129,28 @@ public:
 
     bool fileOpen(const std::string &fileName);
 
-    bool fileSave(const std::string &fileName,
-                  const bool doBackup = false);
+    bool fileSave(const std::string &fileName = std::string());
 
     void clear();
 
+    const std::string &fileName() const;
 
-    StdStringList content() const;
+    StdStringList content();
     void setContent(const StdStringList &content);
 
     int sectionCount();
+
     std::string sectionNameByIndex(const int index) const;
+
     int sectionParameterCountByName(const std::string &sectionName) const;
+
     std::string sectionParameterNameByIndex(const std::string &sectionName,
-                                        const int index) const;
+                                            const int index) const;
 
     template <typename ValueType>
     ValueType value(const std::string &sectionName,
-                      const std::string &parameterName,
-                      const ValueType &defaultValue)
+                    const std::string &parameterName,
+                    const ValueType &defaultValue)
     {
         auto valueString = value(sectionName, parameterName, std::string());
         if (valueString.empty())
@@ -166,18 +168,19 @@ public:
                       const std::string &defaultValue);
 
     StdStringList comments(const std::string &sectionName,
-                          const std::string &parameterName);
+                           const std::string &parameterName);
 
     void setValue(const std::string &sectionName,
                   const std::string &parameterName,
                   const std::string &value);
 
+private:
     void applyChangesToContent();
 
-private:
     void parseContent();
 
 private:
+    std::string _fileName;
     StdStringList _content;
     IniLineList _lines;
     IniLineSectionHash _sectionHash;

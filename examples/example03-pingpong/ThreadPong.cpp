@@ -1,6 +1,6 @@
 #include "ThreadPong.h"
 
-#include "Example3Common.h"
+#include "Example03Common.h"
 
 ThreadPong::ThreadPong()
     : ThreadBase(nullptr, "Thread.Pong")

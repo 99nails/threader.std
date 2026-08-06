@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ThreadsCommon.h"
+#include "MemoryBlock.h"
 
 #include <dirent.h>
 #include <list>
@@ -18,8 +19,11 @@ public:
     static Descriptor fileOpen(const std::string &fileName);
     static void fileClose(Descriptor descriptor);
     static void fileSeek(Descriptor descriptor, int mode, int offset);
+    static MemoryBlock::Ptr fileReadAll(const Descriptor descriptor);
     static size_t fileWrite(const Descriptor &descriptor,
                             const std::string &data);
+    static ssize_t fileSize(const std::string &fileName);
+    static ssize_t fileSize(const Descriptor &descriptor);
 
     static bool isPathExists(const std::string &path);
     static bool isFileExists(const std::string &fileName);

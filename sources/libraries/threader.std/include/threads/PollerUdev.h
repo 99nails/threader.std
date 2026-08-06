@@ -36,7 +36,7 @@ public:
     bool initialize();
     void finalize();
 
-    bool process(const pollfd &event);
+    bool process(const pollfd &event) override;
 private:
     bool initializeContext();
     void releaseContext();

@@ -16,176 +16,163 @@ endif(QT_ENABLE)
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
-# example1-messages
+# example01-messages
 
-add_executable(example1-messages
-    example1-messages/MainExample1.cpp
+add_executable(example01-messages
+    example01-messages/MainExample01.cpp
     )
-target_compile_features(example1-messages PUBLIC cxx_std_17)
+target_compile_features(example01-messages PUBLIC cxx_std_17)
 
-target_link_libraries(example1-messages
-    pthread
-    #    Qt5::Core
+target_link_libraries(example01-messages
     threader-std
     )
 
-#example2-threads
-add_executable(example2-threads
-    example2-threads/MainExample2.cpp
-    example2-threads/ThreadTest.h example2-threads/ThreadTest.cpp
+#example02-threads
+add_executable(example02-threads
+    example02-threads/MainExample02.cpp
+    example02-threads/ThreadTest.h example02-threads/ThreadTest.cpp
     )
-target_compile_features(example2-threads PUBLIC cxx_std_17)
+target_compile_features(example02-threads PUBLIC cxx_std_17)
 
-target_link_libraries(example2-threads
-    -lpthread
-    #        Qt5::Core
+target_link_libraries(example02-threads
     threader-std
     )
 
-# example3-pingpong
-add_executable(example3-pingpong
-    example3-pingpong/Example3Common.h
-    example3-pingpong/MainExample3.cpp
-    example3-pingpong/ThreadPing.h example3-pingpong/ThreadPing.cpp
-    example3-pingpong/ThreadPong.h example3-pingpong/ThreadPong.cpp
+# example03-pingpong
+add_executable(example03-pingpong
+    example03-pingpong/Example03Common.h
+    example03-pingpong/MainExample03.cpp
+    example03-pingpong/ThreadPing.h example03-pingpong/ThreadPing.cpp
+    example03-pingpong/ThreadPong.h example03-pingpong/ThreadPong.cpp
     )
-target_compile_features(example3-pingpong PUBLIC cxx_std_17)
+target_compile_features(example03-pingpong PUBLIC cxx_std_17)
 
-target_link_libraries(example3-pingpong
-    -lpthread
+target_link_libraries(example03-pingpong
     threader-std
     )
 
-## example4-serial
-add_executable(example4-serial
-    example4-serial/Example4Common.h
-    example4-serial/MainExample4.cpp
-    example4-serial/ThreadPing.h example4-serial/ThreadPing.cpp
-    example4-serial/ThreadPong.h example4-serial/ThreadPong.cpp
+## example04-serial
+add_executable(example04-serial
+    example04-serial/Example04Common.h
+    example04-serial/MainExample04.cpp
+    example04-serial/ThreadPing.h example04-serial/ThreadPing.cpp
+    example04-serial/ThreadPong.h example04-serial/ThreadPong.cpp
     )
-target_compile_features(example4-serial PUBLIC cxx_std_17)
+target_compile_features(example04-serial PUBLIC cxx_std_17)
 
-target_link_libraries(example4-serial
-    -lpthread
+target_link_libraries(example04-serial
     threader-std
     )
 
-# example5-gps
-add_executable(example5-gps
-    example5-simpleserver/Example5Common.h
-    example5-simpleserver/MainExample5Gps.cpp
-    example5-simpleserver/SettingsGpsEmulator.h example5-simpleserver/SettingsGpsEmulator.cpp
-    example5-simpleserver/ThreadGpsEmulator.h example5-simpleserver/ThreadGpsEmulator.cpp
-    example5-simpleserver/ThreadMainGps.h example5-simpleserver/ThreadMainGps.cpp
+# example05-gps
+add_executable(example05-gps
+    example05-simpleserver/Example05Common.h
+    example05-simpleserver/MainExample05Gps.cpp
+    example05-simpleserver/SettingsGpsEmulator.h example05-simpleserver/SettingsGpsEmulator.cpp
+    example05-simpleserver/ThreadGpsEmulator.h example05-simpleserver/ThreadGpsEmulator.cpp
+    example05-simpleserver/ThreadMainGps.h example05-simpleserver/ThreadMainGps.cpp
     )
-target_compile_features(example5-gps PUBLIC cxx_std_17)
+target_compile_features(example05-gps PUBLIC cxx_std_17)
 
-target_link_libraries(example5-gps
-    pthread
+target_link_libraries(example05-gps
     threader-std
     )
 
-# example5-simpleserver
-add_executable(example5-timeserver
-    example5-simpleserver/Example5Common.h
-    example5-simpleserver/MainExample5TimeServer.cpp
-    example5-simpleserver/SettingsGps.h example5-simpleserver/SettingsGps.cpp
-    example5-simpleserver/SettingsTimeServer.h example5-simpleserver/SettingsTimeServer.cpp
-    example5-simpleserver/ThreadConnectionServer.h example5-simpleserver/ThreadConnectionServer.cpp
-    example5-simpleserver/ThreadGps.h example5-simpleserver/ThreadGps.cpp
-    example5-simpleserver/ThreadListenConnections.h example5-simpleserver/ThreadListenConnections.cpp
-    example5-simpleserver/ThreadMainTimeServer.h example5-simpleserver/ThreadMainTimeServer.cpp
+# example05-simpleserver
+add_executable(example05-timeserver
+    example05-simpleserver/Example05Common.h
+    example05-simpleserver/MainExample05TimeServer.cpp
+    example05-simpleserver/SettingsGps.h example05-simpleserver/SettingsGps.cpp
+    example05-simpleserver/SettingsTimeServer.h example05-simpleserver/SettingsTimeServer.cpp
+    example05-simpleserver/ThreadConnectionServer.h example05-simpleserver/ThreadConnectionServer.cpp
+    example05-simpleserver/ThreadGps.h example05-simpleserver/ThreadGps.cpp
+    example05-simpleserver/ThreadListenConnections.h example05-simpleserver/ThreadListenConnections.cpp
+    example05-simpleserver/ThreadMainTimeServer.h example05-simpleserver/ThreadMainTimeServer.cpp
     )
-target_compile_features(example5-timeserver PUBLIC cxx_std_17)
+target_compile_features(example05-timeserver PUBLIC cxx_std_17)
 
-target_link_libraries(example5-timeserver
-    pthread
+target_link_libraries(example05-timeserver
     threader-std
     )
 
-# example5-simpleclient
-add_executable(example5-timeclient
-    example5-simpleserver/Example5Common.h
-    example5-simpleserver/MainExample5TimeClient.cpp
-    example5-simpleserver/SettingsTimeServer.h example5-simpleserver/SettingsTimeServer.cpp
-    example5-simpleserver/ThreadConnectionClient.h example5-simpleserver/ThreadConnectionClient.cpp
-    example5-simpleserver/ThreadMainTimeClient.h example5-simpleserver/ThreadMainTimeClient.cpp
+# example05-simpleclient
+add_executable(example05-timeclient
+    example05-simpleserver/Example05Common.h
+    example05-simpleserver/MainExample05TimeClient.cpp
+    example05-simpleserver/SettingsTimeServer.h example05-simpleserver/SettingsTimeServer.cpp
+    example05-simpleserver/ThreadConnectionClient.h example05-simpleserver/ThreadConnectionClient.cpp
+    example05-simpleserver/ThreadMainTimeClient.h example05-simpleserver/ThreadMainTimeClient.cpp
     )
-target_compile_features(example5-timeclient PUBLIC cxx_std_17)
+target_compile_features(example05-timeclient PUBLIC cxx_std_17)
 
-target_link_libraries(example5-timeclient
-    -lpthread
+target_link_libraries(example05-timeclient
     threader-std
     )
 
 
-# example6-devicelist
-add_executable(example6-devicelist
-    example6-udev/MainExample6DeviceList.cpp
+# example06-devicelist
+add_executable(example06-devicelist
+    example06-udev/MainExample06DeviceList.cpp
     )
 
-target_compile_features(example6-devicelist PUBLIC cxx_std_17)
+target_compile_features(example06-devicelist PUBLIC cxx_std_17)
 
-target_link_libraries(example6-devicelist
-    pthread
+target_link_libraries(example06-devicelist
     threader-std
     )
 
-# example6-waitdevice
-add_executable(example6-waitdevice
-    example6-udev/MainExample6WaitDevice.cpp
-    example6-udev/ThreadMainWaitDevice.h example6-udev/ThreadMainWaitDevice.cpp
-    example6-udev/SettingsDevice.h example6-udev/SettingsDevice.cpp
+# example06-waitdevice
+add_executable(example06-waitdevice
+    example06-udev/MainExample06WaitDevice.cpp
+    example06-udev/ThreadMainWaitDevice.h example06-udev/ThreadMainWaitDevice.cpp
+    example06-udev/SettingsDevice.h example06-udev/SettingsDevice.cpp
     )
 
-target_compile_features(example6-waitdevice PUBLIC cxx_std_17)
+target_compile_features(example06-waitdevice PUBLIC cxx_std_17)
 
-target_link_libraries(example6-waitdevice
-    pthread
+target_link_libraries(example06-waitdevice
     threader-std
     )
 
 if(QT_ENABLE)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 
-    # example7-1-qteventloop
-    add_executable(example7-1-qteventloop
-        example7-qteventloop/MainExample7-QtEventLoop.cpp
-        example7-qteventloop/ThreadMainQtEventLoop.h example7-qteventloop/ThreadMainQtEventLoop.cpp
+    # example07-1-qteventloop
+    add_executable(example07-1-qteventloop
+        example07-qteventloop/MainExample07-QtEventLoop.cpp
+        example07-qteventloop/ThreadMainQtEventLoop.h example07-qteventloop/ThreadMainQtEventLoop.cpp
         )
 
-    target_include_directories(example7-1-qteventloop PUBLIC
+    target_include_directories(example07-1-qteventloop PUBLIC
         ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
         )
 
-    target_compile_features(example7-1-qteventloop PUBLIC cxx_std_17)
+    target_compile_features(example07-1-qteventloop PUBLIC cxx_std_17)
 
-    target_link_libraries(example7-1-qteventloop
-        pthread
+    target_link_libraries(example07-1-qteventloop
         threader-std
         threader-qt
         Qt5::Core
         )
 
-    #example7-2-udevlistener
-    add_executable(example7-2-udevlistener
-        example7-qteventloop/MainExample7-UdevListener.cpp
-        example7-qteventloop/MainWindowUdevListener.cpp
-        example7-qteventloop/MainWindowUdevListener.h
-        example7-qteventloop/MainWindowUdevListener.ui
+    #example07-2-udevlistener
+    add_executable(example07-2-udevlistener
+        example07-qteventloop/MainExample07-UdevListener.cpp
+        example07-qteventloop/MainWindowUdevListener.cpp
+        example07-qteventloop/MainWindowUdevListener.h
+        example07-qteventloop/MainWindowUdevListener.ui
         )
 
-    target_include_directories(example7-2-udevlistener PUBLIC
+    target_include_directories(example07-2-udevlistener PUBLIC
         ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads
         ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/utils
         ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
         ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/utils
         )
 
-    target_compile_features(example7-2-udevlistener PUBLIC cxx_std_17)
+    target_compile_features(example07-2-udevlistener PUBLIC cxx_std_17)
 
-    target_link_libraries(example7-2-udevlistener
-        pthread
+    target_link_libraries(example07-2-udevlistener
         threader-std
         threader-qt
         Qt5::Core
@@ -193,30 +180,43 @@ if(QT_ENABLE)
         )
 endif(QT_ENABLE)
 
-#example8-udpsender
-add_executable(example8-udpsender
-    example8-udpfiletranser/Example8Common.h
-    example8-udpfiletranser/MainExample8-UdpSender.cpp
-    example8-udpfiletranser/ThreadMainUdpSender.cpp example8-udpfiletranser/ThreadMainUdpSender.h
-    example8-udpfiletranser/ThreadUdpReceiver.cpp example8-udpfiletranser/ThreadUdpReceiver.h
+#example08-udpsender
+add_executable(example08-udpsender
+    example08-udpfiletranser/Example08Common.h
+    example08-udpfiletranser/MainExample08-UdpSender.cpp
+    example08-udpfiletranser/ThreadMainUdpSender.cpp example08-udpfiletranser/ThreadMainUdpSender.h
+    example08-udpfiletranser/ThreadUdpReceiver.cpp example08-udpfiletranser/ThreadUdpReceiver.h
     )
 
-target_compile_features(example8-udpsender PUBLIC cxx_std_17)
+target_compile_features(example08-udpsender PUBLIC cxx_std_17)
 
-target_link_libraries(example8-udpsender
-    pthread
+target_link_libraries(example08-udpsender
     threader-std
     )
 
-#example9-threadtimer
-add_executable(example9-threadtimer
-    example9-threadtimer/MainExample9-ThreadTimer.cpp
-    example9-threadtimer/ThreadMainTimer.h example9-threadtimer/ThreadMainTimer.cpp
+#example09-threadtimer
+add_executable(example09-threadtimer
+    example09-threadtimer/MainExample09-ThreadTimer.cpp
+    example09-threadtimer/ThreadMainTimer.h example09-threadtimer/ThreadMainTimer.cpp
     )
 
-target_compile_features(example9-threadtimer PUBLIC cxx_std_17)
+target_compile_features(example09-threadtimer PUBLIC cxx_std_17)
 
-target_link_libraries(example9-threadtimer
-    pthread
+target_link_libraries(example09-threadtimer
     threader-std
     )
+
+
+#example109-filewatcher
+add_executable(example10-filewatcher
+    example10-filewatcher/MainExample10-FileWatcher.cpp
+    example10-filewatcher/ThreadMainFileWatcher.h example10-filewatcher/ThreadMainFileWatcher.cpp
+    example10-filewatcher/ThreadFileWatcher.h example10-filewatcher/ThreadFileWatcher.cpp
+    )
+
+target_compile_features(example10-filewatcher PUBLIC cxx_std_17)
+
+target_link_libraries(example10-filewatcher
+    threader-std
+    )
+

@@ -4,12 +4,6 @@
 #include <iostream>
 #include <fstream>
 
-// #include "DateTimeUtils.h"
-// #include <QFile>
-// #include <QRegExp>
-// #include <QRegularExpression>
-// #include <QVariant>
-
 
 IniLineBase::IniLineBase(const CommentList &commentList,
                          const LineType lineType)
@@ -188,12 +182,16 @@ IniLineParameter *IniLineSection::parameterByIndex(const int index) const
     auto iterator = _parameterList.begin();
     std::advance(iterator, index);
     return *iterator;
-    // return _parameterList[index];
 }
 
 /**************************************************************************************************/
 
 IniFile::IniFile()
+    : _fileName{std::string()}
+    , _content{}
+    , _lines{}
+    , _sectionHash{}
+    , _sectionList{}
 {
 }
 
@@ -202,12 +200,19 @@ IniFile::~IniFile()
     clear();
 }
 
+const std::string &IniFile::fileName() const
+{
+    return _fileName;
+}
+
 bool IniFile::fileOpen(const std::string &fileName)
 {
     std::ifstream file;
     file.open(fileName, std::ios::in);
     if (!file.is_open())
         return false;
+
+    _fileName = fileName;
 
     std::string line;
     StdStringList lines;
@@ -222,42 +227,29 @@ bool IniFile::fileOpen(const std::string &fileName)
     return true;
 }
 
-bool IniFile::fileSave(const std::string &fileName,
-                       const bool doBackup)
+bool IniFile::fileSave(const std::string &fileName)
 {
+    applyChangesToContent();
 
-    // QFile file(fileName);
+    if (!fileName.empty())
+        _fileName = fileName;
 
-    // if (doBackup && file.exists())
-    // {
-    //     auto fileNameBackup = fileName + ".copy." +
-    //                           QDateTime::currentDateTime().toString("yyMMdd-HHmmss") +
-    //                           ".ini";
-    //     file.copy(fileName, fileNameBackup);
-    // }
+    std::ofstream file(fileName);
 
-    // if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
-    //     return false;
+    if (!file.is_open())
+    {
+        return false;
+    }
 
-    // auto contentString = _content.join("\r\n");
-    // file.write(contentString.toUtf8());
-    // file.close();
+    for (const auto &line : _content)
+        file << line << std::endl;
 
+    file.close();
     return true;
 }
 
 void IniFile::clear()
 {
-    // for (int i = 0; i < _lines.size(); i++)
-    // {
-    //     auto line = _lines[i];
-    //     if (line)
-    //     {
-    //         delete line;
-    //         _lines[i] = nullptr;
-    //     }
-    // }
-
     for (auto &line : _lines)
     {
         if (line)
@@ -273,8 +265,9 @@ void IniFile::clear()
     _lines.clear();
 }
 
-StdStringList IniFile::content() const
+StdStringList IniFile::content()
 {
+    applyChangesToContent();
     return _content;
 }
 
@@ -393,15 +386,13 @@ void IniFile::setValue(const std::string &sectionName,
         return;
 
     parameter->setValue(value);
+
 }
-
-
 
 void IniFile::applyChangesToContent()
 {
     _content.clear();
-    // for (int i = 0; i < _lines.size(); i++)
-    for (auto &line : _lines)
+    for (const auto &line : _lines)
     {
         auto lineString = line->toString();
         _content.push_back(lineString);
@@ -412,7 +403,7 @@ void IniFile::parseContent()
 {
     clear();
 
-    static const std::regex regExpComment("\\s*\\;.*");
+    static const std::regex regExpComment("\\s*(\\;|\\#).*");
     static const std::regex regExpSection("^\\[[A-z\\d](\\w|\\.|\\d)*\\]\\s*$");
     static const std::regex regExpParameter("^[A-z\\d](\\w|\\.|\\d)*\\=.*$");
 
@@ -425,11 +416,7 @@ void IniFile::parseContent()
     {
         IniLineBase *line = nullptr;
 
-        // const auto &contentLine = _content.at(i);
-
         std::cmatch m;
-        // if (std::regex_match(line.c_str(), m, reSectionValue))
-        // if (regExpComment.exactMatch(contentLine))
         if (std::regex_match(contentLine.c_str(), m, regExpComment))
         {
             auto comment = new IniLineComment();
@@ -438,7 +425,6 @@ void IniFile::parseContent()
 
             commentList.push_back(comment);
         }
-        // else if (regExpSection.exactMatch(contentLine))
         else if (std::regex_match(contentLine.c_str(), m, regExpSection))
         {
             currentSection = new IniLineSection(commentList);
@@ -449,7 +435,6 @@ void IniFile::parseContent()
             _sectionHash[currentSection->name()] = currentSection;
             _sectionList.push_back(currentSection);
         }
-        // else if (regExpParameter.exactMatch(contentLine))
         else if (std::regex_match(contentLine.c_str(), m, regExpParameter))
         {
             auto currenParameter = new IniLineParameter(commentList);

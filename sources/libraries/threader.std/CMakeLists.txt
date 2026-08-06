@@ -25,6 +25,7 @@ set(THREADER_SOURCES
     include/threads/MessageWriteToFile.h sources/threads/MessageWriteToFile.cpp
     include/threads/PacketFactoryAsciiLines.h sources/threads/PacketFactoryAsciiLines.cpp
     include/threads/PacketFactoryBase.h sources/threads/PacketFactoryBase.cpp
+    include/threads/PollerFileNotify.h sources/threads/PollerFileNotify.cpp
     include/threads/PollerListenSocketConnection.h sources/threads/PollerListenSocketConnection.cpp
     include/threads/PollerThread.h sources/threads/PollerThread.cpp
     include/threads/PollerUdev.h sources/threads/PollerUdev.cpp
@@ -32,6 +33,7 @@ set(THREADER_SOURCES
     include/threads/QueueMessages.h sources/threads/QueueMessages.cpp
     include/threads/ThreadBase.h sources/threads/ThreadBase.cpp
     include/threads/ThreadConnections.h sources/threads/ThreadConnections.cpp
+    include/threads/ThreadFileNotifier.h sources/threads/ThreadFileNotifier.cpp
     include/threads/ThreadHandler.h sources/threads/ThreadHandler.cpp
     include/threads/ThreadListenSocketConnection.h sources/threads/ThreadListenSocketConnection.cpp
     include/threads/ThreadLog.h sources/threads/ThreadLog.cpp
@@ -50,6 +52,7 @@ set(THREADER_SOURCES
     include/utils/Log.h sources/utils/Log.cpp
     include/utils/Logger.h sources/utils/Logger.cpp
     include/utils/MemoryBlock.h sources/utils/MemoryBlock.cpp
+    include/utils/ProcessUtils.h sources/utils/ProcessUtils.cpp
     include/utils/SerialUtils.h sources/utils/SerialUtils.cpp
     include/utils/SettingsBase.h sources/utils/SettingsBase.cpp
     include/utils/SignalHandler.h sources/utils/SignalHandler.cpp

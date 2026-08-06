@@ -26,14 +26,14 @@ public:
     static std::string toLower(std::string s);
 
     static bool startWith(const std::string &s,
-                         const std::string &start);
+                          const std::string &start);
 
     static bool endsWith(const std::string &s,
                          const std::string &end);
 
     static StdStringVector split(const std::string &str,
-                               const char delimiter,
-                               const bool keepEmptyParts);
+                                 const char delimiter,
+                                 const bool keepEmptyParts);
 
     static std::string section(const std::string &str,
                                const char delimiter,
@@ -56,36 +56,36 @@ template <size_t STACK_BUFFER_SIZE=256>
 static std::string format(const char * format, va_list &vl_original)
 {
     std::string result;
-    char stack_buffer[STACK_BUFFER_SIZE];
-    char *heap_buffer = nullptr;
-    char *choosen_buffer = stack_buffer;
+    char stackBuffer[STACK_BUFFER_SIZE];
+    char *heapBuffer = nullptr;
+    char *choosenBuffer = stackBuffer;
 
-    va_list vl_working;
-    va_list vl_working_2;
+    va_list valueListWorking;
+    va_list valueListWorking2;
 
-    va_copy(vl_working, vl_original);
-    va_copy(vl_working_2, vl_original);
+    va_copy(valueListWorking, vl_original);
+    va_copy(valueListWorking2, vl_original);
 
-    size_t chars_that_would_be_printed = vsnprintf(stack_buffer,
-                                                   STACK_BUFFER_SIZE,
-                                                   format,
-                                                   vl_working);
+    size_t requiredSize = vsnprintf(stackBuffer,
+                                    STACK_BUFFER_SIZE,
+                                    format,
+                                    valueListWorking);
 
-    if (chars_that_would_be_printed >= STACK_BUFFER_SIZE)
+    if (requiredSize >= STACK_BUFFER_SIZE)
     {
-        uint32_t heap_buffer_size = chars_that_would_be_printed + 1;
-        heap_buffer = new char[heap_buffer_size];
-        vsnprintf(heap_buffer, heap_buffer_size, format, vl_working_2);
-        choosen_buffer = heap_buffer;
+        uint32_t heapBufferSize = requiredSize + 1;
+        heapBuffer = new char[heapBufferSize];
+        vsnprintf(heapBuffer, heapBufferSize, format, valueListWorking2);
+        choosenBuffer = heapBuffer;
     }
 
-    va_end(vl_working);
-    va_end(vl_working_2);
+    va_end(valueListWorking);
+    va_end(valueListWorking2);
 
-    result.assign(choosen_buffer);
+    result.assign(choosenBuffer);
 
-    if (heap_buffer)
-        delete[] heap_buffer;
+    if (heapBuffer)
+        delete[] heapBuffer;
 
     return result;
 }
@@ -114,6 +114,7 @@ bool vtonum(const std::string &view, T& value)
 
     return true;
 }
+
 // TODO Обработать ошибки
 template <>
 inline bool vtonum<double>(const std::string &view, double &value)

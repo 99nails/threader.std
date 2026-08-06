@@ -1,6 +1,6 @@
 #include "ThreadPing.h"
 
-#include "Example3Common.h"
+#include "Example03Common.h"
 
 ThreadPing::ThreadPing()
     : ThreadBase(nullptr, "Thread.Ping")

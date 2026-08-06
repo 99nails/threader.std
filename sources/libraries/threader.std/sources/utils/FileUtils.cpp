@@ -10,9 +10,9 @@
 #include <io.h>
 #endif
 
+#include <limits.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include <limits.h>
 
 namespace Threader::Utils {
 
@@ -87,6 +87,29 @@ void FileUtils::fileSeek(Descriptor descriptor, int mode, int offset)
 #endif
 }
 
+MemoryBlock::Ptr FileUtils::fileReadAll(const Descriptor descriptor)
+{
+    if (descriptor == INVALID_DESCRIPTOR)
+        return nullptr;
+
+    const uint BUFFER_SIZE = 1024;
+    void *buffer = calloc(1, BUFFER_SIZE);
+    auto result = std::make_shared<MemoryBlock>(BUFFER_SIZE);
+
+    ssize_t readCount = 0;
+    do
+    {
+        readCount = ::read(descriptor, buffer, BUFFER_SIZE);
+        if (readCount > 0)
+            result->append(buffer, readCount);
+    }
+    while (readCount == BUFFER_SIZE);
+
+    free(buffer);
+
+    return result;
+}
+
 size_t FileUtils::fileWrite(const Descriptor &descriptor, const std::string &data)
 {
 #ifdef linux
@@ -98,6 +121,29 @@ size_t FileUtils::fileWrite(const Descriptor &descriptor, const std::string &dat
     DWORD writtenCount;
     WriteFile(_descriptor, idata.c_str(), data.length(), &writtenCount, nullptr);
     return writtenCount;
+#endif
+}
+
+ssize_t FileUtils::fileSize(const std::string &fileName)
+{
+    struct stat fileInfo;
+
+    if (stat(fileName.c_str(), &fileInfo) == 0)
+        return fileInfo.st_size;
+
+    return -1;
+}
+
+ssize_t FileUtils::fileSize(const Descriptor &descriptor)
+{
+#ifdef linux
+//    auto result = lseek(descriptor, 0, SEEK_END);
+    struct stat fileInfo;
+    fstat(descriptor, &fileInfo);
+    return fileInfo.st_size;
+#endif
+#ifdef WIN32
+    SetFilePointer(descriptor, offset, NULL, mode);
 #endif
 }
 

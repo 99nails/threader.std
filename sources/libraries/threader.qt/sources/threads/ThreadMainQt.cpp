@@ -20,6 +20,16 @@ ThreadMainQt::ThreadMainQt(MessageConsumer *parent,
         _applicationFriendlyName = threadName;
 }
 
+const std::string &ThreadMainQt::applicationFriendlyName() const
+{
+    return _applicationFriendlyName;
+}
+
+const std::string &ThreadMainQt::applicationBinaryName() const
+{
+    return _applicationBinaryName;
+}
+
 void ThreadMainQt::onThreadStarted()
 {
     writeLog(Message10, _applicationFriendlyName.c_str());

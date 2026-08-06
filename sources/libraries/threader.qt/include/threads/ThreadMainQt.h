@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DaemonApplicationInfo.h"
 #include "LogMessagesTemplates.h"
 #include "ListThreads.h"
 #include "MessageWriteToFile.h"
@@ -25,6 +26,10 @@ public:
                           const std::string &applicationFriendlyName = std::string(),
                           const std::string &threadName = std::string());
 
+    const std::string &applicationBinaryName() const;
+
+    const std::string &applicationFriendlyName() const;
+
 protected:
     void onThreadStarted() override;
     void onThreadFinishing() override;
@@ -35,8 +40,6 @@ private:
     void snapshotThreads(bool rightNow = false);
 
 private:
-    // std::string _iniFileName;
-    // SettingsSet _settings;
     std::string _applicationBinaryName;
     std::string _applicationFriendlyName;
     uint64_t _nextBuildStatisticTickCount;
@@ -71,11 +74,11 @@ protected:
     {
         ThreadMainQt::onThreadStarted();
 
-        writeLog(Message20, _applicationFriendlyName.c_str(), _settings.fileName().c_str());
+        writeLog(Message20, applicationFriendlyName().c_str(), _settings.fileName().c_str());
         if (_settings.read())
-            writeLog(Message21, _applicationFriendlyName.c_str(), _settings.fileName().c_str());
+            writeLog(Message21, applicationFriendlyName().c_str(), _settings.fileName().c_str());
         else
-            writeLog(Message22, _applicationFriendlyName.c_str(), _settings.fileName().c_str());
+            writeLog(Message22, applicationFriendlyName().c_str(), _settings.fileName().c_str());
     }
 
 private:
