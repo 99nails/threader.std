@@ -166,6 +166,20 @@ bool FileUtils::isFileExists(const std::string &fileName)
 {
 #ifdef linux
     struct stat sb;
+    return stat(fileName.c_str(), &sb) == 0;
+#endif
+#ifdef WIN32
+    _finddata_t data;
+    long nFind = _findfirst(fieName.c_str(), &data);
+    _findclose(nFind);
+    return nFind != -1 && data.;
+#endif
+}
+
+bool FileUtils::isRegularFileExists(const std::string &fileName)
+{
+#ifdef linux
+    struct stat sb;
     return stat(fileName.c_str(), &sb) == 0
             && S_ISREG(sb.st_mode);
 #endif

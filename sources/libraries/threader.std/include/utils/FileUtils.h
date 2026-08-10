@@ -27,6 +27,7 @@ public:
 
     static bool isPathExists(const std::string &path);
     static bool isFileExists(const std::string &fileName);
+    static bool isRegularFileExists(const std::string &fileName);
     static std::string absolutePath(const std::string &relativePath);
 
     static bool makeDir(const std::string &path);

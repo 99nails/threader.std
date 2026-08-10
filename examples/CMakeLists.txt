@@ -178,6 +178,31 @@ if(QT_ENABLE)
         Qt5::Core
         Qt5::Widgets
         )
+
+    #example11-messagebridge
+    add_executable(example11-messagebridge
+        example11-messagebridge/MainExample11-MessageBridge.cpp
+        example11-messagebridge/MainWindowMessageBridge.cpp
+        example11-messagebridge/MainWindowMessageBridge.h
+        example11-messagebridge/MainWindowMessageBridge.ui
+        )
+
+    target_include_directories(example11-messagebridge PUBLIC
+        ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads
+        ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/utils
+        ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
+        ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/utils
+        )
+
+    target_compile_features(example11-messagebridge PUBLIC cxx_std_17)
+
+    target_link_libraries(example11-messagebridge PRIVATE
+        threader-std
+        threader-qt
+        Qt5::Core
+        Qt5::Widgets
+        )
+
 endif(QT_ENABLE)
 
 #example08-udpsender
@@ -207,7 +232,7 @@ target_link_libraries(example09-threadtimer
     )
 
 
-#example109-filewatcher
+#example10-filewatcher
 add_executable(example10-filewatcher
     example10-filewatcher/MainExample10-FileWatcher.cpp
     example10-filewatcher/ThreadMainFileWatcher.h example10-filewatcher/ThreadMainFileWatcher.cpp
