@@ -81,7 +81,7 @@ bool DaemonUtils::daemonUnregister(const std::string &serviceName,
 }
 
 bool DaemonUtils::daemonSetRunning(const std::string &serviceName,
-                                   const bool isRunning)
+                                           const bool isRunning)
 {
     if (serviceName.empty())
         return false;

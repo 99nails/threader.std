@@ -2,11 +2,17 @@ cmake_minimum_required(VERSION 3.16)
 
 find_package(ZLIB)
 
-project(threader-std LANGUAGES CXX)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(DBUS REQUIRED dbus-1)
+
+project(threader-std LANGUAGES CXX VERSION ${VERSION})
+
+configure_file(ThreaderStdConfig.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/ThreaderStdConfig.h)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/threads
     ${CMAKE_CURRENT_SOURCE_DIR}/include/utils
+    ${DBUS_INCLUDE_DIRS}
     )
 
 set(THREADER_SOURCES
@@ -45,6 +51,7 @@ set(THREADER_SOURCES
     include/utils/CrcUtils.h sources/utils/CrcUtils.cpp
     include/utils/DaemonApplication.h
     include/utils/DaemonApplicationInfo.h sources/utils/DaemonApplicationInfo.cpp
+    include/utils/DBusUtils.h sources/utils/DBusUtils.cpp
     include/utils/DaemonUtils.h sources/utils/DaemonUtils.cpp
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
     include/utils/FileUtils.h sources/utils/FileUtils.cpp
@@ -78,10 +85,13 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${VER_MAJ})
 
 target_link_libraries(${PROJECT_NAME}
-    -lpthread
-    -ludev
+    pthread
+    udev
     ZLIB::ZLIB
+    ${DBUS_LIBRARIES}
     )
+
+target_include_directories(${PROJECT_NAME} PRIVATE /usr/include/dbus-1.0/)
 
 set(LIBRARY_INSTALL_PATH "/usr/local/lib/threader.std/")
 set(HEADERS_INSTALL_PATH  "/usr/local/include/threader.std")

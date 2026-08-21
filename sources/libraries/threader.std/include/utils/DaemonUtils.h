@@ -1,7 +1,9 @@
 #pragma once
 
-#include <semaphore.h>
+#include <map>
 #include <string>
+
+#include <semaphore.h>
 
 namespace Threader::Utils
 {
@@ -17,7 +19,8 @@ public:
     static bool daemonUnregister(const std::string &serviceName,
                                  std::string *resultString = nullptr);
 
-    static bool daemonSetRunning(const std::string &serviceName, const bool isRunning);
+    static bool daemonSetRunning(const std::string &serviceName,
+                                         const bool isRunning);
 
     static bool daemonIsRunning(const std::string &serviceName);
 
