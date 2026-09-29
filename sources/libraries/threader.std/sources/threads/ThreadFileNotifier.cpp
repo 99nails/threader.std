@@ -33,7 +33,7 @@ void ThreadFileNotifier::processFile(const std::string &action,
 //    std::cout << action << " " << path << "/" << fileName << std::endl;
     (void)action;
     (void)mask;
-    (void)fileName;
+    (void)path;
     (void)fileName;
 }
 

@@ -16,6 +16,7 @@ public:
                                 const std::string &path,
                                 const uint32_t mask = IN_ALL_EVENTS);
 
+protected:
     void initializeThread() override;
 
     void processFile(const std::string &action,

@@ -87,6 +87,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${
 target_link_libraries(${PROJECT_NAME}
     pthread
     udev
+    systemd
     ZLIB::ZLIB
     ${DBUS_LIBRARIES}
     )

@@ -12,4 +12,4 @@
 - [x] Erase semaphore on signal
 - [x] Erase old library versions in postinst script
 - [ ] Windows build
-- [ ] Application info class
+- [x] Application info class

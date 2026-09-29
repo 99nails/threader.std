@@ -1,8 +1,8 @@
-
-#include    <cstring>
-
 #include "DBusUtils.h"
 #include "StdStringUtils.h"
+
+#include <iostream>
+#include <cstring>
 
 namespace Threader::Utils
 {
@@ -286,7 +286,7 @@ static std::string extractStringFromVariant(DBusMessage *reply, DBusError *error
     case DBUS_TYPE_STRING:
         dbus_message_iter_get_basic(&sub, &str);
         return std::string(str);
-//        break;
+        // break;
 
     case DBUS_TYPE_ARRAY:
     {
@@ -319,7 +319,7 @@ static std::string extractStringFromVariant(DBusMessage *reply, DBusError *error
                              "variant_should_be_string_or_array",
                              "This variant reply message must have string or array content");
         return 0;
-//        break;
+        // break;
     }
 
     //    if (DBUS_TYPE_STRING != type) {
@@ -847,8 +847,8 @@ bool DBusUtils::getUnitPath(const std::string &unitName, std::string &unitPath)
         return true;
     }
 
-//    std::string operationName = format(OPERATION_NAME_GET_UNIT_PATH, unitName.c_str());
-//    writeLog(Message100, STRLOG(operationName));
+    //    std::string operationName = format(OPERATION_NAME_GET_UNIT_PATH, unitName.c_str());
+    //    writeLog(Message100, STRLOG(operationName));
 
     DBusMethodGetUnitPath getUnitPathDbus(&_dBusConnection);
 
@@ -857,7 +857,7 @@ bool DBusUtils::getUnitPath(const std::string &unitName, std::string &unitPath)
 
     if (!getUnitPathDbus.isInitialized())
     {
-//        writeLog(Message102, STRLOG2(operationName, _dBusConnection->lastError()));
+        //        writeLog(Message102, STRLOG2(operationName, _dBusConnection->lastError()));
         return false;
     }
 
@@ -865,12 +865,12 @@ bool DBusUtils::getUnitPath(const std::string &unitName, std::string &unitPath)
 
     if (result)
     {
-//        writeLog(Message101, STRLOG(operationName));
+        //        writeLog(Message101, STRLOG(operationName));
         unitPath = std::string(getUnitPathDbus.result());
         _unitPath[unitName] = unitPath;
     }
-//    else
-//        writeLog(Message102, STRLOG2(operationName, _dBusConnection->lastError()));
+    //    else
+    //        writeLog(Message102, STRLOG2(operationName, _dBusConnection->lastError()));
 
     return result;
 
@@ -884,7 +884,7 @@ bool DBusUtils::getUnitState(const std::string &unitName, std::string &unitState
     if (!result ||  unitPath.empty())
         return false;
 
-//    writeLog(Message110, STRLOG(unitName), STRLOG((unitPath)));
+    //    writeLog(Message110, STRLOG(unitName), STRLOG((unitPath)));
 
     result = getProperty(unitPath,
                          INTERFACE_NAME_UNIT,
@@ -901,7 +901,7 @@ bool DBusUtils::getUnitState(const std::string &unitName, std::string &unitState
     if (!result || unitSubState.empty())
         return false;
 
-//    writeLog(Message111, STRLOG3(unitName, unitState, unitSubState));
+    //    writeLog(Message111, STRLOG3(unitName, unitState, unitSubState));
 
     return true;
 
@@ -922,7 +922,7 @@ bool DBusUtils::checkServiceViaDBus(const std::string &serviceName)
     std::string unitState, unitSubState;
     //    ServiceState state(ServiceState::Unknown);
     ServiceSubState subState{ServiceSubState::Unknown};
-//    auto started = DateTimeUtils::getTickCount();
+    //    auto started = DateTimeUtils::getTickCount();
     while(1)
     {
         if (!getUnitState(serviceNameWithSuffix, unitState, unitSubState))
@@ -932,30 +932,293 @@ bool DBusUtils::checkServiceViaDBus(const std::string &serviceName)
         if(subState != ServiceSubState::Waiting)
             break;
 
-//        if(started + TIMEOUT_CHECK_SERVICE <= DateUtils::getTickCount())
-//            return false;
+        //        if(started + TIMEOUT_CHECK_SERVICE <= DateUtils::getTickCount())
+        //            return false;
 
-//        DateUtils::sleepMilliseconds(100);
+        //        DateUtils::sleepMilliseconds(100);
     }
 
     if (subState == ServiceSubState::Running)
     {
-//        writeLog(Message37, STRLOG(serviceName));
+        //        writeLog(Message37, STRLOG(serviceName));
         return true;
     }
 
-//    writeLog(Message7, STRLOG(serviceName));
+    //    writeLog(Message7, STRLOG(serviceName));
 
-//    if (startUnit(serviceNameWithSuffix))
-//    {
-//        writeLog(Message36, STRLOG(serviceName));
-//        return true;
-//    }
+    //    if (startUnit(serviceNameWithSuffix))
+    //    {
+    //        writeLog(Message36, STRLOG(serviceName));
+    //        return true;
+    //    }
 
-//    writeLog(Message35, STRLOG(serviceName));
+    //    writeLog(Message35, STRLOG(serviceName));
     return false;
 }
 
+bool SystemDUtils::getUnitPath(sd_bus *bus,
+                               const std::string &name,
+                               std::string &unitPath)
+{
+    sd_bus_message *reply = nullptr;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    const char *path = nullptr;
+
+    int r = sd_bus_call_method(bus,
+                               "org.freedesktop.systemd1",
+                               "/org/freedesktop/systemd1",
+                               "org.freedesktop.systemd1.Manager",
+                               "GetUnit",
+                               &error,
+                               &reply,
+                               "s",
+                               name.c_str()
+                               );
+
+    if (r < 0)
+    {
+        sd_bus_error_free(&error);
+        return false;
+    }
+
+    r = sd_bus_message_read(reply, "o", &path);
+    unitPath = (r >= 0 && path) ? path : "";
+    sd_bus_message_unref(reply);
+    sd_bus_error_free(&error);
+    return true;
+}
+
+bool SystemDUtils::getPropertyUInt32(sd_bus *bus,
+                                     const char *path,
+                                     const char *interface,
+                                     const char *propertyName,
+                                     uint32_t &value)
+{
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    uint32_t val = 0;
+
+    int r = sd_bus_get_property_trivial(bus,
+                                        "org.freedesktop.systemd1",
+                                        path,
+                                        interface,
+                                        propertyName,
+                                        &error,
+                                        'u',
+                                        &value);
+
+    sd_bus_error_free(&error);
+    return (r >= 0);
+
+}
+
+bool SystemDUtils::getPropertyString(sd_bus *bus,
+                                     const char *path,
+                                     const char *iface,
+                                     const char *prop,
+                                     std::string &value)
+{
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    char *val = nullptr;
+
+    int r = sd_bus_get_property_string(bus,
+                                       "org.freedesktop.systemd1",
+                                       path,
+                                       iface,
+                                       prop,
+                                       &error,
+                                       &val);
+
+    if (r < 0)
+    {
+        value = error.message ? error.message : strerror(-r);
+        sd_bus_error_free(&error);
+        return false;
+    }
+
+    value = val ? val : "(null)";
+    free(val);
+    sd_bus_error_free(&error);
+    return true;
+}
 
 
+std::string SystemDUtils::find_unit_path(sd_bus *bus, const std::string &name)
+{
+    sd_bus_message *reply = nullptr;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+
+    // ListUnits принимает фильтр (prefix) и возвращает массив структур:
+    // [ (name, description, load_state, active_state, sub_state, object_path) ]
+    int r = sd_bus_call_method(
+                bus,
+                "org.freedesktop.systemd1",
+                "/org/freedesktop/systemd1",
+                "org.freedesktop.systemd1.Manager",
+                "ListUnits",
+                &error,
+                &reply,
+                "s",
+                name.c_str()  // префикс: ищем по имени (лучше "sshd.service", а не просто "sshd")
+                );
+
+    if (r < 0) {
+        std::cerr << "ListUnits failed: " << (error.message ? error.message : strerror(-r)) << "\n";
+        sd_bus_error_free(&error);
+        return "";
+    }
+
+    // Читаем массив структур
+    r = sd_bus_message_enter_container(reply, SD_BUS_TYPE_ARRAY, "(ssssso)");
+    if (r < 0)
+    {
+        sd_bus_message_unref(reply);
+        sd_bus_error_free(&error);
+        return "";
+    }
+
+    while ((r = sd_bus_message_read(reply, "(ssssso)", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)) > 0)
+    {
+        // Нам нужен только последний элемент — object_path
+        const char *path = nullptr;
+        r = sd_bus_message_peek_type(reply, nullptr, nullptr);
+        if (r >= 0) {
+            r = sd_bus_message_read(reply, "o", &path);
+            if (r >= 0 && path) {
+                sd_bus_message_exit_container(reply); // выходим из массива
+                sd_bus_message_unref(reply);
+                sd_bus_error_free(&error);
+                return std::string(path);
+            }
+        }
+    }
+
+    sd_bus_message_exit_container(reply);
+    sd_bus_message_unref(reply);
+    sd_bus_error_free(&error);
+    return "";
+}
+
+// Поиск юнита через ListUnits (без аргументов!)
+// Возвращает {object_path, load_state, active_state, sub_state}
+struct UnitInfo {
+    std::string path;
+    std::string load_state;
+    std::string active_state;
+    std::string sub_state;
+};
+
+static UnitInfo find_unit(sd_bus *bus, const std::string &name)
+{
+    UnitInfo info;
+    sd_bus_message *reply = nullptr;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+
+    // ListUnits: входных аргументов НЕТ (сигнатура "")
+    int r = sd_bus_call_method(
+        bus,
+        "org.freedesktop.systemd1",
+        "/org/freedesktop/systemd1",
+        "org.freedesktop.systemd1.Manager",
+        "ListUnits",
+        &error,
+        &reply,
+        ""          // ← пустая сигнатура, никаких аргументов
+    );
+
+    if (r < 0) {
+        std::cerr << "ListUnits: " << (error.message ? error.message : strerror(-r)) << "\n";
+        sd_bus_error_free(&error);
+        return info;
+    }
+
+    // Возвращается массив структур: a(ssssssouso)
+    // Поля: name, description, load_state, active_state, sub_state,
+    //        following, object_path, job_id, job_type, job_path
+    r = sd_bus_message_enter_container(reply, SD_BUS_TYPE_ARRAY, "(ssssssouso)");
+    if (r < 0) {
+        sd_bus_message_unref(reply);
+        sd_bus_error_free(&error);
+        return info;
+    }
+
+    while (true) {
+        r = sd_bus_message_enter_container(reply, SD_BUS_TYPE_STRUCT, "ssssssouso");
+        if (r <= 0)
+            break;
+
+        const char *unit_name = nullptr;
+        const char *desc       = nullptr;
+        const char *load       = nullptr;
+        const char *active     = nullptr;
+        const char *sub        = nullptr;
+        const char *following  = nullptr;
+        const char *obj_path   = nullptr;
+
+        r = sd_bus_message_read(reply, "ssssssouso",
+            &unit_name, &desc, &load, &active, &sub,
+            &following, &obj_path, nullptr, nullptr, nullptr);
+
+        if (r < 0)
+            break;
+
+        std::cout << unit_name <<std::endl;
+
+        if (unit_name && name == unit_name) {
+            info.path         = obj_path   ? obj_path   : "";
+            info.load_state   = load       ? load       : "";
+            info.active_state = active     ? active     : "";
+            info.sub_state    = sub        ? sub        : "";
+            sd_bus_message_exit_container(reply);
+            break;
+        }
+
+        sd_bus_message_exit_container(reply);
+    }
+
+    sd_bus_message_exit_container(reply);
+    sd_bus_message_unref(reply);
+    sd_bus_error_free(&error);
+    return info;
+}
+
+bool SystemDUtils::getServiceState(const std::string &unit,
+                                   SystemDServiceState &state)
+{
+    state = {};
+
+    sd_bus *bus = nullptr;
+    bool result = sd_bus_open_system(&bus) >= 0;
+    std::string path;
+
+    if (!result)
+    {
+        sd_bus_unref(bus);
+        return result;
+    }
+
+//    auto info = find_unit(bus, unit);
+
+//    if (path.empty()) {
+//        sd_bus_unref(bus);
+//        return 1;
+//    }
+
+    result = getUnitPath(bus, unit, path);
+    if (!result)
+        goto finalization;
+
+    state.unit = unit;
+    state.path = path;
+
+    result = getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "ActiveState", state.activeState);
+    result &= getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "SubState", state.subState);
+    result &= getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "Description", state.description);
+    result &= getPropertyString(bus, path.c_str(), INTERFACE_SERVICE, "StatusText", state.statusText);
+    result &= getPropertyUInt32(bus, path.c_str(), INTERFACE_SERVICE, "MainPID", state.mainPID);
+
+finalization:
+    sd_bus_unref(bus);
+
+    return result;
+}
 }

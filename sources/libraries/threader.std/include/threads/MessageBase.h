@@ -90,16 +90,6 @@ public:
     }
 };
 
-#define DECLARE_MESSAGE_NAMED(NAME, NAME_STRING, BASETYPE) \
-    constexpr char NAMED_MESSAGE_NAME_##NAME[] = NAME_STRING; \
-    class Message##NAME : public MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME> \
-{ \
-    public: \
-    using Ptr = std::shared_ptr<MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME>>; \
-    explicit Message##NAME(const BASETYPE &value) \
-    : MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME>(value) {} \
-};
-
 template<class ReferenceType>
 class MessageReference : public MessageBase
 {
@@ -144,3 +134,14 @@ using MessageDouble = MessageValue<double>;
 
 } // namespace Threads
 } // namespace Threader
+
+#define DECLARE_MESSAGE_NAMED(NAME, NAME_STRING, BASETYPE) \
+    constexpr char NAMED_MESSAGE_NAME_##NAME[] = NAME_STRING; \
+    class Message##NAME : public Threader::Threads::MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME> \
+{ \
+    public: \
+    using Ptr = std::shared_ptr<MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME>>; \
+    explicit Message##NAME(const BASETYPE &value) \
+    : MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME>(value) {} \
+};
+

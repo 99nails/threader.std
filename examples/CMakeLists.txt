@@ -245,3 +245,25 @@ target_link_libraries(example10-filewatcher
     threader-std
     )
 
+
+#example12-checkdaemon
+add_executable(example12-checkdaemon
+    example12-checkdaemon/MainExample12-CheckDaemon.cpp
+#    example11-checkdaemon/ThreadMainFileWatcher.h example10-filewatcher/ThreadMainFileWatcher.cpp
+#    example11-checkdaemon/ThreadFileWatcher.h example10-filewatcher/ThreadFileWatcher.cpp
+    )
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(DBUS REQUIRED dbus-1)
+
+target_compile_features(example12-checkdaemon PUBLIC cxx_std_17)
+
+target_link_libraries(example12-checkdaemon
+    threader-std
+    ${DBUS_LIBRARIES}
+    )
+
+target_include_directories(example12-checkdaemon PRIVATE
+    ${DBUS_INCLUDE_DIRS}
+    )
+

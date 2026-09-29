@@ -16,6 +16,7 @@ ThreadMainFileWatcher::ThreadMainFileWatcher(const std::string &applicationBinar
 
 void ThreadMainFileWatcher::startChildThreads()
 {
-    auto homePath = std::getenv("HOME");
+//    auto homePath = std::getenv("HOME");
+    auto homePath = "/var/log/";
     _threadFileNotifier = registerAndStartChildThread(new ThreadFileWatcher(this, homePath));
 }

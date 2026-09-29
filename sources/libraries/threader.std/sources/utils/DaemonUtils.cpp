@@ -11,17 +11,20 @@
 
 constexpr char SERVICE_TEMPLATE[] = R"STRING(
 [Unit]
-Description=%s
 After=network.target
+Description=%s
 
 [Service]
-Type=simple
-ExecStart=%s
 ExecReload=/bin/kill -HUP $MAINPID
-User=root
+ExecStart=%s
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=%s
+Type=notify
+User=root
+
+# Watchdog: если демон не пришлёт WATCHDOG=1 за это время — рестарт
+# WatchdogSec=30
 
 [Install]
 WantedBy=multi-user.target

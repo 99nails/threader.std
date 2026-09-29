@@ -6,6 +6,7 @@
 #include "DateTimeUtils.h"
 #include "LogMessagesTemplates.h"
 #include "SignalHandler.h"
+#include "StdStringUtils.h"
 
 #include "Log.h"
 
@@ -16,6 +17,7 @@
 #include <poll.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <systemd/sd-daemon.h>
 #include <unistd.h>
 
 namespace Threader::Threads {
@@ -26,6 +28,7 @@ void readLine()
 {
     std::string line;
     std::getline(std::cin, line);
+    writeLog(Message16, -1);
 }
 
 template<class ThreadMainType>
@@ -35,6 +38,7 @@ public:
     explicit DaemonApplication(int argc,
                                char *argv[],
                                const std::string &description = std::string(),
+                               const std::string &version = std::string(),
                                const std::string &serviceName = std::string());
     virtual int run();
 protected:
@@ -61,9 +65,12 @@ private:
     Descriptor _pipeDescriptors[2];
 
     bool _console;
+    bool _systemd;
     bool _install;
     bool _uninstall;
+    bool _showVersion;
     int _logLevel;
+    std::string _version;
 };
 
 template<class ThreadMainType>
@@ -76,14 +83,17 @@ template<class ThreadMainType>
 DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
                                                      char *argv[],
                                                      const std::string &description,
+                                                     const std::string &version,
                                                      const std::string &serviceName)
     : _threadMain(nullptr)
     , _argc(argc)
     , _description(description)
     , _console(false)
+    , _systemd(true)
     , _install(false)
     , _uninstall(false)
     , _logLevel(9)
+    , _version(version)
 {
     _serviceName = serviceName;
     _instance = this;
@@ -98,6 +108,13 @@ DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
 template<class ThreadMainType>
 int DaemonApplication<ThreadMainType>::run()
 {
+#ifdef linux
+    int r = sd_notify(0, format("STATUS=Service %s starting...", _serviceName.c_str()).c_str());
+    if (r <= 0) {
+        _systemd = false;
+    }
+#endif
+
     if (!initialize())
         return -1;
 
@@ -153,7 +170,17 @@ int DaemonApplication<ThreadMainType>::run()
     _threadMain = new ThreadMainType(_serviceName, _description);
     _threadMain->startThread();
 
+#ifdef linux
+    if (_systemd)
+        sd_notify(0, format("READY=1\nSTATUS=Service %s is ready", _serviceName.c_str()).c_str());
+#endif
+
     runMainLoop();
+
+#ifdef linux
+    if (_systemd)
+        sd_notify(0, format("STOPPING=1\nSTATUS=Finising service %s...", _serviceName.c_str()).c_str());
+#endif
 
     _threadMain->postTerminateEvent();
     while (!_threadMain->isThreadFinished())
@@ -164,6 +191,11 @@ int DaemonApplication<ThreadMainType>::run()
     DaemonUtils::daemonSetRunning(_serviceName, false);
 
     stopLogSubsystem();
+
+#ifdef linux
+    if (_systemd)
+        sd_notify(0, format("STATUS=Service %s finished", _serviceName.c_str()).c_str());
+#endif
 
     return 0;
 }
@@ -188,13 +220,31 @@ bool DaemonApplication<ThreadMainType>::initialize()
     chdir(appInfo().binaryPath().c_str());
 
     if (appInfo().commandLine().tokenCount() < 1)
+    {
+#ifdef linux
+        if (_systemd)
+            sd_notify(0, "ERRNO=1\nSTATUS=Arguments parse error");
+#endif
         return false;
+    }
 
     if (!parseArguments())
+    {
+#ifdef linux
+        if (_systemd)
+            sd_notify(0, "ERRNO=2\nSTATUS=Arguments parse error");
+#endif
         return false;
+    }
 
     if (_console)
         std::cout << line;
+
+    if (_showVersion)
+    {
+        std::cout << "[" << _version << "]" << std::endl;
+        exit(0);
+    }
 
     bool clearHistory = !_install && !_uninstall;
     if (!clearHistory)
@@ -210,6 +260,10 @@ bool DaemonApplication<ThreadMainType>::initialize()
     result &= signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     result &= signal(SIGTERM, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     // signal(SIGHUP, handleTerminateSignal);
+#ifdef linux
+        if (_systemd && !result)
+            sd_notify(0, "ERRNO=3\nSTATUS=Signal handler error");
+#endif
 
     return result;
 }
@@ -217,7 +271,7 @@ bool DaemonApplication<ThreadMainType>::initialize()
 template<class ThreadMainType>
 void DaemonApplication<ThreadMainType>::runMainLoop()
 {
-    if (_console)
+    if (!_systemd)
     {
         readLine();
     }
@@ -271,8 +325,10 @@ bool DaemonApplication<ThreadMainType>::parseArguments()
     constexpr char PARAMETER_NAME_INSTALL[] = "--install";
     constexpr char PARAMETER_NAME_LOG[] = "--log";
     constexpr char PARAMETER_NAME_UNINSTALL[] = "--uninstall";
+    constexpr char PARAMETER_NAME_VERSION[] = "--version";
 
     _console = appInfo().commandLine().optionExist(PARAMETER_NAME_CONSOLE);
+    _showVersion = appInfo().commandLine().optionExist(PARAMETER_NAME_VERSION);
 
     if (appInfo().commandLine().optionExist(PARAMETER_NAME_LOG))
     {

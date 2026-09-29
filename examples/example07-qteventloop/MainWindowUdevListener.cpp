@@ -38,7 +38,7 @@ void MainWindowUdevListener::slotToolButtonRunClicked()
         // Допустимые значения
         // UDEV_SUBSYSTEM_GPIO, UDEV_SUBSYSTEM_NET,
         // UDEV_SUBSYSTEM_TTY, UDEV_SUBSYSTEM_WLAN
-        _udevListener->startListen({UDEV_SUBSYSTEM_TTY});
+        _udevListener->startListen({UDEV_SUBSYSTEM_TTY, UDEV_SUBSYSTEM_NET});
     }
     else
     {

@@ -1,11 +1,14 @@
 #pragma once
 
+#include "ThreadsCommon.h"
+
 #include <list>
 #include <map>
 #include <string>
 #include <vector>
 
-#include    <dbus-1.0/dbus/dbus.h>
+#include <dbus-1.0/dbus/dbus.h>
+#include <systemd/sd-bus.h>
 
 namespace Threader::Utils
 {
@@ -213,14 +216,14 @@ private:
 };
 
 enum class ServiceState {
-    Active,
-    Reloading,
+    Unknown,
     Inactive,
     Activating,
+    Active,
     Deactivating,
+    Reloading,
     Failed,
-    Maintenance,
-    Unknown
+    Maintenance
 };
 
 enum class ServiceSubState {
@@ -230,6 +233,20 @@ enum class ServiceSubState {
     Failed,
     Unknown
 };
+
+
+typedef struct {
+    std::string unit;
+    std::string path;
+    std::string activeState;
+    std::string subState;
+    std::string description;
+    std::string statusText;
+    uint32_t mainPID;
+} SystemDServiceState;
+
+constexpr char INTERFACE_UNIT[]   = "org.freedesktop.systemd1.Unit";
+constexpr char INTERFACE_SERVICE[] = "org.freedesktop.systemd1.Service";
 
 
 class DBusUtils
@@ -259,10 +276,34 @@ public:
 
     static bool checkServiceViaDBus(const std::string &serviceName);
 
+    static std::string systemdGetUnitPath(sd_bus *bus, const std::string &name);
+
 private:
     static DBusConnectionWrapper _dBusConnection;
     static std::string _lastDBusError;
     static std::map<std::string,std::string> _unitPath;
+};
+
+class SystemDUtils
+{
+public:
+    static bool getUnitPath(sd_bus *bus,
+                            const std::string &name,
+                            std::string &unitPath);
+
+    static bool getPropertyUInt32(sd_bus *bus,
+                                  const char *path,
+                                  const char *interface,
+                                  const char *propertyName,
+                                  uint32_t &value);
+
+    static bool getPropertyString(sd_bus *bus, const char *path,
+                                  const char *iface, const char *prop,
+                                  std::string &value);
+
+    static std::string find_unit_path(sd_bus *bus, const std::string &name);
+
+    static bool getServiceState(const std::string &unit, SystemDServiceState &state);
 };
 
 
