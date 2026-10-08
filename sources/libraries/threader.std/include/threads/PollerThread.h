@@ -42,7 +42,7 @@ public:
     void sendSignalTerminateChildThreads();
     void sendSignalWakeUp();
 
-#ifdef _WIN32
+#ifdef WIN32
     bool process(Descriptor eventToProcess) override;
 #endif
 #ifdef linux
@@ -60,7 +60,7 @@ private:
 #endif
     ISignalHandler *_signalHandler;
 
-#ifdef _WIN32
+#ifdef WIN32
     Descriptor _eventTerminate;
     Descriptor _eventTerminateChildThreads;
     Descriptor _eventWakeUp;

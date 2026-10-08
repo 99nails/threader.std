@@ -41,7 +41,7 @@ private:
 
     PollerListenSocketVector _listeners;
 
-    static const uint TIMEOUT_REOPEN_LISTEN_SOCKET_MILLISECONDS;
+    static const uint32_t TIMEOUT_REOPEN_LISTEN_SOCKET_MILLISECONDS;
 
 protected:
     void slotOnListenSocketError(PollerListenSocketConnection *sender,

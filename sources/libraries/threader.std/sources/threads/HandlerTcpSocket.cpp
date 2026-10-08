@@ -26,7 +26,7 @@ HandlerTcpSocket::HandlerTcpSocket(HandlerDataConsumer *consumer,
     _socketType = (INVALID_DESCRIPTOR == descriptor)
             ? TcpSocketType::Client : TcpSocketType::Server;
 
-#ifdef WIN
+#ifdef WIN32
     registerEvent();
 #endif
     if(INVALID_DESCRIPTOR != descriptor)
@@ -229,7 +229,7 @@ TcpSocketType HandlerTcpSocket::socketType() const
     return _socketType;
 }
 
-#ifdef WIN
+#ifdef WIN32
 
 bool HandlerTcpSocket::open()
 {
@@ -267,7 +267,7 @@ void HandlerTcpSocket::close()
     setDescriptor(INVALID_DESCRIPTOR);
 }
 
-int HandlerTcpSocket::read(char *data, int count)
+int HandlerTcpSocket::read(void *data, int count)
 {
     SOCKET socket = (SOCKET)descriptor();
     if (socket == (SOCKET)INVALID_DESCRIPTOR)
@@ -276,7 +276,7 @@ int HandlerTcpSocket::read(char *data, int count)
     return recv(socket, (char*)data, count, 0);
 }
 
-int HandlerTcpSocket::write(const char *data, int count)
+int HandlerTcpSocket::write(const void *data, int count)
 {
     SOCKET socket = (SOCKET)descriptor();
     if (socket == (SOCKET)INVALID_DESCRIPTOR)
@@ -297,7 +297,7 @@ DescriptorsVector *HandlerTcpSocket::events()
 {
     auto eventsVector = HandlerBase::events();
 
-    if (descriptor() == INVALID_DESCRIPTOR || eventsVector->count() < 1)
+    if (descriptor() == INVALID_DESCRIPTOR || eventsVector->size() < 1)
         return eventsVector;
 
     // событие закрытия сокета принимается всегда
@@ -335,7 +335,7 @@ bool HandlerTcpSocket::process(Descriptor eventToProcess)
 {
     auto eventsVector = events();
     auto socket = (SOCKET)descriptor();
-    if (socket == (SOCKET)INVALID_DESCRIPTOR || eventsVector->count() < 1 ||
+    if (socket == (SOCKET)INVALID_DESCRIPTOR || eventsVector->size() < 1 ||
             eventsVector->at(0) != eventToProcess)
         return false;
 
@@ -425,7 +425,7 @@ void HandlerTcpSocket::registerEvent()
 void HandlerTcpSocket::unregisterEvent()
 {
     auto eventsArray = events();
-    for(const auto e : qAsConst(*eventsArray))
+    for(const auto &e : *eventsArray)
     {
         WSACloseEvent(e);
     }

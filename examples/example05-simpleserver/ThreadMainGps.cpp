@@ -6,7 +6,7 @@
 
 using namespace Threader::Utils;
 
-constexpr char THREAD_NAME[] = "Thread.Main.Time.Server";
+constexpr char THREAD_NAME[] = "Thread.Main.Time.GPS";
 
 ThreadMainGps::ThreadMainGps(const std::string &applicationName,
                              const std::string &description)

@@ -12,7 +12,7 @@ namespace Utils {
 
 THREAD_ID ThreadUtils::currentThreadId()
 {
-#ifdef _WIN32
+#ifdef WIN32
     return GetCurrentThreadId();
 #else
     return syscall(SYS_gettid);

@@ -14,6 +14,11 @@ public:
     {
     }
 
+    CommandLineParser(const CommandLineParser &other)
+        : _token(other._token)
+    {
+    }
+
     CommandLineParser(int argc, char** argv)
     {
         _token.reserve(argc);
@@ -26,6 +31,11 @@ public:
     CommandLineParser(const std::vector<std::string> &arguments)
         : _token(arguments)
     {
+    }
+
+    void setArguments(const std::vector<std::string> &arguments)
+    {
+        _token = arguments;
     }
 
     const std::string& optionValue(const std::string& option) const

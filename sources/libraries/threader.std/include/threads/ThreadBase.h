@@ -11,7 +11,7 @@
 #include "PollingPosix.h"
 #endif
 
-#ifdef _WIN32
+#ifdef WIN32
 #include "PollingWindows.h"
 #endif
 

@@ -88,7 +88,6 @@ void ThreadBase::setThreadName(const std::string &threadName)
 
 std::string ThreadBase::threadClassName()
  {
-
      return demangle(typeid(*this).name());
  }
 
@@ -364,13 +363,15 @@ std::string ThreadBase::errorString(int errorNo)
 {
     if (0 == errorNo)
         errorNo = ThreadBase::errorNo();
-#ifdef _WIN32
+#ifdef WIN32
     LPSTR messageBuffer = nullptr;
     FormatMessageA(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL, errorNo, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
 
-    return std::string(messageBuffer);
+    return StdStringUtils::trim(StdStringUtils::ConvertCP1251ToUTF8(messageBuffer));
+
+    // return std::string(messageBuffer);
 #endif
 
 #ifdef linux
@@ -487,7 +488,7 @@ int ThreadBase::errorNo()
 #ifdef linux
     return errno;
 #endif
-#ifdef _WIN32
+#ifdef WIN32
     return GetLastError();
 #endif
 

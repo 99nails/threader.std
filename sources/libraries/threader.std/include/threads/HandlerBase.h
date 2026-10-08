@@ -7,7 +7,7 @@
 #include "PollingPosix.h"
 #endif
 
-#ifdef _WIN32
+#ifdef WIN32
 #include "PollingWindows.h"
 #endif
 
@@ -44,7 +44,7 @@ public:
                          const Descriptor descriptor = INVALID_DESCRIPTOR,
                          const bool portionedIO = false);
 
-#ifdef _WIN32
+#ifdef WIN32
     Descriptor descriptor() const;
     virtual void setDescriptor(const Descriptor &value);
 #endif
@@ -95,12 +95,12 @@ public:
      * @return - количество прочитанных данных
      */
 #ifdef linux
-    virtual int read(char *data, int count);
+    virtual int read(void *data, int count);
     virtual int write(const void *data, int count);
 #endif
-#ifdef _WIN32
-    virtual int read(char *data, int count) = 0;
-    virtual int write(const char *data, int count) = 0;
+#ifdef WIN32
+    virtual int read(void *data, int count) = 0;
+    virtual int write(const void *data, int count) = 0;
 #endif
 
     std::string readString();
@@ -123,7 +123,7 @@ private:
     bool _needsToWrite;
     bool _portionedIO;
 
-#ifdef _WIN32
+#ifdef WIN32
     Descriptor _descriptor;
 #endif
 };

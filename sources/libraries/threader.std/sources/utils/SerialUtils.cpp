@@ -168,7 +168,7 @@ void SerialUtils::closeSerial(Descriptor descriptor)
 #ifdef linux
     ::close(descriptor);
 #endif
-#ifdef _WIN32
+#ifdef WIN32
     CloseHandle(descriptor);
 #endif
 }
@@ -206,7 +206,7 @@ int SerialUtils::outputBytesAvailable(Descriptor descriptor)
         return 0;
 #endif
 
-#ifdef _WIN32
+#ifdef WIN32
     COMSTAT comStat;
     DWORD errors;
     if (ClearCommError(descriptor, &errors, &comStat))

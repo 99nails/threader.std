@@ -21,7 +21,7 @@ PollerThread::PollerThread(
     }
 #endif
 
-#ifdef _WIN32
+#ifdef WIN32
     _eventTerminate = CreateEvent(nullptr, true, false, nullptr);
     _eventTerminateChildThreads = CreateEvent(nullptr, true, false, nullptr);
     _eventWakeUp = CreateEvent(nullptr, true, false, nullptr);
@@ -52,7 +52,7 @@ void PollerThread::sendSignalWakeUp()
     sendSignal(ThreadSignals::SignalWakeUp);
 }
 
-#ifdef _WIN32
+#ifdef WIN32
 bool PollerThread::process(Descriptor eventToProcess)
 {
     bool result = hasEvent(eventToProcess);
@@ -122,7 +122,7 @@ void PollerThread::sendSignal(ThreadSignals signal)
     auto res = write(_pipeDescriptors[1], &signalInt, sizeof(signalInt));
     (void)res;
 #endif
-#ifdef _WIN32
+#ifdef WIN32
     switch (signal) {
     case ThreadSignals::SignalTerminate:
         SetEvent(_eventTerminate);

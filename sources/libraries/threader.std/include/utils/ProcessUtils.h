@@ -24,9 +24,11 @@ using ProcessEnumerationCallback = std::function<bool(const ProcessInfo &)>;
 class ProcessUtils
 {
 public:
+#ifdef linux
     static bool readProcessInfo(pid_t pid, ProcessInfo &processInfo);
 
     static ProcessInfoList enumerate(ProcessEnumerationCallback &callback);
+#endif
 };
 
 }

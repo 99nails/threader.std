@@ -14,10 +14,14 @@
 #include <iostream>
 
 #include <fcntl.h>
+
+#ifdef linux
 #include <poll.h>
+#include <systemd/sd-daemon.h>
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <systemd/sd-daemon.h>
 #include <unistd.h>
 
 namespace Threader::Threads {
@@ -62,7 +66,12 @@ private:
     std::string _description;
     static std::string _serviceName;
 
+#ifdef linux
     Descriptor _pipeDescriptors[2];
+#endif
+#ifdef WIN32
+    Descriptor _event;
+#endif
 
     bool _console;
     bool _systemd;
@@ -89,7 +98,7 @@ DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
     , _argc(argc)
     , _description(description)
     , _console(false)
-    , _systemd(true)
+    , _systemd(false)
     , _install(false)
     , _uninstall(false)
     , _logLevel(9)
@@ -99,8 +108,12 @@ DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
     _instance = this;
     _console = false;
 
+#ifdef linux
     _pipeDescriptors[0] = INVALID_DESCRIPTOR;
     _pipeDescriptors[1] = INVALID_DESCRIPTOR;
+#else
+    _event = INVALID_DESCRIPTOR;
+#endif
 
     appInfo().setArguments(argc, argv);
 }
@@ -212,10 +225,20 @@ bool DaemonApplication<ThreadMainType>::initialize()
     std::string line = "Нажмите Enter или Ctrl+C для завершения программы...\r\n";
 #endif
 
-#ifdef WIN
+#ifdef WIN32
     constexpr char MESSAGE_START_HINT[] = "Нажмите Enter для завершения программы...\r\n";
-    setlocale(LC_ALL, "russian_Russia.1251");
-    auto line = StdStringUtils::ConvertUTF8ToCP1251(MESSAGE_START_HINT);
+    // setlocale(LC_ALL, "russian_Russia.1251");
+
+    // // переключение стандартного потока вывода в формат Юникода
+    // _setmode(_fileno(stdout), _O_U8TEXT);
+    // // переключение стандартного потока ввода в формат Юникода
+    // _setmode(_fileno(stdin), _O_U8TEXT);
+
+    SetConsoleOutputCP(65001);
+    SetConsoleCP(65001);
+
+    // auto line = StdStringUtils::ConvertUTF8ToCP1251(MESSAGE_START_HINT);
+    auto line = MESSAGE_START_HINT;
 #endif
     chdir(appInfo().binaryPath().c_str());
 
@@ -257,7 +280,9 @@ bool DaemonApplication<ThreadMainType>::initialize()
         _serviceName = appInfo().binaryFileName();
 
     auto result = signal(SIGINT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
+#ifdef linux
     result &= signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
+#endif
     result &= signal(SIGTERM, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     // signal(SIGHUP, handleTerminateSignal);
 #ifdef linux
@@ -271,12 +296,13 @@ bool DaemonApplication<ThreadMainType>::initialize()
 template<class ThreadMainType>
 void DaemonApplication<ThreadMainType>::runMainLoop()
 {
-    if (!_systemd)
+    if (_console)
     {
         readLine();
     }
     else
     {
+#ifdef linux
         if (pipe2(_pipeDescriptors, O_NONBLOCK) != 0)
             return;
 
@@ -287,7 +313,13 @@ void DaemonApplication<ThreadMainType>::runMainLoop()
             result = poll(&fds, 1,  -1);
         }
         while (result < 0 && EINTR == errno);
+#endif
+#ifdef WIN32
+        _event = CreateEvent(nullptr, true, false, nullptr);
+        WaitForSingleObject(_event, INFINITE);
+#endif
     }
+
 }
 
 template<class ThreadMainType>
@@ -296,8 +328,14 @@ void DaemonApplication<ThreadMainType>::exitMainLoop()
     if (_console)
         return;
 
+#ifdef linux
     ::close(_pipeDescriptors[0]);
     ::close(_pipeDescriptors[1]);
+#endif
+
+#ifdef WIN32
+    CloseHandle(_event);
+#endif
 }
 
 template<class ThreadMainType>

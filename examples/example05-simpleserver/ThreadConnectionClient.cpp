@@ -7,6 +7,10 @@
 
 #include <cmath>
 
+#ifdef WIN32
+#define _POSIX_THREAD_SAFE_FUNCTIONS
+#endif
+
 ThreadConnectionClient::ThreadConnectionClient(MessageConsumer *parent,
                                                const SettingsTimeServer::Ptr &settings)
     : ThreadHandler(parent,
@@ -21,8 +25,13 @@ ThreadConnectionClient::ThreadConnectionClient(MessageConsumer *parent,
 
     time_t t = time(NULL);
     struct tm lt = {0};
+#ifdef linux
     localtime_r(&t, &lt);
     _gmtOffset = lt.tm_gmtoff;
+#endif
+#ifdef WIN32
+    localtime_s(&lt, &t);
+#endif
 }
 
 
@@ -104,9 +113,18 @@ bool ThreadConnectionClient::onPacketReceived(const PacketBase::Ptr &packet)
     {
 
         tm dateTimeTm;
+#ifdef linux
         strptime(packetAscii->line().c_str(),
                  "%Y-%m-%d %H:%M:%S",
                  &dateTimeTm);
+#endif
+#ifdef WIN32
+        strftime(const_cast<char*>(packetAscii->line().c_str()),
+                 packetAscii->line().size(),
+                 "%Y-%m-%d %H:%M:%S",
+                 &dateTimeTm);
+#endif
+
         if (dateTimeTm.tm_year > 0)
         {
             dateTimeTm.tm_mon++;

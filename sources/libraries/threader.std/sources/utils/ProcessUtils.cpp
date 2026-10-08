@@ -9,6 +9,8 @@
 
 namespace Threader::Utils {
 
+
+#ifdef linux
 bool ProcessUtils::readProcessInfo(pid_t pid, ProcessInfo &processInfo)
 {
     const std::string cmdLineFileName = "/proc/" + std::to_string(pid) + "/cmdline";
@@ -110,5 +112,7 @@ ProcessInfoList ProcessUtils::enumerate(ProcessEnumerationCallback &callback)
 
     return result;
 }
+
+#endif
 
 }

@@ -40,16 +40,16 @@ public:
     bool process(const pollfd &event) override;
 #endif
 
-#ifdef WIN
+#ifdef WIN32
 protected:
     void registerEvent();
     void unregisterEvent();
 #endif
 
-#ifdef WIN
-    int read(char *data, int count) override;
+#ifdef WIN32
+    int read(void *data, int count) override;
 
-    int write(const char *data, int count) override;
+    int write(const void *data, int count) override;
 
     DescriptorsVector *events() override;
 

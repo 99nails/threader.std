@@ -8,7 +8,7 @@ namespace Threads {
 
 ConnectionBase::ConnectionBase(ThreadBase *parentThread,
                                HandlerBase *handler,
-                               const uint &reconnectTimeout,
+                               const uint32_t &reconnectTimeout,
                                PacketFactoryBase* packetFactory,
                                const bool &portionedIO)
     : _parentThread(parentThread)
@@ -225,7 +225,7 @@ void ConnectionBase::onReadyRead(HandlerBase &sender)
     // чтение данных из входного буфера
     char buffer[65536];
     int readCount;
-    uint totalReadCount = 0;
+    uint32_t totalReadCount = 0;
 
     MemoryBlock localInputBuffer;
     localInputBuffer.setCapacity(64 * 1024);
@@ -248,7 +248,7 @@ void ConnectionBase::onReadyRead(HandlerBase &sender)
             {
                 // сохранение прочитанных данных при успешном чтении
                 localInputBuffer.append(buffer, readCount);
-                totalReadCount += uint(readCount);
+                totalReadCount += uint32_t(readCount);
             }
         }
     } while (readCount > 0);

@@ -36,9 +36,9 @@ public:
 
     bool process(Descriptor eventToProcess) override;
 
-    int read(char *data, int count) override;
+    int read(void *data, int count) override;
 
-    int write(const char *data, int count) override;
+    int write(const void *data, int count) override;
 #endif
 
 #ifdef linux

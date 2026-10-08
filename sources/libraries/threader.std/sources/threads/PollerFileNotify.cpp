@@ -1,5 +1,7 @@
 #include "PollerFileNotify.h"
 
+#ifdef linux
+
 #include <map>
 
 #include <unistd.h>
@@ -119,3 +121,5 @@ std::string PollerFileNotify::operationName(const MaskType code)
 }
 
 }
+
+#endif

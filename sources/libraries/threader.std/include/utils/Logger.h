@@ -178,7 +178,7 @@ private:
 
     int _logDetails;
 
-#ifdef _WIN32
+#ifdef WIN32
     Descriptor _consoleHandle;
 #endif
 };

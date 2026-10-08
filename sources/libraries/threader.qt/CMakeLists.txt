@@ -8,13 +8,29 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt5 REQUIRED COMPONENTS Core)
 
-add_library(${PROJECT_NAME} SHARED
+set(THREADER_QT_SOURCES
     include/threads/DaemonApplicationQt.h
     include/threads/MessageBridge.h sources/threads/MessageBridge.cpp
     include/threads/ThreadQtEventLoop.h sources/threads/ThreadQtEventLoop.cpp
     include/threads/ThreadMainQt.h sources/threads/ThreadMainQt.cpp
-    include/utils/UdevListener.h sources/utils/UdevListener.cpp
+)
+
+if (UNIX)
+    set(THREADER_QT_SOURCES "${THREADER_SOURCES}"
+        ";include/utils/UdevListener.h;sources/utils/UdevListener.cpp"
     )
+endif()
+
+add_library(${PROJECT_NAME} SHARED ${THREADER_QT_SOURCES})
+
+
+# add_library(${PROJECT_NAME} SHARED
+#     include/threads/DaemonApplicationQt.h
+#     include/threads/MessageBridge.h sources/threads/MessageBridge.cpp
+#     include/threads/ThreadQtEventLoop.h sources/threads/ThreadQtEventLoop.cpp
+#     include/threads/ThreadMainQt.h sources/threads/ThreadMainQt.cpp
+#     include/utils/UdevListener.h sources/utils/UdevListener.cpp
+#     )
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 

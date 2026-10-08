@@ -11,7 +11,7 @@ namespace Threads {
 using namespace Threader::Utils;
 
 
-const uint ThreadListenSocketConnection::TIMEOUT_REOPEN_LISTEN_SOCKET_MILLISECONDS = 30000;
+const uint32_t ThreadListenSocketConnection::TIMEOUT_REOPEN_LISTEN_SOCKET_MILLISECONDS = 30000;
 
 
 ThreadListenSocketConnection::ThreadListenSocketConnection(uint16_t port,

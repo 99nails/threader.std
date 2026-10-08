@@ -61,11 +61,12 @@ bool PollerListenSocketConnection::initialize()
 #ifdef linux
     setEvents(POLLIN | POLLERR);
 #endif
-#ifdef WIN
+#ifdef WIN32
     _event = WSACreateEvent();
     if (WSAEventSelect((SOCKET)_descriptor, _event, FD_ACCEPT) != 0)
     {
-        emit signalOnListenSocketError(this, SocketUtils::lastError());
+        if (_consumer)
+            _consumer->onListenSocketError(this, errorCode);
         _isInitialized = false;
         return false;
     }
@@ -78,7 +79,7 @@ bool PollerListenSocketConnection::initialize()
 
 void PollerListenSocketConnection::finalize()
 {
-#ifdef WIN
+#ifdef WIN32
     finalizeWindows();
 #endif
 
@@ -88,19 +89,19 @@ void PollerListenSocketConnection::finalize()
     _isInitialized = false;
 }
 
-#ifdef WIN
+#ifdef WIN32
 
-Descriptor PollerListenSocket::descriptor() const
+Descriptor PollerListenSocketConnection::descriptor() const
 {
     return _descriptor;
 }
 
-void PollerListenSocket::setDescriptor(const Descriptor descriptor)
+void PollerListenSocketConnection::setDescriptor(const Descriptor descriptor)
 {
     _descriptor = descriptor;
 }
 
-void PollerListenSocket::finalizeWindows()
+void PollerListenSocketConnection::finalizeWindows()
 {
     if (INVALID_SOCKET == (SOCKET)_descriptor)
         return;
@@ -109,7 +110,7 @@ void PollerListenSocket::finalizeWindows()
     _descriptor = (Descriptor)INVALID_SOCKET;
 }
 
-bool PollerListenSocket::process(Descriptor eventToProcess)
+bool PollerListenSocketConnection::process(Descriptor eventToProcess)
 {
     if (_event != eventToProcess)
         return false;
@@ -125,15 +126,18 @@ bool PollerListenSocket::process(Descriptor eventToProcess)
 
     if (INVALID_SOCKET == newSocket)
     {
-        emit signalOnListenSocketError(this, SocketUtils::lastError());
+        if (_consumer)
+            _consumer->onListenSocketError(this, SocketUtils::lastError());
         return true;
     }
 
     bool acceptConnection = true;
-    emit signalConnectionRequest(this,
-                                 Descriptor(newSocket),
-                                 clientAddress,
-                                 acceptConnection);
+    if (_consumer)
+        _consumer->onConnectionRequest(this,
+                                       Descriptor(newSocket),
+                                       clientAddress,
+                                       acceptConnection);
+
     if (!acceptConnection)
         SocketUtils::closeSocket((Descriptor)newSocket);
     return true;

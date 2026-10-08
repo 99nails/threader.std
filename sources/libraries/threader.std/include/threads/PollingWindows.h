@@ -1,11 +1,12 @@
 #pragma once
 
-#ifdef _WIN32
+#ifdef WIN32
 
 #include "ThreadsCommon.h"
 
 #include <list>
 #include <vector>
+#include <stdint.h>
 #include <string>
 #include <windows.h>
 

@@ -8,9 +8,9 @@
 #include "StdStringUtils.h"
 #include "ThreadQtEventLoop.h"
 
-#ifdef linux
-#include <sys/resource.h>
-#endif
+// #ifdef linux
+// #include <sys/resource.h>
+// #endif
 
 #include "ThreadMain.h"
 

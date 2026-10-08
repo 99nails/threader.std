@@ -9,7 +9,7 @@
 
 namespace Threader::Utils {
 
-using DirentList = std::list<dirent>;
+using FilenameList = std::list<std::string>;
 
 class FileUtils
 {
@@ -19,6 +19,7 @@ public:
     static Descriptor fileOpen(const std::string &fileName);
     static void fileClose(Descriptor descriptor);
     static void fileSeek(Descriptor descriptor, int mode, int offset);
+    static size_t fileRead(const Descriptor descriptor, void *buffer, size_t count);
     static MemoryBlock::Ptr fileReadAll(const Descriptor descriptor);
     static size_t fileWrite(const Descriptor &descriptor,
                             const std::string &data);
@@ -37,14 +38,14 @@ public:
     static std::string extractFileName(const std::string &fileName);
     static std::string extractFileExtension(const std::string &fileName);
 
-    static DirentList scanFiles(const std::string &path);
+    static FilenameList scanFiles(const std::string &path);
 
     static constexpr char DELIMITER =
 #ifdef linux
         '/';
 #endif
 #ifdef WIN32
-        '\';'
+    '\\';
 #endif
 
 };

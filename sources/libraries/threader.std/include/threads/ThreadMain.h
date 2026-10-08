@@ -14,8 +14,8 @@
 namespace Threader::Threads
 {
 
-constexpr uint TIMEOUT_BUILD_STATISTIC_MILLISECONDS = 10000;
-constexpr uint TIMEOUT_BUILD_COMMON_STATISTIC_MILLISECONDS = 60000;
+constexpr uint32_t TIMEOUT_BUILD_STATISTIC_MILLISECONDS = 10000;
+constexpr uint32_t TIMEOUT_BUILD_COMMON_STATISTIC_MILLISECONDS = 60000;
 
 class ThreadMainWithouSettings : public ThreadBase
 {

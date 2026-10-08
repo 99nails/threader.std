@@ -3,6 +3,7 @@
 #include "MemoryBlock.h"
 
 #include <memory>
+#include <stdint.h>
 
 namespace Threader::Threads {
 

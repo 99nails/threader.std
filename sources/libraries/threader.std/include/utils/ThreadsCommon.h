@@ -8,7 +8,7 @@ constexpr Descriptor INVALID_DESCRIPTOR = -1;
 
 #endif
 
-#ifdef _WIN32
+#ifdef WIN32
 
 // Настройки заголовочника <winsock.h>, который подключен в <windows.h>, приводят к
 // предупреждению при компиляции в <winsock2.h>: Please include winsock2.h before windows.h

@@ -1,7 +1,12 @@
 #include "SocketUtils.h"
 
+#ifdef linux
 #include <ifaddrs.h>
+#endif
+
+#ifdef WIN32
 #include <string.h>
+#endif
 
 namespace Threader {
 
@@ -22,7 +27,7 @@ InterfaceInfo::InterfaceInfo(std::string interfaceName_,
 
 bool SocketUtils::initializeSockets()
 {
-#ifdef WIN
+#ifdef WIN32
     if (_isSocketsInitialized)
         return true;
 
@@ -40,7 +45,7 @@ bool SocketUtils::initializeSockets()
 
 void SocketUtils::finalizeSockets()
 {
-#ifdef WIN
+#ifdef WIN32
    if (_isSocketsInitialized)
        WSACleanup();
 #endif
@@ -84,9 +89,9 @@ std::string SocketUtils::hostToIpAddressString(const std::string &host)
     if (!checkSocketsInitialization())
         return result;
 
-#ifdef WIN
+#ifdef WIN32
 
-    auto entry = gethostbyname(host.toLocal8Bit().constData());
+    auto entry = gethostbyname(host.c_str());
     if (!entry)
         return result;
 
@@ -199,7 +204,7 @@ InterfaceInfo SocketUtils::interfaceInfo(const std::string &adapterName, const u
 
 int SocketUtils::lastError()
 {
-#ifdef WIN
+#ifdef WIN32
     return WSAGetLastError();
 #endif
 #ifdef linux
@@ -210,7 +215,7 @@ int SocketUtils::lastError()
 
 void SocketUtils::closeSocket(Descriptor socket)
 {
-#ifdef WIN
+#ifdef WIN32
     shutdown((SOCKET)socket, SD_BOTH);
     closesocket((SOCKET)socket);
 #endif
@@ -221,7 +226,7 @@ void SocketUtils::closeSocket(Descriptor socket)
 #endif
 }
 
-#ifdef WIN
+#ifdef WIN32
 
 Descriptor SocketUtils::createTcpServerSocket(uint16_t port,
                                               bool isBlocking,
@@ -523,7 +528,7 @@ Descriptor SocketUtils::createUdpSocket(sockaddr_in &bindAddress,
                                         int &errorCode)
 {
     errorCode= 0;
-#ifdef WIN
+#ifdef WIN32
     if (!checkSocketsInitialization())
         return (Descriptor)INVALID_SOCKET;
     Descriptor result = (Descriptor)socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -539,7 +544,7 @@ Descriptor SocketUtils::createUdpSocket(sockaddr_in &bindAddress,
         return result;
     }
 
-#ifdef WIN
+#ifdef WIN32
     auto callResult = bind((SOCKET)result,
                            reinterpret_cast<sockaddr*>(&bindAddress),
                            sizeof(bindAddress));
@@ -578,7 +583,7 @@ int SocketUtils::inputBytesAvalable(const Descriptor descriptor)
 bool SocketUtils::setBlockingMode(Descriptor socket, bool isBlocking)
 {
 
-#ifdef WIN
+#ifdef WIN32
     u_long arg = (isBlocking) ? 0 : 1;
     return ioctlsocket((SOCKET)socket, FIONBIO, &arg) == 0;
 #endif

@@ -1,6 +1,6 @@
 #include "PollingWindows.h"
 
-#ifdef _WIN32
+#ifdef WIN32
 
 #include "DateTimeUtils.h"
 
@@ -51,7 +51,7 @@ bool PollerBase::process(Descriptor eventToProcess)
 Polling::Polling(const std::string &threadName)
     : _waitCount(0)
     , _threadName(threadName)
-{    
+{
 }
 
 int Polling::pollersCount()

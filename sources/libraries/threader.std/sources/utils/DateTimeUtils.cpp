@@ -106,7 +106,7 @@ void DateTimeUtils::sleepMilliseconds(int milliseconds)
     ts.tv_nsec = (milliseconds % 1000) * 1000000;
     nanosleep(&ts, nullptr);
 #endif
-#ifdef _WIN32
+#ifdef WIN32
     Sleep(milliseconds);
 #endif
 }
@@ -124,7 +124,7 @@ uint64_t DateTimeUtils::getTickCount()
     return tickCountMsecs;
 #endif
 
-#ifdef _WIN32
+#ifdef WIN32
     if (!_getTickCount)
     {
         HINSTANCE hModule = ::LoadLibraryA("kernel32.dll");

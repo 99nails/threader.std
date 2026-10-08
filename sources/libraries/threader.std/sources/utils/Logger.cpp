@@ -43,7 +43,7 @@ Logger::Logger(bool doConsoleOutput,
               ? pathToBin.substr(slashIndex + 1)
               : "LogFile";
 
-#ifdef _WIN32
+#ifdef WIN32
     _consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
     if (StdStringUtils::endsWith(StdStringUtils::toUpper(_logFilePrefix), ".EXE"))
@@ -51,7 +51,8 @@ Logger::Logger(bool doConsoleOutput,
         _logFilePrefix.erase(_logFilePrefix.length() - 4, 4);
     }
 #endif
-    _pathToLog = FileUtils::absolutePath(FileUtils::extractFilePath(pathToBin) +
+    _pathToLog = FileUtils::extractFilePath(pathToBin);
+    _pathToLog = FileUtils::absolutePath( _pathToLog +
                                          "/../log/");
     if (!_pathToLog.empty())
     {
@@ -176,11 +177,9 @@ bool Logger::flush()
     for (auto iterator = _buffer.cbegin(); iterator != _buffer.cend(); iterator++)
     {
 #ifdef linux
-
         ::write(_descriptor, iterator->c_str(), iterator->length());
-
 #endif
-#ifdef _WIN32
+#ifdef WIN32
         DWORD writtenCount;
         WriteFile(_descriptor, iterator->c_str(), iterator->length(), &writtenCount, nullptr);
 #endif
@@ -233,7 +232,7 @@ bool Logger::prepareFilePath()
                     #endif
                             ) == 0;
         if (!result)
-            std::cout << "Ошибка создания каталога " << _pathToLog.c_str() << std::endl;
+            std::cout << "Directory creation error: " << _pathToLog.c_str() << std::endl;
         return result;
 
     }
@@ -255,7 +254,7 @@ bool Logger::openFile()
 #ifdef linux
     lseek(_descriptor, 0, SEEK_END);
 #endif
-#ifdef _WIN32
+#ifdef WIN32
     SetFilePointer(_descriptor, 0, 0, FILE_END);
 #endif
     return true;
@@ -294,7 +293,7 @@ void Logger::printLine(const std::string &line, MessageType messageType)
     }
     std::cout << line << ANSI_COLOR_RESET;
 #endif
-#ifdef _WIN32
+#ifdef WIN32
     uint8_t color;
     switch (messageType) {
     case Attention:
@@ -315,7 +314,8 @@ void Logger::printLine(const std::string &line, MessageType messageType)
     if (INVALID_HANDLE_VALUE != _consoleHandle)
         SetConsoleTextAttribute(_consoleHandle, color);
 
-    std::cout << StdStringUtils::ConvertUTF8ToCP1251(line);
+    // std::cout << StdStringUtils::ConvertUTF8ToCP1251(line);
+    std::cout << line;
 
     if (INVALID_HANDLE_VALUE != _consoleHandle)
         SetConsoleTextAttribute(_consoleHandle, 7);

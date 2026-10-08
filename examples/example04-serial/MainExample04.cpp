@@ -4,6 +4,7 @@
 
 #include "DateTimeUtils.h"
 #include "SignalHandler.h"
+#include "StdStringUtils.h"
 
 #include "Log.h"
 #include "ThreadPing.h"
@@ -42,7 +43,7 @@ int main(int argc, char *argv[])
 
     auto threadPing = new ThreadPing(
             #ifdef WIN32
-                "COM4"
+                "COM5"
             #else
                 "/dev/pts/1"
             #endif
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
 
     auto threadPong = new ThreadPong(
             #ifdef WIN32
-                "COM5"
+                "COM6"
             #else
                 "/dev/pts/0"
             #endif

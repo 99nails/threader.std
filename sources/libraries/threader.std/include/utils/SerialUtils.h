@@ -26,7 +26,7 @@ public:
 
     static int outputBytesAvailable(Descriptor descriptor);
 
-#ifdef _WIN32
+#ifdef WIN32
     static bool setWaitMask(Descriptor descriptor, bool needsToWrite);
 #endif
 };

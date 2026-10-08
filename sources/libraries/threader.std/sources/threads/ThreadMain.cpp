@@ -1,5 +1,9 @@
 #include "ThreadMain.h"
 
+#ifdef WIN32
+#include <psapi.h>
+#endif
+
 namespace Threader::Threads
 {
 

@@ -6,6 +6,9 @@ namespace Threader::Utils
 {
 
 DaemonApplicationInfo::DaemonApplicationInfo()
+    : _arguments({})
+    , _binaryFileName(std::string())
+    , _binaryPath(std::string())
 {
 }
 
@@ -16,10 +19,10 @@ void DaemonApplicationInfo::setArguments(int argc, char *argv[])
     {
         _arguments.push_back(argv[i]);
     }
-    _commandLine = CommandLineParser(_arguments);
+    _commandLine.setArguments(_arguments);
 
-    _binaryFileName = FileUtils::extractFileName(appInfo().commandLine().token(0));
-    _binaryPath = FileUtils::extractFilePath(FileUtils::absolutePath(appInfo().commandLine().token(0)));
+    _binaryFileName = FileUtils::extractFileName(_commandLine.token(0));
+    _binaryPath = FileUtils::extractFilePath(FileUtils::absolutePath(_commandLine.token(0)));
 }
 
 const CommandLineParser &DaemonApplicationInfo::commandLine()

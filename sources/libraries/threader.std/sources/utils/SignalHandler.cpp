@@ -1,12 +1,15 @@
 
-#ifdef linux
 
 #include <cxxabi.h>
 #include <csignal>
+
+#ifdef linux
 #include <execinfo.h>
+#include <sys/syscall.h>
+#endif
+
 #include <unistd.h>
 #include <sys/stat.h>
-#include <sys/syscall.h>
 
 #include <iostream>
 
@@ -19,6 +22,41 @@
 #ifndef STACK_LEVEL
 #define STACK_LEVEL 50
 #endif
+
+using namespace Threader::Threads;
+
+std::string demangle(const char* name)
+{
+    int status;
+    char* demangled = abi::__cxa_demangle(name, nullptr, nullptr, &status);
+    std::string result = std::string((0 == status) ? demangled : name);
+
+    if (demangled)
+        free(demangled);
+
+    return result;
+}
+
+std::string demangleFunctionName(char* line)
+{
+    std::string result{line};
+
+    auto start = result.find('(');
+    auto end = result.find('+');
+    if (start > 0 && end > 0 && start < end)
+    {
+        std::string name = result.substr(start + 1, end - start - 1);
+        if (!name.empty())
+        {
+            name = demangle(name.c_str());
+            result.replace(start + 1, end - start - 1, name);
+        }
+    }
+
+    return result;
+}
+
+#ifdef linux
 
 pid_t gettid()
 {
@@ -78,38 +116,6 @@ void setErrorSignalHandler(const char* arg0)
         signal(signal_name_num.signum, handleDeathSignal);
 }
 
-using namespace Threader::Threads;
-
-std::string demangle(const char* name)
-{
-    int status;
-    char* demangled = abi::__cxa_demangle(name, nullptr, nullptr, &status);
-    std::string result = std::string((0 == status) ? demangled : name);
-
-    if (demangled)
-        free(demangled);
-
-    return result;
-}
-
-std::string demangleFunctionName(char* line)
-{
-    std::string result{line};
-
-    auto start = result.find('(');
-    auto end = result.find('+');
-    if (start > 0 && end > 0 && start < end)
-    {
-        std::string name = result.substr(start + 1, end - start - 1);
-        if (!name.empty())
-        {
-            name = demangle(name.c_str());
-            result.replace(start + 1, end - start - 1, name);
-        }
-    }
-
-    return result;
-}
 
 void handleDeathSignal(int signum)
 {

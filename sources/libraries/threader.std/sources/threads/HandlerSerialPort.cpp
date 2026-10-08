@@ -8,7 +8,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef _WIN32
+#ifdef WIN32
 #include <fileapi.h>
 #endif
 
@@ -181,7 +181,7 @@ bool HandlerSerialPort::process(Descriptor eventToProcess)
     return true;
 }
 
-int HandlerSerialPort::read(char *data, int count)
+int HandlerSerialPort::read(void *data, int count)
 {
     if (INVALID_DESCRIPTOR == descriptor())
         return 0;
@@ -223,7 +223,7 @@ int HandlerSerialPort::read(char *data, int count)
     return readCount;
 }
 
-int HandlerSerialPort::write(const char *data, int count)
+int HandlerSerialPort::write(const void *data, int count)
 {
     if (INVALID_DESCRIPTOR == descriptor())
         return 0;
@@ -233,7 +233,7 @@ int HandlerSerialPort::write(const char *data, int count)
     overlapped.hEvent = CreateEvent(nullptr, true, false, nullptr);
 
     DWORD writtenCount = 0;
-    if (WriteFile(descriptor(), const_cast<char*>(data), count, &writtenCount, &overlapped))
+    if (WriteFile(descriptor(), const_cast<char*>((char*)data), count, &writtenCount, &overlapped))
     {
         CloseHandle(overlapped.hEvent);
         return writtenCount;

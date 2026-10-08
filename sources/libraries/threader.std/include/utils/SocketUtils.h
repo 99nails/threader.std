@@ -14,13 +14,21 @@
 #include <unistd.h>
 #endif
 
-#ifdef WIN
+#ifdef WIN32
 #include "windows.h"
 #endif
 
 #include <list>
 #include <set>
 #include <string>
+
+#ifdef WIN32
+
+#include <stdint.h>
+
+using sa_family_t = uint16_t;
+
+#endif
 
 namespace Threader::Utils {
 

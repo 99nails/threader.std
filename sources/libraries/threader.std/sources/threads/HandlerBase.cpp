@@ -11,7 +11,7 @@ HandlerBase::HandlerBase(HandlerDataConsumer *consumer,
                          const std::string &deviceName,
                          const Descriptor descriptor,
                          const bool portionedIO)
-#ifdef _WIN32
+#ifdef WIN32
     : PollerBase()
 #endif
 #ifdef linux
@@ -22,13 +22,13 @@ HandlerBase::HandlerBase(HandlerDataConsumer *consumer,
     , _connectionState(ConnectionState::Disconnected)
     , _needsToWrite(false)
     , _portionedIO(portionedIO)
-    #ifdef _WIN32
+#ifdef WIN32
     , _descriptor(descriptor)
-    #endif
+#endif
 {
 }
 
-#ifdef _WIN32
+#ifdef WIN32
 
 Descriptor HandlerBase::descriptor() const
 {
@@ -39,7 +39,7 @@ Descriptor HandlerBase::descriptor() const
 
 void HandlerBase::setDescriptor(const Descriptor &value)
 {
-#ifdef _WIN32
+#ifdef WIN32
     _descriptor = value;
 #endif
 

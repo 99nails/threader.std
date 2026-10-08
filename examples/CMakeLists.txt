@@ -27,6 +27,8 @@ target_link_libraries(example01-messages
     threader-std
     )
 
+set_target_properties(example01-messages PROPERTIES WIN32_EXECUTABLE OFF)
+
 #example02-threads
 add_executable(example02-threads
     example02-threads/MainExample02.cpp
@@ -109,6 +111,7 @@ target_link_libraries(example05-timeclient
     threader-std
     )
 
+if(UNIX)
 
 # example06-devicelist
 add_executable(example06-devicelist
@@ -134,6 +137,8 @@ target_link_libraries(example06-waitdevice
     threader-std
     )
 
+endif()
+
 if(QT_ENABLE)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 
@@ -155,6 +160,7 @@ if(QT_ENABLE)
         Qt5::Core
         )
 
+    if(UNIX)
     #example07-2-udevlistener
     add_executable(example07-2-udevlistener
         example07-qteventloop/MainExample07-UdevListener.cpp
@@ -178,32 +184,35 @@ if(QT_ENABLE)
         Qt5::Core
         Qt5::Widgets
         )
+    endif()
 
-    #example11-messagebridge
-    add_executable(example11-messagebridge
-        example11-messagebridge/MainExample11-MessageBridge.cpp
-        example11-messagebridge/MainWindowMessageBridge.cpp
-        example11-messagebridge/MainWindowMessageBridge.h
-        example11-messagebridge/MainWindowMessageBridge.ui
-        )
+    # #example11-messagebridge
+    # add_executable(example11-messagebridge
+    #     example11-messagebridge/MainExample11-MessageBridge.cpp
+    #     example11-messagebridge/MainWindowMessageBridge.cpp
+    #     example11-messagebridge/MainWindowMessageBridge.h
+    #     example11-messagebridge/MainWindowMessageBridge.ui
+    #     )
 
-    target_include_directories(example11-messagebridge PUBLIC
-        ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads
-        ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/utils
-        ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
-        ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/utils
-        )
+    # target_include_directories(example11-messagebridge PUBLIC
+    #     ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads
+    #     ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/utils
+    #     ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/threads
+    #     ${CMAKE_SOURCE_DIR}/sources/libraries/threader.qt/include/utils
+    #     )
 
-    target_compile_features(example11-messagebridge PUBLIC cxx_std_17)
+    # target_compile_features(example11-messagebridge PUBLIC cxx_std_17)
 
-    target_link_libraries(example11-messagebridge PRIVATE
-        threader-std
-        threader-qt
-        Qt5::Core
-        Qt5::Widgets
-        )
+    # target_link_libraries(example11-messagebridge PRIVATE
+    #     threader-std
+    #     threader-qt
+    #     Qt5::Core
+    #     Qt5::Widgets
+    #     )
 
 endif(QT_ENABLE)
+
+if(UNIX)
 
 #example08-udpsender
 add_executable(example08-udpsender
@@ -230,7 +239,6 @@ target_compile_features(example09-threadtimer PUBLIC cxx_std_17)
 target_link_libraries(example09-threadtimer
     threader-std
     )
-
 
 #example10-filewatcher
 add_executable(example10-filewatcher
@@ -267,3 +275,4 @@ target_include_directories(example12-checkdaemon PRIVATE
     ${DBUS_INCLUDE_DIRS}
     )
 
+endif()

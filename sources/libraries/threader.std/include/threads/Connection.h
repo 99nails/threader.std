@@ -21,7 +21,7 @@ class ConnectionBase : public HandlerDataConsumer
 public:
     explicit ConnectionBase(ThreadBase *parentThread,
                             HandlerBase *handler,
-                            const uint &reconnectTimeout = 0,
+                            const uint32_t &reconnectTimeout = 0,
                             PacketFactoryBase *packetFactory = nullptr,
                             const bool &portionedIO = false);
 

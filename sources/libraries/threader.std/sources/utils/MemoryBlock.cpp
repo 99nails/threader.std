@@ -1,6 +1,7 @@
 #include "MemoryBlock.h"
 
 #include <string.h>
+#include <stdint.h>
 
 namespace Threader::Utils {
 

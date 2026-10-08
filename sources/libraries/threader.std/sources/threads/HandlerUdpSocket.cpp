@@ -119,7 +119,7 @@ DescriptorsVector *HandlerUdpSocket::events()
 {
     auto eventsVector = HandlerBase::events();
 
-    if (descriptor() == INVALID_DESCRIPTOR || eventsVector->count() < 1)
+    if (descriptor() == INVALID_DESCRIPTOR || eventsVector->size() < 1)
         return eventsVector;
 
     // событие закрытия сокета принимается всегда
@@ -150,7 +150,7 @@ bool HandlerUdpSocket::process(Descriptor eventToProcess)
 {
     auto eventsVector = events();
     auto socket = (SOCKET)descriptor();
-    if (socket == (SOCKET)INVALID_DESCRIPTOR || eventsVector->count() < 1 ||
+    if (socket == (SOCKET)INVALID_DESCRIPTOR || eventsVector->size() < 1 ||
             eventsVector->at(0) != eventToProcess)
         return false;
 
@@ -292,7 +292,7 @@ bool HandlerUdpSocket::process(const pollfd &event)
 
 #endif
 
-int HandlerUdpSocket::read(char *data, int count)
+int HandlerUdpSocket::read(void *data, int count)
 {
     if (descriptor() == INVALID_DESCRIPTOR)
         return -1;
@@ -308,7 +308,7 @@ int HandlerUdpSocket::read(char *data, int count)
 #endif
 #ifdef WIN32
     int addrSize = sizeof(_remoteAddress);
-    return recvfrom((SOCKET)descriptor(), data, count, 0,
+    return recvfrom((SOCKET)descriptor(), (char*)data, count, 0,
                     reinterpret_cast<struct sockaddr*>(&_remoteAddress), &addrSize);
 #endif
     return -1;
@@ -335,9 +335,9 @@ int HandlerUdpSocket::writeTo(const sockaddr_in &address,
                   reinterpret_cast<struct sockaddr*>(const_cast<struct sockaddr_in*>(&address)),
                   (int)sizeof(address));
 #endif
-#ifdef WIN
+#ifdef WIN32
     return sendto((SOCKET)descriptor(),
-                  data,
+                  (char*)data,
                   count,
                   0,
                   reinterpret_cast<struct sockaddr*>(const_cast<struct sockaddr_in*>(&address)),
@@ -377,7 +377,7 @@ const sockaddr_in &HandlerUdpSocket::readAddress() const
     return _readAddress;
 }
 
-#ifdef WIN
+#ifdef WIN32
 
 void HandlerUdpSocket::registerEvent()
 {

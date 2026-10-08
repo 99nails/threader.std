@@ -45,7 +45,7 @@ void ThreadLogCleaner::onIdle()
     struct stat file_stat;
     auto files = FileUtils::scanFiles(_pathToLog);
 
-    constexpr uint secondsByDay = 86400;
+    constexpr uint32_t secondsByDay = 86400;
     constexpr char EXTENTION_LOG[] = ".log";
     constexpr char EXTENTION_ZIP[] = ".gzip";
 
@@ -56,7 +56,7 @@ void ThreadLogCleaner::onIdle()
 
     for (const auto &file : files)
     {
-        auto fileName = _pathToLog + file.d_name;
+        auto fileName = _pathToLog + file;
         if (stat(fileName.c_str(), &file_stat) < 0)
             continue;
 
@@ -157,7 +157,8 @@ bool ThreadLogCleaner::compressFileGzip(const std::string &inputFilename,
     uint32_t readCount;
     do
     {
-        readCount = ::read(descriptor, buffer, sizeof(buffer));
+        // readCount = ::read((int)descriptor, buffer, sizeof(buffer));
+        readCount = FileUtils::fileRead(descriptor, buffer, sizeof(buffer));
         if (readCount > 0)
         {
             auto writtenCount = gzwrite(zipFile, buffer, readCount);
@@ -174,7 +175,7 @@ bool ThreadLogCleaner::compressFileGzip(const std::string &inputFilename,
     while (readCount > 0);
 
     gzclose(zipFile);
-    ::close(descriptor);
+    FileUtils::fileClose(descriptor);
 
     return result;
 }

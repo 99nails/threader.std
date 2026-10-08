@@ -1,5 +1,14 @@
 #include "ThreadMainQt.h"
 
+#ifdef linux
+#include <sys/resource.h>
+#endif
+
+#ifdef WIN32
+#include <psapi.h>
+#endif
+
+
 namespace Threader::Threads::QtEventLoop
 {
 

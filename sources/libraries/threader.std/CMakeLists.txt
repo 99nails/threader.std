@@ -13,7 +13,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/threads
     ${CMAKE_CURRENT_SOURCE_DIR}/include/utils
     ${DBUS_INCLUDE_DIRS}
-    )
+)
 
 set(THREADER_SOURCES
     include/threads/Connection.h sources/threads/Connection.cpp
@@ -34,24 +34,23 @@ set(THREADER_SOURCES
     include/threads/PollerFileNotify.h sources/threads/PollerFileNotify.cpp
     include/threads/PollerListenSocketConnection.h sources/threads/PollerListenSocketConnection.cpp
     include/threads/PollerThread.h sources/threads/PollerThread.cpp
-    include/threads/PollerUdev.h sources/threads/PollerUdev.cpp
     include/threads/PollingPosix.h sources/threads/PollingPosix.cpp
     include/threads/QueueMessages.h sources/threads/QueueMessages.cpp
     include/threads/ThreadBase.h sources/threads/ThreadBase.cpp
     include/threads/ThreadConnections.h sources/threads/ThreadConnections.cpp
-    include/threads/ThreadFileNotifier.h sources/threads/ThreadFileNotifier.cpp
+    # include/threads/ThreadFileNotifier.h sources/threads/ThreadFileNotifier.cpp
     include/threads/ThreadHandler.h sources/threads/ThreadHandler.cpp
     include/threads/ThreadListenSocketConnection.h sources/threads/ThreadListenSocketConnection.cpp
     include/threads/ThreadLog.h sources/threads/ThreadLog.cpp
     include/threads/ThreadLogCleaner.h sources/threads/ThreadLogCleaner.cpp
     include/threads/ThreadMain.h sources/threads/ThreadMain.cpp
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
-    include/threads/ThreadUdevMonitor.h sources/threads/ThreadUdevMonitor.cpp
+    # include/threads/ThreadUdevMonitor.h sources/threads/ThreadUdevMonitor.cpp
     include/utils/CommandLineParser.h
     include/utils/CrcUtils.h sources/utils/CrcUtils.cpp
     include/utils/DaemonApplication.h
     include/utils/DaemonApplicationInfo.h sources/utils/DaemonApplicationInfo.cpp
-    include/utils/DBusUtils.h sources/utils/DBusUtils.cpp
+    # include/utils/DBusUtils.h sources/utils/DBusUtils.cpp
     include/utils/DaemonUtils.h sources/utils/DaemonUtils.cpp
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
     include/utils/FileUtils.h sources/utils/FileUtils.cpp
@@ -69,13 +68,24 @@ set(THREADER_SOURCES
     include/utils/TrafficCounter.h sources/utils/TrafficCounter.cpp
     include/utils/ThreadsCommon.h
     include/utils/ThreadUtils.h sources/utils/ThreadUtils.cpp
-    include/utils/UdevDeviceInfo.h sources/utils/UdevDeviceInfo.cpp
-    include/utils/UdevEnumerator.h sources/utils/UdevEnumerator.cpp
-    )
+    # include/utils/UdevDeviceInfo.h sources/utils/UdevDeviceInfo.cpp
+    # include/utils/UdevEnumerator.h sources/utils/UdevEnumerator.cpp
+)
 
 if (WIN32)
     set(THREADER_SOURCES "${THREADER_SOURCES}"
         ";include/threads/PollingWindows.h;sources/threads/PollingWindows.cpp")
+endif()
+
+if (UNIX)
+    set(THREADER_SOURCES "${THREADER_SOURCES}"
+        ";include/threads/PollerUdev.h;sources/threads/PollerUdev.cpp"
+        ";include/threads/ThreadFileNotifier.h;sources/threads/ThreadFileNotifier.cpp"
+        ";include/utils/DBusUtils.h;sources/utils/DBusUtils.cpp"
+        ";include/utils/UdevDeviceInfo.h;sources/utils/UdevDeviceInfo.cpp"
+        ";include/utils/UdevEnumerator.h;sources/utils/UdevEnumerator.cpp"
+        ";include/threads/ThreadUdevMonitor.h;sources/threads/ThreadUdevMonitor.cpp"
+    )
 endif()
 
 add_library(${PROJECT_NAME} SHARED ${THREADER_SOURCES})
@@ -84,13 +94,23 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${VER_MAJ})
 
-target_link_libraries(${PROJECT_NAME}
-    pthread
-    udev
-    systemd
-    ZLIB::ZLIB
-    ${DBUS_LIBRARIES}
+if (WIN32)
+    target_link_libraries(${PROJECT_NAME}
+        pthread
+        ws2_32
+        ZLIB::ZLIB
     )
+endif()
+
+if (UNIX)
+    target_link_libraries(${PROJECT_NAME}
+        pthread
+        udev
+        systemd
+        ZLIB::ZLIB
+        ${DBUS_LIBRARIES}
+    )
+endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE /usr/include/dbus-1.0/)
 
@@ -106,12 +126,12 @@ install(TARGETS ${PROJECT_NAME}
     GROUP_READ
     WORLD_READ
     COMPONENT std-lib
-    )
+)
 
 install(FILES ${ROOT_PROJECT_DIR}/install/threader-std.conf
     DESTINATION ${CONFIG_INSTALL_PATH}
     COMPONENT std-lib
-    )
+)
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
     DESTINATION ${HEADERS_INSTALL_PATH}
@@ -127,7 +147,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
     FILES_MATCHING
     PATTERN "*.h"
     PATTERN "*.hpp"
-    )
+)
 
 #include(${ROOT_PROJECT_DIR}/Common.cmake)
 

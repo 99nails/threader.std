@@ -8,6 +8,7 @@
 
 #ifdef WIN32
 #include <io.h>
+#include <stdint.h>
 #endif
 
 #include <limits.h>
@@ -87,19 +88,45 @@ void FileUtils::fileSeek(Descriptor descriptor, int mode, int offset)
 #endif
 }
 
+size_t FileUtils::fileRead(const Descriptor descriptor, void *buffer, size_t count)
+{
+#ifdef linux
+    ssize_t readCount = 0;
+    readCount = ::read(descriptor, buffer, count);
+    return readCount;
+#endif
+#ifdef WIN32
+    DWORD readCount = 0;
+    ReadFile(descriptor, buffer, count, &readCount, nullptr);
+    return readCount;
+#endif
+}
+
 MemoryBlock::Ptr FileUtils::fileReadAll(const Descriptor descriptor)
 {
     if (descriptor == INVALID_DESCRIPTOR)
         return nullptr;
 
-    const uint BUFFER_SIZE = 1024;
+    const uint32_t BUFFER_SIZE = 1024;
     void *buffer = calloc(1, BUFFER_SIZE);
     auto result = std::make_shared<MemoryBlock>(BUFFER_SIZE);
 
+#ifdef linux
     ssize_t readCount = 0;
+#endif
+#ifdef WIN32
+    DWORD readCount = 0;
+#endif
+
     do
     {
+#ifdef linux
         readCount = ::read(descriptor, buffer, BUFFER_SIZE);
+#endif
+
+#ifdef WIN32
+        ReadFile(descriptor, buffer, BUFFER_SIZE, &readCount, nullptr);
+#endif
         if (readCount > 0)
             result->append(buffer, readCount);
     }
@@ -117,9 +144,9 @@ size_t FileUtils::fileWrite(const Descriptor &descriptor, const std::string &dat
     return ::write(descriptor, data.c_str(), data.length());
 
 #endif
-#ifdef _WIN32
+#ifdef WIN32
     DWORD writtenCount;
-    WriteFile(_descriptor, idata.c_str(), data.length(), &writtenCount, nullptr);
+    WriteFile(descriptor, data.c_str(), data.length(), &writtenCount, nullptr);
     return writtenCount;
 #endif
 }
@@ -143,7 +170,7 @@ ssize_t FileUtils::fileSize(const Descriptor &descriptor)
     return fileInfo.st_size;
 #endif
 #ifdef WIN32
-    SetFilePointer(descriptor, offset, NULL, mode);
+    return SetFilePointer(descriptor, 0, nullptr, SEEK_END);
 #endif
 }
 
@@ -155,10 +182,11 @@ bool FileUtils::isPathExists(const std::string &path)
             && S_ISDIR(sb.st_mode);
 #endif
 #ifdef WIN32
-    _finddata_t data;
-    long nFind = _findfirst(path.c_str(), &data);
-    _findclose(nFind);
-    return nFind != -1;
+    DWORD attrs = GetFileAttributesA(path.c_str());
+    if (attrs == INVALID_FILE_ATTRIBUTES) {
+        return false;
+    }
+    return (attrs & FILE_ATTRIBUTE_DIRECTORY) != 0;
 #endif
 }
 
@@ -169,10 +197,11 @@ bool FileUtils::isFileExists(const std::string &fileName)
     return stat(fileName.c_str(), &sb) == 0;
 #endif
 #ifdef WIN32
-    _finddata_t data;
-    long nFind = _findfirst(fieName.c_str(), &data);
-    _findclose(nFind);
-    return nFind != -1 && data.;
+    DWORD attrs = GetFileAttributesA(fileName.c_str());
+    if (attrs == INVALID_FILE_ATTRIBUTES) {
+        return false;
+    }
+    return (attrs & FILE_ATTRIBUTE_DIRECTORY) == 0;
 #endif
 }
 
@@ -184,10 +213,11 @@ bool FileUtils::isRegularFileExists(const std::string &fileName)
             && S_ISREG(sb.st_mode);
 #endif
 #ifdef WIN32
-    _finddata_t data;
-    long nFind = _findfirst(fieName.c_str(), &data);
-    _findclose(nFind);
-    return nFind != -1 && data.;
+    DWORD attrs = GetFileAttributesA(fileName.c_str());
+    if (attrs == INVALID_FILE_ATTRIBUTES) {
+        return false;
+    }
+    return (attrs & FILE_ATTRIBUTE_DIRECTORY) == 0;
 #endif
 }
 
@@ -200,7 +230,7 @@ std::string FileUtils::absolutePath(const std::string &relativePath)
 #endif
 #ifdef WIN32
     GetFullPathName(relativePath.c_str(),
-                    strlen(pathFrom),
+                    PATH_MAX,
                     result,
                     nullptr);
 #endif
@@ -246,11 +276,13 @@ std::string FileUtils::extractFileExtension(const std::string &fileName)
                                              : shortName.substr(pointIndex);
 }
 
+#ifdef linux
+
 int filter_file(const struct dirent *entry) {
     return (entry->d_type != DT_DIR);
 }
 
-DirentList FileUtils::scanFiles(const std::string &path)
+FilenameList FileUtils::scanFiles(const std::string &path)
 {
     struct dirent **namelist;
     int n = scandir(path.c_str(), &namelist, filter_file, alphasort);
@@ -260,7 +292,7 @@ DirentList FileUtils::scanFiles(const std::string &path)
     {
         for (int i = 0; i < n; i++)
         {
-            result.push_back(*namelist[i]);
+            result.push_back(*namelist[i].d_name);
             free(namelist[i]);
         }
         free(namelist);
@@ -268,5 +300,42 @@ DirentList FileUtils::scanFiles(const std::string &path)
 
     return result;
 }
+
+#endif
+
+#ifdef WIN32
+
+FilenameList FileUtils::scanFiles(const std::string &path)
+{
+    WIN32_FIND_DATA fd;
+
+    Descriptor hFind = FindFirstFile(path.c_str(), &fd);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        return {};
+    }
+
+    FilenameList files;
+    do
+    {
+        const std::string fileName(fd.cFileName);
+        // Пропускаем . и ..
+        if (fileName == "." || fileName == "..")
+            continue;
+
+        // Только обычные файлы (не каталоги)
+        if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            // Формируем полный путь, если нужно:
+            // L"C:\\path\\to\\folder\\" + fd.cFileName
+            files.emplace_back(fd.cFileName);
+        }
+    }
+    while (FindNextFile(hFind, &fd));
+
+    FindClose(hFind);
+
+    return files;
+}
+
+#endif
 
 }

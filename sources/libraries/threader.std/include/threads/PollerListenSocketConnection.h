@@ -9,11 +9,12 @@
 #include <sys/ioctl.h>
 #endif
 
-#ifdef WIN
-#include "PollingsWindows.h"
+#ifdef WIN32
+#include "PollingWindows.h"
 #include <windows.h>
 #endif
 
+#include <stdint.h>
 #include <vector>
 
 namespace Threader::Threads
@@ -35,7 +36,7 @@ public:
     bool initialize();
     void finalize();
 
-#ifdef WIN
+#ifdef WIN32
     Descriptor descriptor() const;
     void setDescriptor(const Descriptor descriptor);
 #endif
@@ -50,7 +51,7 @@ private:
     uint16_t _port;
     ConsumerListenSocketEvents *_consumer;
 
-#ifdef WIN
+#ifdef WIN32
     Descriptor _descriptor;
     Descriptor _event;
 
