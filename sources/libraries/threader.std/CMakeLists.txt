@@ -74,7 +74,11 @@ set(THREADER_SOURCES
 
 if (WIN32)
     set(THREADER_SOURCES "${THREADER_SOURCES}"
-        ";include/threads/PollingWindows.h;sources/threads/PollingWindows.cpp")
+        ";include/threads/PollingWindows.h;sources/threads/PollingWindows.cpp"
+        ";include/utils/CopyDisabler.h"
+        ";include/utils/ServiceBase.h;sources/utils/ServiceBase.cpp"
+        ";include/utils/ServiceInstaller.h;sources/utils/ServiceInstaller.cpp"
+    )
 endif()
 
 if (UNIX)
