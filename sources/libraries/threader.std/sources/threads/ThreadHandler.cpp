@@ -354,7 +354,8 @@ void ThreadHandler::onReadyWrite(HandlerBase &sender)
     int written = sender.write((char*)_outputBuffer->data(), _outputBuffer->size());
 
     // если хоть что-то ушло в устройство
-    if (written > 0) {
+    if (written > 0)
+    {
         // подсчет отправленных данных
         _outputTrafficCounter.append(DateTimeUtils::msecsSinceEpochLocal(),
                                      written);

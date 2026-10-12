@@ -20,6 +20,11 @@
 #include <systemd/sd-daemon.h>
 #endif
 
+#ifdef WIN32
+#include "ServiceBase.h"
+#include "ServiceInstaller.h"
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -71,6 +76,7 @@ private:
 #endif
 #ifdef WIN32
     Descriptor _event;
+    ServiceThreader *_service;
 #endif
 
     bool _console;
@@ -103,6 +109,9 @@ DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
     , _uninstall(false)
     , _logLevel(9)
     , _version(version)
+    #ifdef WIN32
+    , _service(nullptr)
+    #endif
 {
     _serviceName = serviceName;
     _instance = this;
@@ -131,16 +140,41 @@ int DaemonApplication<ThreadMainType>::run()
     if (!initialize())
         return -1;
 
+    _threadMain = new ThreadMainType(_serviceName, _description);
+#ifdef WIN32
+    OutputDebugString("Initialization complited");
+
+
+    _service = nullptr;
+    if (!_console || _install || _uninstall)
+    {
+        _service = new ServiceThreader(_threadMain,
+                                       _serviceName,
+                                       _description,
+                                       SERVICE_AUTO_START,
+                                       SERVICE_ERROR_NORMAL,
+                                       SERVICE_ACCEPT_STOP);
+    }
+#endif
+
     if (_install)
     {
         writeLog(Message50, _serviceName.c_str());
 
         std::string resultString;
+#ifdef linux
         auto applicationBinaryFile = appInfo().binaryPath() + appInfo().binaryFileName();
         auto registered = DaemonUtils::daemonRegister(_serviceName,
                                                       applicationBinaryFile,
                                                       _description,
                                                       &resultString);
+#endif
+
+#ifdef WIN32
+        bool registered = true;
+        if (_service)
+            registered = ServiceInstaller::Install(*_service, resultString);
+#endif
         if (registered)
         {
             writeLog(Message51, _serviceName.c_str());
@@ -158,8 +192,16 @@ int DaemonApplication<ThreadMainType>::run()
         writeLog(Message60, _serviceName.c_str());
 
         std::string resultString;
+#ifdef linux
         auto unregistered = DaemonUtils::daemonUnregister(_serviceName,
                                                           &resultString);
+#endif
+#ifdef WIN32
+        bool unregistered = true;
+        if (_service)
+            unregistered = ServiceInstaller::Uninstall(*_service, resultString);
+#endif
+
         if (unregistered)
         {
             writeLog(Message61, _serviceName.c_str());
@@ -180,13 +222,19 @@ int DaemonApplication<ThreadMainType>::run()
 
     DaemonUtils::daemonSetRunning(_serviceName, true);
 
-    _threadMain = new ThreadMainType(_serviceName, _description);
-    _threadMain->startThread();
+#ifdef WIN32
+    if (_console)
+        _threadMain->startThread();
+#endif
 
 #ifdef linux
+    _threadMain->startThread();
+
     if (_systemd)
         sd_notify(0, format("READY=1\nSTATUS=Service %s is ready", _serviceName.c_str()).c_str());
 #endif
+
+    OutputDebugString("Starting main loop...");
 
     runMainLoop();
 
@@ -227,17 +275,9 @@ bool DaemonApplication<ThreadMainType>::initialize()
 
 #ifdef WIN32
     constexpr char MESSAGE_START_HINT[] = "Нажмите Enter для завершения программы...\r\n";
-    // setlocale(LC_ALL, "russian_Russia.1251");
-
-    // // переключение стандартного потока вывода в формат Юникода
-    // _setmode(_fileno(stdout), _O_U8TEXT);
-    // // переключение стандартного потока ввода в формат Юникода
-    // _setmode(_fileno(stdin), _O_U8TEXT);
-
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
 
-    // auto line = StdStringUtils::ConvertUTF8ToCP1251(MESSAGE_START_HINT);
     auto line = MESSAGE_START_HINT;
 #endif
     chdir(appInfo().binaryPath().c_str());
@@ -277,17 +317,23 @@ bool DaemonApplication<ThreadMainType>::initialize()
                       nullptr, _console, _logLevel, clearHistory);
 
     if (_serviceName.empty())
+    {
         _serviceName = appInfo().binaryFileName();
+#ifdef WIN32
+        if (_serviceName.size() > 3)
+            _serviceName.resize(_serviceName.length() - 4);
+#endif
+    }
 
     auto result = signal(SIGINT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
+    result &= signal(SIGTERM, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
 #ifdef linux
     result &= signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
 #endif
-    result &= signal(SIGTERM, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     // signal(SIGHUP, handleTerminateSignal);
 #ifdef linux
-        if (_systemd && !result)
-            sd_notify(0, "ERRNO=3\nSTATUS=Signal handler error");
+    if (_systemd && !result)
+        sd_notify(0, "ERRNO=3\nSTATUS=Signal handler error");
 #endif
 
     return result;
@@ -315,8 +361,7 @@ void DaemonApplication<ThreadMainType>::runMainLoop()
         while (result < 0 && EINTR == errno);
 #endif
 #ifdef WIN32
-        _event = CreateEvent(nullptr, true, false, nullptr);
-        WaitForSingleObject(_event, INFINITE);
+        _service->Run();
 #endif
     }
 

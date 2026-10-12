@@ -1,8 +1,10 @@
 #include "ServiceInstaller.h"
 
+#include "StdStringUtils.h"
+
 #include <iostream>
 
-namespace
+namespace Threader::Utils
 {
 
 class ServiceHandle
@@ -30,36 +32,37 @@ private:
     SC_HANDLE _handle;
 };
 
-}
 
-bool ServiceInstaller::Install(const ServiceBase &service)
+bool ServiceInstaller::Install(const ServiceBase &service,
+                               std::string &resultString)
 {
     TCHAR modulePath[MAX_PATH];
 
     if (::GetModuleFileName(nullptr, modulePath, MAX_PATH) == 0)
     {
-        std::cout << "Couldn't get module file name: " << std::endl;
+        resultString = "Couldn't get module file name: " + errorString();
         return false;
     }
 
     ServiceHandle serviceControlManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_CONNECT | SC_MANAGER_CREATE_SERVICE);
     if (!serviceControlManager)
     {
-        std::cout << "Couldn't open service control manager: " << errorString() << std::endl;
+        resultString = "Couldn't open service control manager: " + errorString();
         return false;
     }
 
-    const std::string& depends = service.GetDependencies();
-    const std::string& account = service.GetAccount();
-    const std::string& password = service.GetPassword();
+    const auto displayName = StdStringUtils::ConvertUTF8ToCP1251(service.displayName());
+    const auto &depends = service.dependencies();
+    const auto &account = service.account();
+    const auto &password = service.password();
 
     ServiceHandle serviceHandle = ::CreateService(serviceControlManager,
-                                                  service.GetName().c_str(),
-                                                  service.GetDisplayName().c_str(),
+                                                  service.name().c_str(),
+                                                  displayName.c_str(),
                                                   SERVICE_QUERY_STATUS,
                                                   SERVICE_WIN32_OWN_PROCESS,
-                                                  service.GetStartType(),
-                                                  service.GetErrorControlType(),
+                                                  service.startType(),
+                                                  service.errorControlType(),
                                                   modulePath,
                                                   nullptr,
                                                   nullptr,
@@ -69,30 +72,31 @@ bool ServiceInstaller::Install(const ServiceBase &service)
 
     if (!serviceHandle)
     {
-        std::cout << "Couldn't create service: " << errorString() << std::endl;
+        resultString = "Couldn't create service: " + errorString();
         return false;
     }
 
-    std::cout << "Service installed sucesessfully" << std::endl;
+    resultString = "Service installed sucesessfully";
     return true;
 }
 
-bool ServiceInstaller::Uninstall(const ServiceBase& service)
+bool ServiceInstaller::Uninstall(const ServiceBase& service,
+                                 std::string &resultString)
 {
     ServiceHandle svcControlManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_CONNECT);
 
     if (!svcControlManager)
     {
-        std::cout << "Couldn't open service control manager: " << errorString() << std::endl;
+       resultString = "Couldn't open service control manager: " + errorString();
         return false;
     }
 
-    ServiceHandle serviceHandle = ::OpenService(svcControlManager, service.GetName().c_str(),
+    ServiceHandle serviceHandle = ::OpenService(svcControlManager, service.name().c_str(),
                                                 SERVICE_QUERY_STATUS | SERVICE_STOP | DELETE);
 
     if (!serviceHandle)
     {
-        std::cout << "Couldn't open service: " << errorString() << std::endl;
+       resultString = "Couldn't open service: " + errorString();
         return false;
     }
 
@@ -100,7 +104,7 @@ bool ServiceInstaller::Uninstall(const ServiceBase& service)
 
     if (!::QueryServiceStatus(serviceHandle, &serviceStatus))
     {
-        std::cout << "Failed to query the service : " << errorString();
+        resultString = "Failed to query the service : " + errorString();
         return false;
     }
 
@@ -108,8 +112,6 @@ bool ServiceInstaller::Uninstall(const ServiceBase& service)
     {
         if (::ControlService(serviceHandle, SERVICE_CONTROL_STOP, &serviceStatus))
         {
-            std::cout << "Stoping service " << service.GetName() << std::endl;
-
             while (::QueryServiceStatus(serviceHandle, &serviceStatus))
             {
                 if (serviceStatus.dwCurrentState != SERVICE_STOP_PENDING)
@@ -120,27 +122,23 @@ bool ServiceInstaller::Uninstall(const ServiceBase& service)
 
             if (serviceStatus.dwCurrentState != SERVICE_STOPPED)
             {
-                std::cout << "Failed to stop the service " << errorString();
-            }
-            else
-            {
-                std::cout << "Service stopped\n";
+                resultString = "Failed to stop the service " + errorString();
             }
         }
         else
         {
-            std::cout << "Didn't control service: " << errorString() << std::endl;
+            resultString = "Didn't control service: " + errorString();
         }
     }
 
     if (!::DeleteService(serviceHandle))
     {
-        std::cout << "Failed to delete the service: " << errorString() << std::endl;
+        resultString = "Failed to delete the service: " + errorString();
         return false;
     }
 
-    std::cout << "Service uninstalled sucesessfully" << std::endl;
+    resultString = "Service uninstalled sucesessfully";
     return true;
 }
 
-
+}

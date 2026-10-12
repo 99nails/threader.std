@@ -2,6 +2,15 @@
 #include "ServiceBase.h"
 #include <cassert>
 
+#include "Log.h"
+#include "Logger.h"
+
+
+namespace Threader::Utils
+{
+
+MESSAGE_TEMPLATE(9999, 0, MessageType::Debug,
+                 "Debug: %s");
 
 std::string errorString(int errorNo)
 {
@@ -16,62 +25,50 @@ std::string errorString(int errorNo)
     return std::to_string(errorNo) + " - " + std::string(messageBuffer);
 }
 
-std::string ConvertUTF8ToCP1251(const std::string &str)
-{
-    int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
-    wchar_t* wstr = new wchar_t[len];
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, wstr, len);
 
-    len = WideCharToMultiByte(1251, 0, wstr, -1, NULL, 0, NULL, NULL);
-    char* cp1251 = new char[len];
-    WideCharToMultiByte(1251, 0, wstr, -1, cp1251, len, NULL, NULL);
-
-    std::string result(cp1251);
-    delete[] wstr;
-    delete[] cp1251;
-
-    return result;
-}
-
+/***************************************************************************************************
+ * ServiceBase class
+ **************************************************************************************************/
 
 ServiceBase* ServiceBase::_service = nullptr;
+
 
 bool ServiceBase::Run()
 {
     return RunInternal(this);
 }
 
-const std::string &ServiceBase::GetName() const
+const std::string &ServiceBase::name() const
 {
     return _name;
 }
 
-const std::string &ServiceBase::GetDisplayName() const
+const std::string &ServiceBase::displayName() const
 {
     return _displayName;
 }
 
-DWORD ServiceBase::GetStartType() const
+DWORD ServiceBase::startType() const
 {
     return _dwStartType;
 }
 
-DWORD ServiceBase::GetErrorControlType() const
+DWORD ServiceBase::errorControlType() const
 {
     return _dwErrorCtrlType;
 }
 
-const std::string &ServiceBase::GetDependencies() const
+const std::string &ServiceBase::dependencies() const
 {
     return _dependencies;
 }
 
-const std::string &ServiceBase::GetAccount() const
+const std::string &ServiceBase::account() const
 {
     return _account;
 }
 
-const std::string &ServiceBase::GetPassword() const
+const std::string &ServiceBase::password() const
 {
     return _password;
 }
@@ -133,8 +130,11 @@ void ServiceBase::WriteToEventLog(const std::string &name,
 void WINAPI ServiceBase::SvcMain(DWORD argc,
                                  TCHAR* argv[])
 {
+    // writeLog(Message9999, "Starting service...");
+
+
     assert(_service);
-    _service->_serviceStatusHandle = ::RegisterServiceCtrlHandlerEx(_service->GetName().c_str(),
+    _service->_serviceStatusHandle = ::RegisterServiceCtrlHandlerEx(_service->name().c_str(),
                                                                     ServiceCtrlHandler,
                                                                     NULL);
 
@@ -186,8 +186,9 @@ DWORD WINAPI ServiceBase::ServiceCtrlHandler(DWORD ctrlCode,
 bool ServiceBase::RunInternal(ServiceBase* service)
 {
     _service = service;
-    TCHAR* svcName = new TCHAR[_service->GetName().size() + 1];
-    std::copy(_service->GetName().begin(), _service->GetName().end(), svcName);
+
+    TCHAR* svcName = new TCHAR[_service->name().size() + 1];
+    std::copy(_service->name().begin(), _service->name().end(), svcName);
 
     SERVICE_TABLE_ENTRY tableEntry[] =
     {
@@ -230,4 +231,57 @@ void ServiceBase::Shutdown()
 {
     OnShutdown();
     SetStatus(SERVICE_STOPPED);
+}
+
+/***************************************************************************************************
+ * ServiceThreader class
+ **************************************************************************************************/
+
+ServiceThreader::ServiceThreader(ThreadBase *thread,
+                                 const std::string &name,
+                                 const std::string &displayName,
+                                 DWORD dwStartType,
+                                 DWORD dwErrCtrlType,
+                                 DWORD dwAcceptedCmds,
+                                 const std::string &depends,
+                                 const std::string &account,
+                                 const std::string &password)
+    : ServiceBase(name,
+                  displayName,
+                  dwStartType,
+                  dwErrCtrlType,
+                  dwAcceptedCmds,
+                  depends,
+                  account,
+                  password)
+    , _thread(thread)
+{
+}
+
+void ServiceThreader::OnStart(DWORD argc, TCHAR *argv[])
+{
+    writeLog(Message9999, "Starting service...");
+
+    if (!_thread)
+    {
+        writeLog(Message9999, "Thread is NULL");
+        return;
+    }
+
+
+    _thread->startThread();
+}
+
+void ServiceThreader::OnStop()
+{
+    if (!_thread)
+        return;
+
+    while (!_thread->isThreadFinished())
+    {
+        _thread->postTerminateEvent();
+        DateTimeUtils::sleepMilliseconds(100);
+    }
+}
+
 }

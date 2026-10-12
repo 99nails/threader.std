@@ -91,7 +91,6 @@ bool PollerFileNotify::process(const pollfd &event)
         p += sizeof(inotify_event) + notifyEvent->len;
 
         auto action = operationName(eventMask);
-        // std::cout << action << " " << notifyEvent->name << std::endl;
         if (consumer())
             consumer()->processFile(action, eventMask, _path, notifyEvent->name);
     }

@@ -14,7 +14,8 @@
 
 #include <string.h>
 
-namespace Threader::Utils {
+namespace Threader::Utils
+{
 
 #ifdef WIN32
 

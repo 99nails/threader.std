@@ -293,6 +293,7 @@ void Logger::printLine(const std::string &line, MessageType messageType)
     }
     std::cout << line << ANSI_COLOR_RESET;
 #endif
+
 #ifdef WIN32
     uint8_t color;
     switch (messageType) {
@@ -314,7 +315,6 @@ void Logger::printLine(const std::string &line, MessageType messageType)
     if (INVALID_HANDLE_VALUE != _consoleHandle)
         SetConsoleTextAttribute(_consoleHandle, color);
 
-    // std::cout << StdStringUtils::ConvertUTF8ToCP1251(line);
     std::cout << line;
 
     if (INVALID_HANDLE_VALUE != _consoleHandle)

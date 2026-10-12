@@ -30,20 +30,19 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef WIN32
-    setlocale(LC_ALL, "russian_Russia.1251");
-    auto line = StdStringUtils::ConvertUTF8ToCP1251(MESSAGE_START_HINT);
+    SetConsoleOutputCP(65001);
+    SetConsoleCP(65001);
 #else
     setlocale(LC_ALL, "ru_RU.UTF-8");
-    auto line = MESSAGE_START_HINT;
 #endif
-
+    auto line = MESSAGE_START_HINT;
     std::cout << line;
 
     startLogSubsystem(argv[0], nullptr, true);
 
     auto threadPing = new ThreadPing(
             #ifdef WIN32
-                "COM5"
+                "COM4"
             #else
                 "/dev/pts/1"
             #endif
@@ -52,7 +51,7 @@ int main(int argc, char *argv[])
 
     auto threadPong = new ThreadPong(
             #ifdef WIN32
-                "COM6"
+                "COM3"
             #else
                 "/dev/pts/0"
             #endif

@@ -25,6 +25,7 @@ ThreadLog::ThreadLog(const std::string &pathToBin,
     : ThreadBase(nullptr, "Thread.Log")
     , _logger(nullptr)
     , _consumer(consumer)
+    , _threadLogCleaner(nullptr)
 {
     _instance = this;
     _logger = new Logger(console, pathToBin, level, logDetailsAllWithoutDate);
