@@ -130,7 +130,7 @@ bool isValidDescriptor(int fd)
     return fcntl(fd, F_GETFL) != -1 || errno != EBADF;
 }
 
-int HandlerBase::read(char *data, int count)
+int HandlerBase::read(void *data, int count)
 {
     if (ConnectionState::Connected == _connectionState && isValidDescriptor(descriptor()))
         return int(::read(descriptor(), data, count));

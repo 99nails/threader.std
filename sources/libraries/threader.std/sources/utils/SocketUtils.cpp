@@ -4,9 +4,7 @@
 #include <ifaddrs.h>
 #endif
 
-#ifdef WIN32
 #include <string.h>
-#endif
 
 namespace Threader {
 

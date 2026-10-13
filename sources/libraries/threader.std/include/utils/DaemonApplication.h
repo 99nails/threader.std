@@ -234,8 +234,6 @@ int DaemonApplication<ThreadMainType>::run()
         sd_notify(0, format("READY=1\nSTATUS=Service %s is ready", _serviceName.c_str()).c_str());
 #endif
 
-    OutputDebugString("Starting main loop...");
-
     runMainLoop();
 
 #ifdef linux

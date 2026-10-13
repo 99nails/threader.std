@@ -286,13 +286,13 @@ FilenameList FileUtils::scanFiles(const std::string &path)
 {
     struct dirent **namelist;
     int n = scandir(path.c_str(), &namelist, filter_file, alphasort);
-    DirentList result;
+    FilenameList result;
 
     if (n >= 0)
     {
         for (int i = 0; i < n; i++)
         {
-            result.push_back(*namelist[i].d_name);
+            result.push_back(namelist[i]->d_name);
             free(namelist[i]);
         }
         free(namelist);
