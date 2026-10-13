@@ -63,6 +63,9 @@ private:
     bool parseArguments();
     static void signalHandler(int signal);
 
+    uint32_t installDaemon();
+    uint32_t uninstallDaemon();
+
 private:
     static DaemonApplication *_instance;
     ThreadMainType *_threadMain;
@@ -109,9 +112,9 @@ DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
     , _uninstall(false)
     , _logLevel(9)
     , _version(version)
-    #ifdef WIN32
+#ifdef WIN32
     , _service(nullptr)
-    #endif
+#endif
 {
     _serviceName = serviceName;
     _instance = this;
@@ -141,10 +144,8 @@ int DaemonApplication<ThreadMainType>::run()
         return -1;
 
     _threadMain = new ThreadMainType(_serviceName, _description);
+
 #ifdef WIN32
-    OutputDebugString("Initialization complited");
-
-
     _service = nullptr;
     if (!_console || _install || _uninstall)
     {
@@ -158,62 +159,10 @@ int DaemonApplication<ThreadMainType>::run()
 #endif
 
     if (_install)
-    {
-        writeLog(Message50, _serviceName.c_str());
-
-        std::string resultString;
-#ifdef linux
-        auto applicationBinaryFile = appInfo().binaryPath() + appInfo().binaryFileName();
-        auto registered = DaemonUtils::daemonRegister(_serviceName,
-                                                      applicationBinaryFile,
-                                                      _description,
-                                                      &resultString);
-#endif
-
-#ifdef WIN32
-        bool registered = true;
-        if (_service)
-            registered = ServiceInstaller::Install(*_service, resultString);
-#endif
-        if (registered)
-        {
-            writeLog(Message51, _serviceName.c_str());
-            stopLogSubsystem();
-            return 0;
-        }
-
-        writeLog(Message52, _serviceName.c_str(), resultString.c_str());
-        stopLogSubsystem();
-        return -1;
-    }
+        return installDaemon();
 
     if (_uninstall)
-    {
-        writeLog(Message60, _serviceName.c_str());
-
-        std::string resultString;
-#ifdef linux
-        auto unregistered = DaemonUtils::daemonUnregister(_serviceName,
-                                                          &resultString);
-#endif
-#ifdef WIN32
-        bool unregistered = true;
-        if (_service)
-            unregistered = ServiceInstaller::Uninstall(*_service, resultString);
-#endif
-
-        if (unregistered)
-        {
-            writeLog(Message61, _serviceName.c_str());
-            stopLogSubsystem();
-            return 0;
-        }
-
-        writeLog(Message62, _serviceName.c_str(), resultString.c_str());
-        stopLogSubsystem();
-        return -1;
-    }
-
+        return uninstallDaemon();
 
     if (DaemonUtils::daemonIsRunning(_serviceName))
     {
@@ -224,12 +173,10 @@ int DaemonApplication<ThreadMainType>::run()
 
 #ifdef WIN32
     if (_console)
-        _threadMain->startThread();
 #endif
+        _threadMain->startThread();
 
 #ifdef linux
-    _threadMain->startThread();
-
     if (_systemd)
         sd_notify(0, format("READY=1\nSTATUS=Service %s is ready", _serviceName.c_str()).c_str());
 #endif
@@ -323,18 +270,19 @@ bool DaemonApplication<ThreadMainType>::initialize()
 #endif
     }
 
+#ifdef linux
     auto result = signal(SIGINT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     result &= signal(SIGTERM, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
-#ifdef linux
     result &= signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
-#endif
-    // signal(SIGHUP, handleTerminateSignal);
-#ifdef linux
     if (_systemd && !result)
         sd_notify(0, "ERRNO=3\nSTATUS=Signal handler error");
+    return result;
 #endif
 
-    return result;
+#ifdef WIN32
+    return true;
+#endif
+
 }
 
 template<class ThreadMainType>
@@ -456,6 +404,67 @@ void DaemonApplication<ThreadMainType>::signalHandler(int signal)
         ::close(fd);
         std::cout << std::endl;
     }
+}
+
+template<class ThreadMainType>
+uint32_t DaemonApplication<ThreadMainType>::installDaemon()
+{
+    writeLog(Message50, _serviceName.c_str());
+
+    std::string resultString;
+#ifdef linux
+    auto applicationBinaryFile = appInfo().binaryPath() + appInfo().binaryFileName();
+    auto registered = DaemonUtils::daemonRegister(_serviceName,
+                                                  applicationBinaryFile,
+                                                  _description,
+                                                  &resultString);
+#endif
+
+#ifdef WIN32
+    bool registered = true;
+    if (_service)
+        registered = ServiceInstaller::Install(*_service, resultString);
+#endif
+    if (registered)
+    {
+        writeLog(Message51, _serviceName.c_str());
+        stopLogSubsystem();
+        return 0;
+    }
+
+    writeLog(Message52, _serviceName.c_str(), resultString.c_str());
+    stopLogSubsystem();
+    return -1;
+
+}
+
+template<class ThreadMainType>
+uint32_t DaemonApplication<ThreadMainType>::uninstallDaemon()
+{
+    writeLog(Message60, _serviceName.c_str());
+
+    std::string resultString;
+#ifdef linux
+    auto unregistered = DaemonUtils::daemonUnregister(_serviceName,
+                                                      &resultString);
+#endif
+#ifdef WIN32
+    bool unregistered = true;
+    if (_service)
+        unregistered = ServiceInstaller::Uninstall(*_service, resultString);
+#endif
+
+    if (unregistered)
+    {
+        writeLog(Message61, _serviceName.c_str());
+        stopLogSubsystem();
+        return 0;
+    }
+
+    writeLog(Message62, _serviceName.c_str(), resultString.c_str());
+    stopLogSubsystem();
+    return -1;
+
 }
 
 }
