@@ -1,7 +1,7 @@
 # Local build directories
 bin/
 build/
-
+sources/libraries/threader.std/include/ThreaderStdConfig.h
 # C++ objects and libs
 *.slo
 *.lo
