@@ -38,19 +38,16 @@ set(THREADER_SOURCES
     include/threads/QueueMessages.h sources/threads/QueueMessages.cpp
     include/threads/ThreadBase.h sources/threads/ThreadBase.cpp
     include/threads/ThreadConnections.h sources/threads/ThreadConnections.cpp
-    # include/threads/ThreadFileNotifier.h sources/threads/ThreadFileNotifier.cpp
     include/threads/ThreadHandler.h sources/threads/ThreadHandler.cpp
     include/threads/ThreadListenSocketConnection.h sources/threads/ThreadListenSocketConnection.cpp
     include/threads/ThreadLog.h sources/threads/ThreadLog.cpp
     include/threads/ThreadLogCleaner.h sources/threads/ThreadLogCleaner.cpp
     include/threads/ThreadMain.h sources/threads/ThreadMain.cpp
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
-    # include/threads/ThreadUdevMonitor.h sources/threads/ThreadUdevMonitor.cpp
     include/utils/CommandLineParser.h
     include/utils/CrcUtils.h sources/utils/CrcUtils.cpp
     include/utils/DaemonApplication.h
     include/utils/DaemonApplicationInfo.h sources/utils/DaemonApplicationInfo.cpp
-    # include/utils/DBusUtils.h sources/utils/DBusUtils.cpp
     include/utils/DaemonUtils.h sources/utils/DaemonUtils.cpp
     include/utils/DateTimeUtils.h sources/utils/DateTimeUtils.cpp
     include/utils/FileUtils.h sources/utils/FileUtils.cpp
@@ -68,8 +65,6 @@ set(THREADER_SOURCES
     include/utils/TrafficCounter.h sources/utils/TrafficCounter.cpp
     include/utils/ThreadsCommon.h
     include/utils/ThreadUtils.h sources/utils/ThreadUtils.cpp
-    # include/utils/UdevDeviceInfo.h sources/utils/UdevDeviceInfo.cpp
-    # include/utils/UdevEnumerator.h sources/utils/UdevEnumerator.cpp
 )
 
 if (WIN32)
@@ -152,7 +147,5 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
     PATTERN "*.h"
     PATTERN "*.hpp"
 )
-
-#include(${ROOT_PROJECT_DIR}/Common.cmake)
 
 include(CPack)
