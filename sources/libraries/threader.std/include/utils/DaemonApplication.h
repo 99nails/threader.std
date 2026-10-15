@@ -134,10 +134,7 @@ template<class ThreadMainType>
 int DaemonApplication<ThreadMainType>::run()
 {
 #ifdef linux
-    int r = sd_notify(0, format("STATUS=Service %s starting...", _serviceName.c_str()).c_str());
-    if (r <= 0) {
-        _systemd = false;
-    }
+    _systemd = 0 < sd_notify(0, format("STATUS=Service %s starting...", _serviceName.c_str()).c_str());
 #endif
 
     if (!initialize())
@@ -178,14 +175,14 @@ int DaemonApplication<ThreadMainType>::run()
 
 #ifdef linux
     if (_systemd)
-        sd_notify(0, format("READY=1\nSTATUS=Service %s is ready", _serviceName.c_str()).c_str());
+        _systemd = 0 < sd_notify(0, format("READY=1\nSTATUS=Service %s is ready", _serviceName.c_str()).c_str());
 #endif
 
     runMainLoop();
 
 #ifdef linux
     if (_systemd)
-        sd_notify(0, format("STOPPING=1\nSTATUS=Finising service %s...", _serviceName.c_str()).c_str());
+        _systemd = 0 < sd_notify(0, format("STOPPING=1\nSTATUS=Finising service %s...", _serviceName.c_str()).c_str());
 #endif
 
     _threadMain->postTerminateEvent();
@@ -200,7 +197,7 @@ int DaemonApplication<ThreadMainType>::run()
 
 #ifdef linux
     if (_systemd)
-        sd_notify(0, format("STATUS=Service %s finished", _serviceName.c_str()).c_str());
+        _systemd = 0 < sd_notify(0, format("STATUS=Service %s finished", _serviceName.c_str()).c_str());
 #endif
 
     return 0;
@@ -231,7 +228,7 @@ bool DaemonApplication<ThreadMainType>::initialize()
     {
 #ifdef linux
         if (_systemd)
-            sd_notify(0, "ERRNO=1\nSTATUS=Arguments parse error");
+            _systemd = 0 < sd_notify(0, "ERRNO=1\nSTATUS=Arguments parse error");
 #endif
         return false;
     }
@@ -240,7 +237,7 @@ bool DaemonApplication<ThreadMainType>::initialize()
     {
 #ifdef linux
         if (_systemd)
-            sd_notify(0, "ERRNO=2\nSTATUS=Arguments parse error");
+            _systemd = 0 < sd_notify(0, "ERRNO=2\nSTATUS=Arguments parse error");
 #endif
         return false;
     }
@@ -275,7 +272,7 @@ bool DaemonApplication<ThreadMainType>::initialize()
     result &= signal(SIGTERM, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     result &= signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     if (_systemd && !result)
-        sd_notify(0, "ERRNO=3\nSTATUS=Signal handler error");
+        _systemd = 0 < sd_notify(0, "ERRNO=3\nSTATUS=Signal handler error");
     return result;
 #endif
 
