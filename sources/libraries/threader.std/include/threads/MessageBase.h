@@ -2,7 +2,6 @@
 
 #include "ThreadsCommon.h"
 
-#include <ctime>
 #include <list>
 #include <memory>
 #include <stdint.h>
@@ -102,7 +101,7 @@ public:
                               const ReferenceType *value,
                               const bool ownsReference = true)
         : MessageBase(name)
-        , _reference(_reference)
+        , _reference(value)
         , _ownsReference(ownsReference)
     {}
 
@@ -137,7 +136,7 @@ using MessageDouble = MessageValue<double>;
 } // namespace Threader
 
 #define DECLARE_MESSAGE_NAMED(NAME, NAME_STRING, BASETYPE) \
-    constexpr char NAMED_MESSAGE_NAME_##NAME[] = NAME_STRING; \
+    inline const char NAMED_MESSAGE_NAME_##NAME[] = NAME_STRING; \
     class Message##NAME : public Threader::Threads::MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME> \
 { \
     public: \

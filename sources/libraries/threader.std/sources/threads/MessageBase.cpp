@@ -4,8 +4,8 @@
 #include "StdStringUtils.h"
 #include "ThreadUtils.h"
 
-#include <chrono>
-#include <ctime>
+// #include <chrono>
+// #include <ctime>
 
 namespace Threader {
 
@@ -13,7 +13,7 @@ namespace Threads {
 
 using namespace Threader::Utils;
 
-using namespace std::chrono;
+// using namespace std::chrono;
 
 MessageBase::MessageBase(const std::string &name)
     : _name(name)

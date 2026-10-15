@@ -1,4 +1,5 @@
 #include "FileUtils.h"
+#include <cstdint>
 
 #ifdef linux
 #include <fcntl.h>
@@ -11,7 +12,6 @@
 #include <stdint.h>
 #endif
 
-#include <limits.h>
 #include <stdio.h>
 #include <sys/stat.h>
 
