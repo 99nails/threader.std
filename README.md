@@ -14,7 +14,7 @@ cd build
 cmake ..
 make -j`nproc`
 sudo make install
-cpack -D DEB
+cpack -G DEB
 ```
 
 ## Deploying
