@@ -268,6 +268,8 @@ bool DaemonApplication<ThreadMainType>::initialize()
     }
 
 #ifdef linux
+    _systemd = 0 < sd_notify(0, format("STATUS=Service %s starting...", _serviceName.c_str()).c_str());
+
     auto result = signal(SIGINT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     result &= signal(SIGTERM, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;
     result &= signal(SIGQUIT, DaemonApplication<ThreadMainType>::signalHandler) != SIG_ERR;

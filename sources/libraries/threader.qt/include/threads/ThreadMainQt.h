@@ -8,10 +8,6 @@
 #include "StdStringUtils.h"
 #include "ThreadQtEventLoop.h"
 
-// #ifdef linux
-// #include <sys/resource.h>
-// #endif
-
 #include "ThreadMain.h"
 
 namespace Threader::Threads::QtEventLoop

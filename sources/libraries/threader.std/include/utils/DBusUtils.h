@@ -304,6 +304,49 @@ public:
     static std::string find_unit_path(sd_bus *bus, const std::string &name);
 
     static bool getServiceState(const std::string &unit, SystemDServiceState &state);
+
+    /**
+     * @brief Действие, применяемое к systemd-юниту.
+     */
+    enum UnitControlMethod
+    {
+        Start,   /// Запустить юнит
+        Stop,    /// Остановить юнит
+        Restart  /// Перезапустить юнит
+    };
+
+    /**
+     * @brief Управляет systemd-юнитом через D-Bus, вызывая указанный метод.
+     * @details Открывает соединение с системной шиной D-Bus, вызывает метод
+     * (например, StartUnit, StopUnit, RestartUnit) менеджера systemd
+     * для заданного юнита в режиме "replace" и закрывает соединение.
+     * @param unit   Имя systemd-юнита (например, "nginx.service").
+     * @param method Вызываемый метод D-Bus (например, "StartUnit").
+     * @return true  — если соединение установлено и вызов метода успешен;
+     * false — в случае любой ошибки.
+     */
+    static bool controlUnit(const std::string &unit, UnitControlMethod method);
+
+    /**
+     * @brief Запускает systemd-юнит.
+     * @param unit Имя юнита.
+     * @return true при успешном создании создания на запуск, false в случае ошибки.
+     */
+    static bool startUnit(const std::string &unit);
+
+    /**
+     * @brief Останавливает systemd-юнит.
+     * @param unit Имя юнита.
+     * @return true при успешном создании создания на запуск, false в случае ошибки.
+     */
+    static bool stopUnit(const std::string &unit);
+
+    /**
+     * @brief Перезапускает systemd-юнит.
+     * @param unit Имя юнита.
+     * @return true при успешном создании создания на запуск, false в случае ошибки.
+     */
+    static bool restartUnit(const std::string &unit);
 };
 
 

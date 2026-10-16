@@ -370,8 +370,6 @@ std::string ThreadBase::errorString(int errorNo)
         NULL, errorNo, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
 
     return StdStringUtils::trim(StdStringUtils::ConvertCP1251ToUTF8(messageBuffer));
-
-    // return std::string(messageBuffer);
 #endif
 
 #ifdef linux
