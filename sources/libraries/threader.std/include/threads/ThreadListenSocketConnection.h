@@ -42,16 +42,6 @@ private:
     PollerListenSocketVector _listeners;
 
     static const uint32_t TIMEOUT_REOPEN_LISTEN_SOCKET_MILLISECONDS;
-
-protected:
-    void slotOnListenSocketError(PollerListenSocketConnection *sender,
-                                 int errorCode);
-
-    void slotOnConnectionRequest(PollerListenSocketConnection *sender,
-                                 Descriptor socket,
-                                 const sockaddr_in &addr,
-                                 bool &accept);
-
 };
 
 }

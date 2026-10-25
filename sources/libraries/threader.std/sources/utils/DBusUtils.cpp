@@ -1221,4 +1221,59 @@ finalization:
 
     return result;
 }
+
+bool SystemDUtils::controlUnit(const std::string &unit, UnitControlMethod method)
+{
+    // Подключаемся к системной шине D-Bus
+    sd_bus *bus = nullptr;
+    bool result = sd_bus_open_system(&bus) >= 0;
+    if (!result)
+    {
+        sd_bus_unref(bus);
+        return result;
+    }
+
+    // Преобразуем enum -> std::string
+    std::string strMethod;
+    if (method == UnitControlMethod::Start)
+        strMethod = "StartUnit";
+    else if (method == UnitControlMethod::Stop)
+        strMethod = "StopUnit";
+    else if (method == UnitControlMethod::Restart)
+        strMethod = "RestartUnit";
+    else
+        return false;
+
+    // Вызываем метод остановки сервиса
+    result = sd_bus_call_method(bus,
+                                "org.freedesktop.systemd1",         // сервис
+                                "/org/freedesktop/systemd1",        // путь
+                                "org.freedesktop.systemd1.Manager", // интерфейс
+                                strMethod.c_str(),                  // метод
+                                nullptr,                            // объект для ошибок
+                                nullptr,                            // ответ
+                                "ss",                               // типы аргументов (string, string)
+                                unit.c_str(),                       // имя службы
+                                "replace"                           // режим замены
+                                ) >= 0;
+
+    // Очистка и завершение
+    sd_bus_unref(bus);
+    return result;
+}
+
+bool SystemDUtils::startUnit(const std::string &unit)
+{
+    return controlUnit(unit, UnitControlMethod::Start);
+}
+
+bool SystemDUtils::stopUnit(const std::string &unit)
+{
+    return controlUnit(unit, UnitControlMethod::Stop);
+}
+
+bool SystemDUtils::restartUnit(const std::string &unit)
+{
+    return controlUnit(unit, UnitControlMethod::Restart);
+}
 }

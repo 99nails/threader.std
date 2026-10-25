@@ -48,19 +48,6 @@ void ConnectionBase::setHandler(HandlerBase *handler)
         // регистрация обработчика в пуле слушателей событий
         _parentThread->polling()->registerPoller(_handler);
     }
-/*
-    // соединение сигналов и слотов
-    connect(_handler, &HandlerBase::destroyed,
-            this, &ConnectionBase::slotOnHandlerDestroyed, Qt::DirectConnection);
-    connect(_handler, &HandlerBase::signalOnConnectionStateChanged,
-            this, &ConnectionBase::slotOnConnectionStateChanged, Qt::DirectConnection);
-    connect(_handler, &HandlerBase::signalOnError,
-            this, &ConnectionBase::slotOnError, Qt::DirectConnection);
-    connect(_handler, &HandlerBase::signalOnReadyRead,
-            this, &ConnectionBase::slotOnReadyToRead, Qt::DirectConnection);
-    connect(_handler, &HandlerBase::signalOnReadyWrite,
-            this, &ConnectionBase::slotOnReadyToWrite, Qt::DirectConnection);
-*/
 }
 
 void ConnectionBase::onBeforeWaitEvents()

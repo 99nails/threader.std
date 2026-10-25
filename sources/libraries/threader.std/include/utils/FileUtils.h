@@ -23,6 +23,11 @@ public:
     static MemoryBlock::Ptr fileReadAll(const Descriptor descriptor);
     static size_t fileWrite(const Descriptor &descriptor,
                             const std::string &data);
+
+    static std::string fileReadAll(const std::string &fileName);
+    static bool fileReplaceContent(const std::string &fileName,
+                                   const std::string &content);
+
     static ssize_t fileSize(const std::string &fileName);
     static ssize_t fileSize(const Descriptor &descriptor);
 
@@ -47,6 +52,8 @@ public:
 #ifdef WIN32
     '\\';
 #endif
+
+    static std::string pathtoTemp();
 
 };
 

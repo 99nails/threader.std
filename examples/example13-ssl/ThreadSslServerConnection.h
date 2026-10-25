@@ -1,0 +1,38 @@
+#pragma once
+
+#include "ThreadHandler.h"
+
+#include "Example13Common.h"
+
+using namespace Threader::Threads;
+
+class ThreadSslServerConnection : public ThreadHandler
+{
+public:
+    explicit ThreadSslServerConnection(MessageConsumer *parent,
+                                    const std::string &host,
+                                    const uint16_t port,
+                                    const Descriptor &descriptor,
+                                    const bool useSsl);
+
+public:
+    void onError(HandlerBase &sender,
+                 const int errorCode,
+                 const std::string &errorDescription) override;
+
+protected:
+    void onThreadStarted() override;
+    void onThreadFinishing() override;
+    void onThreadFinished() override;
+
+    void onConnected(const HandlerBase &handler) override;
+    void onDisconnected(const HandlerBase &handler) override;
+
+    bool onPacketReceived(const PacketBase::Ptr &packet) override;
+    bool onPacketSent(const PacketBase::Ptr &packet) override;
+
+    void processMessage(const MessageBase::Ptr &message) override;
+
+private:
+    void doMessagePacket(const MessagePacket::Ptr &message);
+};

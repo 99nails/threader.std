@@ -192,14 +192,15 @@ bool Logger::flush()
 bool Logger::snapshot(const std::string &fileName,
                       const std::string &content)
 {
-    auto descriptor = FileUtils::fileCreate(_pathToLog + fileName);
-    if (INVALID_DESCRIPTOR != descriptor)
-    {
-        bool result = FileUtils::fileWrite(descriptor, content) == content.length();
-        FileUtils::fileClose(descriptor);
-        return result;
-    }
-    return false;
+    return FileUtils::fileReplaceContent(fileName, content);
+    // auto descriptor = FileUtils::fileCreate(_pathToLog + fileName);
+    // if (INVALID_DESCRIPTOR != descriptor)
+    // {
+    //     bool result = FileUtils::fileWrite(descriptor, content) == content.length();
+    //     FileUtils::fileClose(descriptor);
+    //     return result;
+    // }
+    // return false;
 }
 
 bool Logger::append(const std::string &fileName,

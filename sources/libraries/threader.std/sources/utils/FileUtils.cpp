@@ -137,6 +137,36 @@ MemoryBlock::Ptr FileUtils::fileReadAll(const Descriptor descriptor)
     return result;
 }
 
+std::string FileUtils::fileReadAll(const std::string &fileName)
+{
+    if (!isRegularFileExists(fileName))
+        return std::string();
+
+    auto descriptor = fileOpen(fileName);
+    if (descriptor == INVALID_DESCRIPTOR)
+        return std::string();
+
+    auto content = fileReadAll(descriptor);
+    std::string result = std::string((char*)content->data(), (char*)content->data() + content->size());
+
+    fileClose(descriptor);
+
+    return  result;
+}
+
+bool FileUtils::fileReplaceContent(const std::string &fileName,
+                                   const std::string &content)
+{
+    auto descriptor = FileUtils::fileCreate(fileName);
+    if (INVALID_DESCRIPTOR != descriptor)
+    {
+        bool result = FileUtils::fileWrite(descriptor, content) == content.length();
+        FileUtils::fileClose(descriptor);
+        return result;
+    }
+    return false;
+}
+
 size_t FileUtils::fileWrite(const Descriptor &descriptor, const std::string &data)
 {
 #ifdef linux
@@ -323,9 +353,8 @@ FilenameList FileUtils::scanFiles(const std::string &path)
             continue;
 
         // Только обычные файлы (не каталоги)
-        if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-            // Формируем полный путь, если нужно:
-            // L"C:\\path\\to\\folder\\" + fd.cFileName
+        if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+        {
             files.emplace_back(fd.cFileName);
         }
     }
@@ -337,5 +366,19 @@ FilenameList FileUtils::scanFiles(const std::string &path)
 }
 
 #endif
+
+std::string FileUtils::pathtoTemp()
+{
+#ifdef linux
+    return "/tmp/";
+#endif
+
+#ifdef WIN32
+    char buffer[MAX_PATH + 1];
+    GetTemporaryPath(bugger, MAX_PATH);
+    return buffer;
+#endif
+
+}
 
 }

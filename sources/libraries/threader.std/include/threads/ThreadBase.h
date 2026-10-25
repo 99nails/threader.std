@@ -32,6 +32,8 @@ using ListThreadBase = std::list<ThreadBase *>;
 
 using VectorThreadBase = std::vector<ThreadBase *>;
 
+using ThreadBasePtr = ThreadBase*;
+
 /**
  * @brief ThreadBase - Базовый класс потока системы
  * Реализует функционал:
@@ -283,7 +285,7 @@ protected:
      * @brief childthreadsCount - Получение количества подчиненных потоков
      * @return - Количество подчиненных потоков
      */
-    int childthreadsCount();
+    int childThreadCount();
 
     /**
      * @brief childThread - Получение подчиненного потока по индексу

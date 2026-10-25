@@ -157,7 +157,6 @@ bool ThreadLogCleaner::compressFileGzip(const std::string &inputFilename,
     uint32_t readCount;
     do
     {
-        // readCount = ::read((int)descriptor, buffer, sizeof(buffer));
         readCount = FileUtils::fileRead(descriptor, buffer, sizeof(buffer));
         if (readCount > 0)
         {

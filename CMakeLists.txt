@@ -21,7 +21,8 @@ set_target_properties(${TARGET} PROPERTIES
 set(OS_SUFFIX ${CMAKE_SYSTEM_NAME})
 string(TOLOWER ${OS_SUFFIX} OS_SUFFIX)
 
-option(QT_ENABLE "Using Qt" ON)
+option(QT_ENABLE "Build with Qt support" ON)
+option(SSL_ENABLE "Build with SSL support" ON)
 
 message("Target system name - [" ${OS_SUFFIX} "]")
 message("Version [" ${VERSION4} "]")
@@ -48,8 +49,12 @@ include_directories(${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/t
 
 add_subdirectory(sources/libraries/threader.std)
 
-if(QT_ENABLE)
+if (QT_ENABLE)
     add_subdirectory(sources/libraries/threader.qt)
+endif()
+
+if (SSL_ENABLE)
+    add_subdirectory(sources/libraries/threader.ssl)
 endif()
 
 add_subdirectory(examples)

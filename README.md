@@ -4,6 +4,12 @@ The library is designed to create stable multithreaded applications based on dat
 unified messages. The library supports working with external devices and system descriptors through 
 the poll mechanism and minimizes processor load.
 
+## Install required libraries
+
+```bash
+sudo apt install libssl-dev libdbus-1-dev libsystemd-dev libudev-dev
+```
+
 ## Download and install
 
 ```bash
@@ -21,11 +27,17 @@ cpack -G DEB
 
 ```bash
 sudo dpkg -i *.deb
-libthreader-*-Linux-std-lib.deb
-libthreader-*-Linux-std-dev.deb
-libthreader-*-Linux-qt-lib.deb
-libthreader-*-Linux-qt-dev.deb
 ```
+
+The following packages will be assembled:
+
+* libthreader-*-Linux-std-lib.deb
+* libthreader-*-Linux-std-dev.deb
+* libthreader-*-Linux-qt-lib.deb
+* libthreader-*-Linux-qt-dev.deb
+* libthreader-*-Linux-ssl-dev.deb
+* libthreader-*-Linux-ssl-dev.deb
+
 
 ## Examples
 
@@ -47,8 +59,13 @@ without support of waiting subsystem.
     - TCP client that receive date and time information from remote server and set system time on 
     local host.
 1. Example #6 waits for udev events of plug-in USB device with specified pid/vid.
-1. Example #7-1 demostrates ability of using qt eventloop with threader-std library if it is 
+1. Example #7 has shows threader-qt extensions:
+    1. Example #7-1 demostrates ability of using qt eventloop with threader-std library if it is 
 necessary.
-1. Example #7-2 shows udev events in QMainWindow.
+    1. Example #7-2 shows udev events in QMainWindow.
 1. Example #8 is not complited....
 1. Example #9 shows timer usage in ThreadBase class.
+1. Example #10 realise watching file changes in directory.
+1. Example #11 use MessageBridge class for receiving thread messages in QWindow.
+1. Example #12 checks daemons state in Linux.
+1. Example #13 demonstrates library SSL socket exchange abilities.

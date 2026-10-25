@@ -110,25 +110,4 @@ void ThreadListenSocketConnection::terminateChildThreads()
     ThreadBase::terminateChildThreads();
 }
 
-//void ThreadListenSocket::onListenSocketError(PollerListenSocket *listener,
-//                                             int errorCode)
-//{
-
-//}
-
-void ThreadListenSocketConnection::slotOnListenSocketError(PollerListenSocketConnection *sender,
-                                                           int errorCode)
-{
-    onListenSocketError(sender, errorCode);
-}
-
-void ThreadListenSocketConnection::slotOnConnectionRequest(PollerListenSocketConnection *sender,
-                                                           Descriptor socket,
-                                                           const sockaddr_in &addr,
-                                                           bool &accept)
-{
-    //    std::string ipAddress = SocketUtils::sockAddrToString(addr);
-    //    onAcceptConnectionRequest(sender, socket, ipAddress, accept);
-}
-
 }}

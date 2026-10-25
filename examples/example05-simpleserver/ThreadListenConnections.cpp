@@ -30,18 +30,18 @@ void ThreadListenConnections::onThreadFinished()
 
 void ThreadListenConnections::onBeforeListenSocketInitialization(PollerListenSocketConnection *listener)
 {
-    writeLog(Message110, portString().c_str());
+    writeLog(Message110, std::to_string(listener->port()).c_str());
 }
 
 void ThreadListenConnections::onListenSocketInitialized(PollerListenSocketConnection *listener)
 {
-    writeLog(Message111, portString().c_str());
+    writeLog(Message111, std::to_string(listener->port()).c_str());
 }
 
 void ThreadListenConnections::onListenSocketError(PollerListenSocketConnection *sender,
                                                   int errorCode)
 {
-    writeLog(Message112, portString().c_str(), errorString(errorCode).c_str());
+    writeLog(Message112, std::to_string(sender->port()).c_str(), errorString(errorCode).c_str());
 }
 
 void ThreadListenConnections::onConnectionRequest(PollerListenSocketConnection *sender,
