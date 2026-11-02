@@ -1,74 +1,136 @@
 #pragma once
 
-#include <algorithm>
+#include <list>
+// #include <map>
 #include <string>
-#include <vector>
 
-namespace Threader::Threads
+/*
+service-binary-name [global-options] [command] [command-option [value]|...]
+
+Global options:
+service-binary-name --console|-c
+service-binary-name --log-level|-l -1..9
+service-binary-name --config|-f file-name
+
+Commands:
+service-binary-name install [--name|-n service-name] [--exec-start|-e command-line]
+service-binary-name uninstall [--name|-n service-name]
+service-binary-name configure --group|-g group-name --short-name|-s short-name
+service-binary-name outer-connect --app-id application-id
+*/
+
+namespace Threader::Utils
 {
+
+class CommandLineParser;
+
+class CommandLineOption
+{
+    friend CommandLineParser;
+public:
+    explicit CommandLineOption(const std::string &description,
+                               const std::string &longName,
+                               const std::string &shortName,
+                               const bool expectValue = false,
+                               const bool expectOption = false);
+
+    const std::string &description() const;
+
+    const std::string &longName() const;
+
+    const std::string &shortName() const;
+
+    bool expectValue() const;
+
+    bool expectOption() const;
+
+    const std::string &value() const;
+
+protected:
+    void setValue(const std::string &value);
+
+private:
+    std::string _description;
+    std::string _longName;
+    std::string _shortName;
+    bool _expectValue;
+    bool _expectOption;
+    std::string _value;
+
+};
+
+
+using OptionList = std::list<CommandLineOption>;
+
+class CommandLineCommand
+{
+public:
+    explicit CommandLineCommand(const std::string &description = std::string(),
+                                const std::string &command = std::string(),
+                                const OptionList &options = {});
+
+    std::string description() const;
+    std::string command() const;
+    OptionList options();
+
+    CommandLineOption *findOption(const std::string &name);
+
+private:
+    std::string _description;
+    std::string _command;
+    OptionList _options;
+};
+
+using CommandList = std::list<CommandLineCommand>;
+
 
 class CommandLineParser
 {
 public:
-    CommandLineParser()
-    {
-    }
+    explicit CommandLineParser(const OptionList &globalOptions = {},
+                               const CommandList &commands = {});
 
-    CommandLineParser(const CommandLineParser &other)
-        : _token(other._token)
-    {
-    }
+    explicit CommandLineParser(const CommandLineParser &other);
 
-    CommandLineParser(int argc, char** argv)
-    {
-        _token.reserve(argc);
-        for (int i = 1; i < argc; i++)
-        {
-            _token.push_back(std::string(argv[i]));
-        }
-    }
+    explicit CommandLineParser(int argc, char** argv);
 
-    CommandLineParser(const std::vector<std::string> &arguments)
-        : _token(arguments)
-    {
-    }
+    explicit CommandLineParser(const std::list<std::string> &arguments);
 
-    void setArguments(const std::vector<std::string> &arguments)
-    {
-        _token = arguments;
-    }
+    void setArguments(const std::list<std::string> &arguments);
 
-    const std::string& optionValue(const std::string& option) const
-    {
-        auto iterator = std::find(this->_token.begin(), this->_token.end(), option);
-        if (iterator != this->_token.end() && ++iterator != this->_token.end())
-        {
-            return *iterator;
-        }
-        static const std::string emptyString("");
-        return emptyString;
-    }
+    void setArguments(int argc, char** argv);
 
-    bool optionExist(const std::string& option) const
-    {
-        auto it = std::find(this->_token.begin(), this->_token.end(), option);
-        return (it != this->_token.end());
-    }
+    const std::string& optionValue(const std::string& option) const;
 
-    size_t tokenCount() const
-    {
-        return _token.size();
-    }
+    bool optionExist(const std::string& option) const;
 
-    std::string token(const size_t index) const
-    {
-        if (index >= _token.size())
-            return std::string();
-        return _token[index];
-    }
+    size_t tokenCount() const;
+
+    std::string binaryFileName() const;
+
+    bool parse(std::string *error = nullptr);
+
+    const OptionList &parsedGlobalOptions();
+
+    CommandLineCommand parsedCommand();
+
+    std::string help();
 
 private:
-    std::vector<std::string> _token;
+    CommandLineOption *findGlobalOption(const std::string &name);
+
+    const CommandLineCommand *findCommand(const std::string &name);
+
+private:
+    std::list<std::string> _token;
+
+    std::string _binaryName;
+
+    OptionList _globalOptionsList;
+    CommandList _commandsList;
+
+    OptionList _parsedGlobalOptions;
+    CommandLineCommand _parsedCommand;
 };
 
 }

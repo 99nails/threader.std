@@ -45,6 +45,11 @@ public:
     static std::string rtrim(const std::string &s);
 
     static std::string trim(const std::string &s);
+
+    static std::string appendChar(const std::string &s,
+                                  const uint32_t length,
+                                  const char c);
+
 #ifdef WIN32
     static std::string ConvertCP1251ToUTF8(const std::string &str);
 

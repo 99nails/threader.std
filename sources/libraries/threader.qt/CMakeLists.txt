@@ -31,7 +31,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     )
 
 target_link_libraries(${PROJECT_NAME}
-    pthread Qt5::Core threader-std
+    Qt5::Core
+    threader-std
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

@@ -93,6 +93,19 @@ std::string StdStringUtils::trim(const std::string &s)
     return ltrim(rtrim(s));
 }
 
+std::string StdStringUtils::appendChar(const std::string &s,
+                                       const uint32_t length,
+                                       const char c)
+{
+    auto result = s;
+    while (result.size() < length)
+        result += c;
+
+    return result;
+}
+
+
+
 std::string format(const char *formatString, ...)
 {
     va_list list;

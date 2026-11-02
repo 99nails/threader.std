@@ -11,8 +11,9 @@
 
 constexpr char SERVICE_TEMPLATE[] = R"STRING(
 [Unit]
-After=network.target
+After=network-onine.target
 Description=%s
+Wants=network-onine.target
 
 [Service]
 ExecReload=/bin/kill -HUP $MAINPID

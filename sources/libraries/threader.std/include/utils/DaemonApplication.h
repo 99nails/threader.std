@@ -106,26 +106,23 @@ DaemonApplication<ThreadMainType>::DaemonApplication(int argc,
     : _threadMain(nullptr)
     , _argc(argc)
     , _description(description)
+    #ifdef linux
+    , _pipeDescriptors{INVALID_DESCRIPTOR, INVALID_DESCRIPTOR}
+    #endif
+    #ifdef WIN32
+    , _event(INVALID_DESCRIPTOR)
+    , _service(nullptr)
+    #endif
     , _console(false)
     , _systemd(false)
     , _install(false)
     , _uninstall(false)
     , _logLevel(9)
     , _version(version)
-#ifdef WIN32
-    , _service(nullptr)
-#endif
 {
     _serviceName = serviceName;
     _instance = this;
     _console = false;
-
-#ifdef linux
-    _pipeDescriptors[0] = INVALID_DESCRIPTOR;
-    _pipeDescriptors[1] = INVALID_DESCRIPTOR;
-#else
-    _event = INVALID_DESCRIPTOR;
-#endif
 
     appInfo().setArguments(argc, argv);
 }
@@ -207,7 +204,7 @@ template<class ThreadMainType>
 bool DaemonApplication<ThreadMainType>::initialize()
 {
 #ifdef linux
-    setErrorSignalHandler(appInfo().commandLine().token(0).c_str());
+    setErrorSignalHandler(appInfo().commandLine().binaryFileName().c_str());
 
     setlocale(LC_ALL, "ru_RU.UTF-8");
     setlocale(LC_NUMERIC, "C");

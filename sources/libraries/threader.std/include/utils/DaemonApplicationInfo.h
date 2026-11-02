@@ -5,8 +5,6 @@
 #include <vector>
 #include <string>
 
-using namespace Threader::Threads;
-
 namespace Threader::Utils
 {
 
@@ -36,7 +34,7 @@ public:
     const std::string &binaryPath() const;
 
 private:
-    std::vector<std::string> _arguments;
+    std::list<std::string> _arguments;
     CommandLineParser _commandLine;
 
     std::string _binaryFileName;

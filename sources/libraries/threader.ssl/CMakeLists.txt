@@ -6,7 +6,6 @@ project(threader-ssl LANGUAGES CXX VERSION ${VERSION})
 
 set(THREADER_SSL_SOURCES
     include/threads/HandlerSslSocket.h sources/threads/HandlerSslSocket.cpp
-    include/utils/ThreadsSslCommon.h sources/utils/ThreadsSslCommon.cpp
 )
 
 if (WIN32)
@@ -30,7 +29,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME}
-        pthread
         OpenSSL::SSL
         OpenSSL::Crypto
     )
@@ -39,19 +37,13 @@ endif()
 if (UNIX)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(_OPENSSL REQUIRED openssl)
-
-    message("_OPENSSL_FOUND ${_OPENSSL_FOUND}")
-    message("_OPENSSL_INCLUDE_DIRS ${_OPENSSL_INCLUDE_DIRS}")
-    message("_OPENSSL_LIBRARIES ${_OPENSSL_LIBRARIES}")
-
     target_link_libraries(${PROJECT_NAME}
-        pthread
         ${_OPENSSL_LIBRARIES}
     )
 endif()
 
 set(LIBRARY_INSTALL_PATH "/usr/local/lib/threader.ssl/")
-set(HEADERS_INSTALL_PATH  "/usr/local/include/threader.ssl")
+set(HEADERS_INSTALL_PATH "/usr/local/include/threader.ssl")
 set(CONFIG_INSTALL_PATH  "/etc/ld.so.conf.d/")
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/

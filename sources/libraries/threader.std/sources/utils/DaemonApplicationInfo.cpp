@@ -14,15 +14,15 @@ DaemonApplicationInfo::DaemonApplicationInfo()
 
 void DaemonApplicationInfo::setArguments(int argc, char *argv[])
 {
-    _arguments.reserve(argc);
+    // _arguments.reserve(argc);
     for (int i = 0; i < argc; i++)
     {
         _arguments.push_back(argv[i]);
     }
     _commandLine.setArguments(_arguments);
 
-    _binaryFileName = FileUtils::extractFileName(_commandLine.token(0));
-    _binaryPath = FileUtils::extractFilePath(FileUtils::absolutePath(_commandLine.token(0)));
+    _binaryFileName = FileUtils::extractFileName(_commandLine.binaryFileName());
+    _binaryPath = FileUtils::extractFilePath(FileUtils::absolutePath(_commandLine.binaryFileName()));
 }
 
 const CommandLineParser &DaemonApplicationInfo::commandLine()
