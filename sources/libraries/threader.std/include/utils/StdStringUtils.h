@@ -50,6 +50,7 @@ public:
                                   const uint32_t length,
                                   const char c);
 
+    static size_t utf8Length(const std::string& s);
 #ifdef WIN32
     static std::string ConvertCP1251ToUTF8(const std::string &str);
 

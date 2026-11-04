@@ -5,7 +5,7 @@
 
 ThreadMainUdpSender::ThreadMainUdpSender(const std::string &applicationBinaryName,
                                          const std::string &applicationFriendlyName)
-    : ThreadMainWithouSettings(nullptr,
+    : ThreadMainWithoutSettings(nullptr,
                                applicationBinaryName,
                                applicationFriendlyName)
     , _threadReceiver(nullptr)

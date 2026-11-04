@@ -165,7 +165,7 @@ DescriptorsVector *HandlerSslSocket::events()
 {
     auto eventsVector = HandlerBase::events();
 
-    if (descriptor() == INVALID_DESCRIPTOR || eventsVector->count() < 1)
+    if (descriptor() == INVALID_DESCRIPTOR || eventsVector->size() < 1)
         return eventsVector;
 
     // событие закрытия сокета принимается всегда
@@ -211,7 +211,7 @@ DescriptorsVector *HandlerSslSocket::events()
     }
 
     // установка маски на событие сокета
-    if (descriptor() != INVALID_DESCRIPTOR && eventsVector->length() > 0)
+    if (descriptor() != INVALID_DESCRIPTOR && eventsVector->size() > 0)
     {
         int operationResult = WSAEventSelect((SOCKET)descriptor(), eventsVector->at(0), mask);
         if (operationResult != 0)
@@ -260,7 +260,7 @@ void HandlerSslSocket::doHandlerError(const int error)
     doError(sslError);
 }
 
-Descriptor HandlerSslSocket::openTcpClientSocket(const QString &ipAddress,
+Descriptor HandlerSslSocket::openTcpClientSocket(const std::string &ipAddress,
                                                  const uint16_t port,
                                                  int &errorCode,
                                                  const int &timeout)
@@ -306,7 +306,7 @@ Descriptor HandlerSslSocket::openTcpClientSocket(const QString &ipAddress,
     sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = inet_addr(ipAddress.toLocal8Bit().constData());
+    addr.sin_addr.s_addr = inet_addr(ipAddress.c_str());
     memset(addr.sin_zero, 0, sizeof(addr.sin_zero));
 
     // подключение
@@ -354,14 +354,15 @@ Descriptor HandlerSslSocket::openTcpClientSocket(const QString &ipAddress,
         return INVALID_DESCRIPTOR;
     }
 
-    if (_verifyCert)
+    if (_verifyCertificate)
     {
-        if (!QFile::exists(_caCert))
+        if (!FileUtils::isRegularFileExists(_certificateFilename))
         {
             doError(1, "CA Certification file not found");
             return INVALID_DESCRIPTOR;
         }
-        SSL_CTX_load_verify_locations(getClientContext(), _caCert.toLocal8Bit().constData(), nullptr);
+
+        SSL_CTX_load_verify_locations(getClientContext(), _certificateFilename.c_str(), nullptr);
         SSL_CTX_set_verify(getClientContext(), SSL_VERIFY_NONE, nullptr);
     }
 
@@ -383,10 +384,10 @@ Descriptor HandlerSslSocket::openTcpClientSocket(const QString &ipAddress,
             return INVALID_DESCRIPTOR;
         }
 
-        if (_verifyCert)
+        if (_verifyCertificate)
         {
             auto verResult = SSL_get_verify_result(SSLInstance());
-            QString verStr(X509_verify_cert_error_string(verResult));
+            std::string verStr = X509_verify_cert_error_string(verResult);
             if (verResult != X509_V_OK)
             {
                 doError(int(verResult), verStr);

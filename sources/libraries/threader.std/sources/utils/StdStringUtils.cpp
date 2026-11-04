@@ -98,12 +98,32 @@ std::string StdStringUtils::appendChar(const std::string &s,
                                        const char c)
 {
     auto result = s;
-    while (result.size() < length)
+    while (utf8Length(result) < length)
         result += c;
 
     return result;
 }
 
+size_t StdStringUtils::utf8Length(const std::string &s)
+{
+    size_t count = 0;
+    for (size_t i = 0; i < s.size(); ) {
+        unsigned char c = static_cast<unsigned char>(s[i]);
+        if ((c & 0x80) == 0x00) {
+            ++i;
+        } else if ((c & 0xE0) == 0xC0) {
+            i += 2;
+        } else if ((c & 0xF0) == 0xE0) {
+            i += 3;
+        } else if ((c & 0xF8) == 0xF0) {
+            i += 4;
+        } else {
+            ++i;
+        }
+        ++count;
+    }
+    return count;
+}
 
 
 std::string format(const char *formatString, ...)

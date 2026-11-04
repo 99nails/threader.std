@@ -61,8 +61,8 @@ bool SocketUtils::isIpAddressString(const std::string &ipAddressString)
     if (!checkSocketsInitialization())
         return false;
 
-    auto addr = inet_addr(ipAddressString.c_str());
-    return (addr != INADDR_NONE && addr != INADDR_ANY);
+    auto address = inet_addr(ipAddressString.c_str());
+    return (address != INADDR_NONE && address != INADDR_ANY);
 }
 
 std::string SocketUtils::sockAddrToString(const sockaddr_in &addr)
@@ -73,12 +73,18 @@ std::string SocketUtils::sockAddrToString(const sockaddr_in &addr)
 sockaddr_in SocketUtils::ipAddressStringToAddress(const std::string &ipAddress,
                                                   const uint16_t &port)
 {
-    sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr(ipAddress.c_str());
-    addr.sin_port = htons(port);
-    return addr;
+    sockaddr_in address;
+    memset(&address, 0, sizeof(address));
+    address.sin_family = AF_INET;
+#ifdef WIN32
+   address.sin_addr.s_addr = inet_addr(ipAddress.c_str());
+#endif
+#ifdef linux
+    if (inet_pton(AF_INET, ipAddress.c_str(), &address.sin_addr) <= 0)
+        address.sin_addr.s_addr = INADDR_NONE;
+#endif
+    address.sin_port = htons(port);
+    return address;
 }
 
 std::string SocketUtils::hostToIpAddressString(const std::string &host)

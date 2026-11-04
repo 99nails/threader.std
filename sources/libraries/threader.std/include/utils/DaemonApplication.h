@@ -73,6 +73,7 @@ private:
     int _argc;
     std::string _description;
     static std::string _serviceName;
+    static std::string _serviceExecArgs;
 
 #ifdef linux
     Descriptor _pipeDescriptors[2];
@@ -86,13 +87,15 @@ private:
     bool _systemd;
     bool _install;
     bool _uninstall;
-    bool _showVersion;
     int _logLevel;
     std::string _version;
 };
 
 template<class ThreadMainType>
 std::string DaemonApplication<ThreadMainType>::_serviceName = std::string();
+
+template<class ThreadMainType>
+std::string DaemonApplication<ThreadMainType>::_serviceExecArgs = std::string();
 
 template<class ThreadMainType>
 DaemonApplication<ThreadMainType> *DaemonApplication<ThreadMainType>::_instance = nullptr;
@@ -242,12 +245,6 @@ bool DaemonApplication<ThreadMainType>::initialize()
     if (_console)
         std::cout << line;
 
-    if (_showVersion)
-    {
-        std::cout << "[" << _version << "]" << std::endl;
-        exit(0);
-    }
-
     bool clearHistory = !_install && !_uninstall;
     if (!clearHistory)
         _console = true;
@@ -343,38 +340,104 @@ int DaemonApplication<ThreadMainType>::logLevel()
     return _logLevel;
 }
 
+constexpr char OPTION_NAME_CONSOLE_LONG[] = "--console";
+constexpr char OPTION_NAME_CONSOLE_SHORT[] = "-c";
+
+constexpr char OPTION_NAME_HELP_LONG[] = "--help";
+constexpr char OPTION_NAME_HELP_SHORT[] = "-h";
+
+constexpr char OPTION_NAME_LOG_LONG[] = "--log-level";
+constexpr char OPTION_NAME_LOG_SHORT[] = "-l";
+
+constexpr char OPTION_NAME_VERSION_LONG[] = "--version";
+constexpr char OPTION_NAME_VERSION_SHORT[] = "-v";
+
+constexpr char COMMAND_NAME_INSTALL[] = "install";
+constexpr char COMMAND_NAME_UNINSTALL[] = "uninstall";
+
+constexpr char ARG_NAME_NAME_LONG[] = "--name";
+constexpr char ARG_NAME_NAME_SHORT[] = "-n";
+
+constexpr char ARG_EXEC_START_NAME_LONG[] = "--exec-args";
+constexpr char ARG_EXEC_START_NAME_SHORT[] = "-e";
+
 template<class ThreadMainType>
 bool DaemonApplication<ThreadMainType>::parseArguments()
 {
-    constexpr char PARAMETER_NAME_CONSOLE[] = "--console";
-    constexpr char PARAMETER_NAME_INSTALL[] = "--install";
-    constexpr char PARAMETER_NAME_LOG[] = "--log";
-    constexpr char PARAMETER_NAME_UNINSTALL[] = "--uninstall";
-    constexpr char PARAMETER_NAME_VERSION[] = "--version";
 
-    _console = appInfo().commandLine().optionExist(PARAMETER_NAME_CONSOLE);
-    _showVersion = appInfo().commandLine().optionExist(PARAMETER_NAME_VERSION);
+    COMM_OPTION("Вывод протокола работы в терминал", OPTION_NAME_CONSOLE_LONG,
+               OPTION_NAME_CONSOLE_SHORT, false, false);
 
-    if (appInfo().commandLine().optionExist(PARAMETER_NAME_LOG))
+    COMM_OPTION("Вывод справки", OPTION_NAME_HELP_LONG,
+               OPTION_NAME_HELP_SHORT, false, false);
+
+    COMM_OPTION("Установка уровня протоколирования [-1..9]", OPTION_NAME_LOG_LONG,
+               OPTION_NAME_LOG_SHORT, true, false);
+
+    COMM_OPTION("Вывод версии и завершение приложения",OPTION_NAME_VERSION_LONG,
+               OPTION_NAME_VERSION_SHORT, false, false);
+
+    OptionList list = {
+        CommandLineOption("Идентификатор службы в systemd",
+        ARG_NAME_NAME_LONG, ARG_NAME_NAME_SHORT, true, false),
+        CommandLineOption("Аргументы командной строки запуска службы",
+        ARG_EXEC_START_NAME_LONG, ARG_EXEC_START_NAME_SHORT, true, false)
+    };
+    COMM_COMMAND("Регистрация службы и завершение приложения", COMMAND_NAME_INSTALL, list);
+
+    list = {
+        CommandLineOption("Идентификатор службы в systemd",
+        ARG_NAME_NAME_LONG, ARG_NAME_NAME_SHORT, true, false),
+    };
+    COMM_COMMAND("Снятие регистрации службы и завершение приложения", COMMAND_NAME_UNINSTALL, list);
+
+    std::string error{};
+    bool result = appInfo().commandLine().parse(&error);
+
+    if (!result || appInfo().commandLine().hasParsedOption(OPTION_NAME_HELP_LONG))
     {
-        const auto logLevelString = appInfo().commandLine().optionValue(PARAMETER_NAME_LOG);
+        if (!error.empty())
+            std::cout << "Ошибка разбора командной строки: " << error << std::endl;
+
+        std::cout << appInfo().commandLine().help();
+        exit(1);
+    }
+
+    bool showVersion = appInfo().commandLine().hasParsedOption(OPTION_NAME_VERSION_LONG);
+    if (showVersion)
+    {
+        std::cout << "Version [" << _version << "]" << std::endl;
+        exit(0);
+    }
+
+    _console = appInfo().commandLine().hasParsedOption(OPTION_NAME_CONSOLE_LONG);
+
+    std::string logLevelString;
+    if (appInfo().commandLine().hasParsedOption(OPTION_NAME_LOG_LONG, &logLevelString))
+    {
         if (!logLevelString.empty() && logLevelString.find_first_not_of("0123456789") == std::string::npos)
             _logLevel = std::stoi(logLevelString);
     }
 
-    if (appInfo().commandLine().optionExist(PARAMETER_NAME_INSTALL))
-    {
-        if (appInfo().commandLine().tokenCount() != 2)
-            return false;
+    const auto command = appInfo().commandLine().parsedCommand().command();
 
+    if (command == COMMAND_NAME_INSTALL)
+    {
         _install = true;
-    }
-    else if (appInfo().commandLine().optionExist(PARAMETER_NAME_UNINSTALL))
-    {
-        if (appInfo().commandLine().tokenCount() != 2)
-            return false;
+        auto optionName = appInfo().commandLine().parsedCommand().findOption(ARG_NAME_NAME_SHORT);
+        if (optionName)
+            _serviceName = optionName->value();
 
+        auto optionExecArgs = appInfo().commandLine().parsedCommand().findOption(ARG_EXEC_START_NAME_SHORT);
+        if (optionExecArgs)
+            _serviceExecArgs = optionExecArgs->value();
+    }
+    else if (command == COMMAND_NAME_UNINSTALL)
+    {
         _uninstall = true;
+        auto optionName = appInfo().commandLine().parsedCommand().findOption(ARG_NAME_NAME_SHORT);
+        if (optionName)
+            _serviceName = optionName->value();
     }
 
     return true;
@@ -412,6 +475,7 @@ uint32_t DaemonApplication<ThreadMainType>::installDaemon()
     auto applicationBinaryFile = appInfo().binaryPath() + appInfo().binaryFileName();
     auto registered = DaemonUtils::daemonRegister(_serviceName,
                                                   applicationBinaryFile,
+                                                  _serviceExecArgs,
                                                   _description,
                                                   &resultString);
 #endif

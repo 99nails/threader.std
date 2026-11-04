@@ -27,7 +27,7 @@ public:
 
     void setArguments(int argc, char* argv[]);
 
-    const CommandLineParser &commandLine();
+    CommandLineParser &commandLine();
 
     const std::string &binaryFileName() const;
 

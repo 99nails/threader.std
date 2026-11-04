@@ -22,7 +22,7 @@ ThreadSslClientConnection::ThreadSslClientConnection(MessageConsumer *parent,
 
     _factory = dynamic_cast<PacketFactoryAsciiLines*>(packetFactory());
 
-    setTimeout(2000);
+    setTimeout(20000);
 }
 
 void ThreadSslClientConnection::onError(HandlerBase &sender,
@@ -62,6 +62,9 @@ void ThreadSslClientConnection::onThreadFinished()
 void ThreadSslClientConnection::onIdle()
 {
     if (!_factory)
+        return;
+
+    if (!_useSsl)
         return;
 
     auto line = std::string((_useSsl) ? "SSL" : "Open") + " packet " + std::to_string(++_count);

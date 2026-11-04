@@ -1,5 +1,10 @@
 #include "ThreadMain.h"
 
+#include "ListThreads.h"
+#include "MessageWriteToFile.h"
+#include "SignalHandler.h"
+#include "StdStringUtils.h"
+
 #ifdef WIN32
 #include <psapi.h>
 #endif
@@ -7,7 +12,7 @@
 namespace Threader::Threads
 {
 
-ThreadMainWithouSettings::ThreadMainWithouSettings(MessageConsumer *parent,
+ThreadMainWithoutSettings::ThreadMainWithoutSettings(MessageConsumer *parent,
                                                    const std::string &applicationBinaryName,
                                                    const std::string &applicationFriendlyName,
                                                    const std::string &threadName)
@@ -23,31 +28,31 @@ ThreadMainWithouSettings::ThreadMainWithouSettings(MessageConsumer *parent,
         _applicationFriendlyName = threadName;
 }
 
-void ThreadMainWithouSettings::onThreadStarted()
+void ThreadMainWithoutSettings::onThreadStarted()
 {
     writeLog(Message10, _applicationFriendlyName.c_str());
 
     snapshotThreads(true);
 }
 
-void ThreadMainWithouSettings::onThreadFinishing()
+void ThreadMainWithoutSettings::onThreadFinishing()
 {
     writeLog(Message11, _applicationFriendlyName.c_str());
 }
 
-void ThreadMainWithouSettings::onThreadFinished()
+void ThreadMainWithoutSettings::onThreadFinished()
 {
     writeLog(Message12, _applicationFriendlyName.c_str());
 
     snapshotThreads(true);
 }
 
-void ThreadMainWithouSettings::onIdle()
+void ThreadMainWithoutSettings::onIdle()
 {
     snapshotThreads();
 }
 
-void ThreadMainWithouSettings::snapshotThreads(bool rightNow)
+void ThreadMainWithoutSettings::snapshotThreads(bool rightNow)
 {
     auto tickCount = DateTimeUtils::getTickCount();
     if (!rightNow && tickCount < _nextBuildStatisticTickCount)
@@ -131,12 +136,12 @@ void ThreadMainWithouSettings::snapshotThreads(bool rightNow)
     }
 }
 
-const std::string &ThreadMainWithouSettings::applicationFriendlyName() const
+const std::string &ThreadMainWithoutSettings::applicationFriendlyName() const
 {
     return _applicationFriendlyName;
 }
 
-const std::string &ThreadMainWithouSettings::applicationBinaryName() const
+const std::string &ThreadMainWithoutSettings::applicationBinaryName() const
 {
     return _applicationBinaryName;
 }

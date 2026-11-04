@@ -36,7 +36,9 @@ target_compile_features(example01-messages PUBLIC cxx_std_17)
 
 target_link_libraries(example01-messages
     threader-std
-)
+    )
+
+set_target_properties(example01-messages PROPERTIES WIN32_EXECUTABLE OFF)
 
 #example02-threads
 add_executable(example02-threads

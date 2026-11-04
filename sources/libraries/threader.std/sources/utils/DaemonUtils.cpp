@@ -39,6 +39,7 @@ sem_t *DaemonUtils::_semaphore = SEM_FAILED;
 
 bool DaemonUtils::daemonRegister(const std::string &serviceName,
                                  const std::string &binaryFileName,
+                                 const std::string &execArguments,
                                  const std::string &description,
                                  std::string *resultString)
 {
@@ -46,7 +47,11 @@ bool DaemonUtils::daemonRegister(const std::string &serviceName,
     auto descriptor = FileUtils::fileCreate(serviceFileName);
     if (INVALID_DESCRIPTOR != descriptor)
     {
-        auto content = format(SERVICE_TEMPLATE, description.c_str(), binaryFileName.c_str(), serviceName.c_str());
+        auto execStart = binaryFileName;
+        if (!execArguments.empty())
+            execStart += " " + execArguments;
+
+        auto content = format(SERVICE_TEMPLATE, description.c_str(), execStart.c_str(), serviceName.c_str());
         FileUtils::fileWrite(descriptor, content);
         FileUtils::fileClose(descriptor);
 

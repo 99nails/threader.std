@@ -1,12 +1,11 @@
 #pragma once
 
-#include "PollerFileNotify.h"
 #include "ThreadMain.h"
 
 using namespace Threader::Threads;
 
 class ThreadMainFileWatcher :
-        public ThreadMainWithouSettings
+        public ThreadMainWithoutSettings
 {
 public:
     explicit ThreadMainFileWatcher(const std::string &applicationBinaryName,

@@ -375,7 +375,7 @@ std::string FileUtils::pathtoTemp()
 
 #ifdef WIN32
     char buffer[MAX_PATH + 1];
-    GetTemporaryPath(bugger, MAX_PATH);
+    GetTempPath(MAX_PATH, buffer);
     return buffer;
 #endif
 

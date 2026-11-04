@@ -132,6 +132,8 @@ CommandLineParser::CommandLineParser(const std::list<std::string> &arguments)
 void CommandLineParser::setArguments(const std::list<std::string> &arguments)
 {
     _token = arguments;
+    if (!arguments.empty())
+        _binaryName = arguments.front();
 }
 
 void CommandLineParser::setArguments(int argc, char **argv)
@@ -139,6 +141,7 @@ void CommandLineParser::setArguments(int argc, char **argv)
     _token.clear();
     for (int i = 0; i < argc; i++)
         _token.push_back(argv[i]);
+    _binaryName = argv[0];
 }
 
 const std::string &CommandLineParser::optionValue(const std::string &option) const
@@ -282,7 +285,7 @@ bool CommandLineParser::parse(std::string *error)
     // check all options are set
     for (const auto &option: _parsedCommand.options())
     {
-        if (option.expectValue() && option.value().empty())
+        if (option.expectOption() && option.expectValue() && option.value().empty())
         {
             if (error)
                 *error = "не задано значение " + option.longName();
@@ -320,17 +323,29 @@ CommandLineCommand CommandLineParser::parsedCommand()
 
 std::string CommandLineParser::help()
 {
-    std::string result = FileUtils::extractFileName(_binaryName);
+    std::string result = "Использование: " + FileUtils::extractFileName(_binaryName);
 
-    std::string globalOptions = "\r\nГлобальные опции:\r\n";
+    std::string globalOptions = "\r\nОпции:\r\n";
 
     if (_globalOptionsList.size() > 0)
     {
-        result += " [global-options]";
+        result += " <опции>";
 
         for (const auto &option : _globalOptionsList)
         {
-            globalOptions += "\t" + option.shortName() + "\t" + option.longName() + "\t- " + option.description() + "\r\n";
+            auto s = option.shortName();
+            if (!s.empty())
+                s += ", ";
+            else
+                s = "   ";
+
+            s += option.longName();
+            if (option.expectValue())
+                s += " <значение> ";
+
+            s = StdStringUtils::appendChar(s, 30, ' ');
+
+            globalOptions += "  " + s + option.description() + "\r\n";
         }
     }
 
@@ -338,19 +353,27 @@ std::string CommandLineParser::help()
 
     if (_commandsList.size() > 0)
     {
-        result += " [command [command-option [value|...]]]";
+        result += " [<команда> [аргумент [значение]|...]]";
 
         for (auto &command : _commandsList)
         {
-            commands += "    " +
-                        StdStringUtils::appendChar(command.command(), 10, ' ')
-                        + " - " + command.description() + "\r\n";
+            commands += "  " +
+                        StdStringUtils::appendChar(command.command(), 30, ' ')
+                        + command.description() + "\r\n";
 
             for (const auto &option : command.options())
             {
-                commands += "        " +
-                            StdStringUtils::appendChar(option.shortName(), 8, ' ') +
-                            StdStringUtils::appendChar(option.longName(), 15, ' ') + " - " + option.description() + "\r\n";
+                auto s = option.shortName();
+                if (!s.empty())
+                    s += ", ";
+                else
+                    s = "   ";
+
+                s += option.longName();
+                if (option.expectValue())
+                    s += " <значение> ";
+
+                commands += "    " + StdStringUtils::appendChar(s, 28, ' ') + option.description() + "\r\n";
             }
 
             commands += "\r\n";
@@ -360,6 +383,31 @@ std::string CommandLineParser::help()
     result += "\r\n" + globalOptions + commands;
 
     return result;
+}
+
+void CommandLineParser::addOption(const CommandLineOption &option)
+{
+    _globalOptionsList.push_back(option);
+}
+
+void CommandLineParser::addCommand(const CommandLineCommand &command)
+{
+    _commandsList.push_back(command);
+}
+
+bool CommandLineParser::hasParsedOption(const std::string &name,
+                                        std::string *value)
+{
+    for (auto &option : _parsedGlobalOptions)
+    {
+        if (option.longName() == name || option.shortName() == name)
+        {
+            if (value)
+                *value = option.value();
+            return true;
+        }
+    }
+    return false;
 }
 
 const OptionList &CommandLineParser::parsedGlobalOptions()

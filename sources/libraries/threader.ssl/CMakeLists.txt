@@ -29,6 +29,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME}
+        threader-std
         OpenSSL::SSL
         OpenSSL::Crypto
     )
@@ -38,6 +39,7 @@ if (UNIX)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(_OPENSSL REQUIRED openssl)
     target_link_libraries(${PROJECT_NAME}
+        threader-std
         ${_OPENSSL_LIBRARIES}
     )
 endif()

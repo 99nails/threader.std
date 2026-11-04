@@ -116,6 +116,13 @@ public:
 
     std::string help();
 
+    void addOption(const CommandLineOption &option);
+
+    void addCommand(const CommandLineCommand &command);
+
+    bool hasParsedOption(const std::string& name,
+                         std::string *value = nullptr);
+
 private:
     CommandLineOption *findGlobalOption(const std::string &name);
 
@@ -132,5 +139,14 @@ private:
     OptionList _parsedGlobalOptions;
     CommandLineCommand _parsedCommand;
 };
+
+
+#define COMM_OPTION(DESC, LONG, SHORT, VALUE, OPTION) \
+    appInfo().commandLine().addOption(CommandLineOption(DESC, LONG, SHORT, VALUE, OPTION))
+
+
+#define COMM_COMMAND(DESC, COMMAND, OPTIONS) \
+    appInfo().commandLine().addCommand(CommandLineCommand(DESC, COMMAND, OPTIONS))
+
 
 }

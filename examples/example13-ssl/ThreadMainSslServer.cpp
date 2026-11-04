@@ -3,9 +3,11 @@
 #include "ThreadListenSslConnections.h"
 #include "ThreadSslServerConnection.h"
 
+#include "SignalHandler.h"
+
 ThreadMainSslServer::ThreadMainSslServer(const std::string &applicationBinaryName,
                                          const std::string &applicationFriendlyName)
-    : ThreadMainWithouSettings(nullptr,
+    : ThreadMainWithoutSettings(nullptr,
                                applicationBinaryName,
                                applicationFriendlyName)
     , _threadListen(nullptr)

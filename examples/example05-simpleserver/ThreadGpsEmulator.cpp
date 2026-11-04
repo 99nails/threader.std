@@ -19,9 +19,11 @@ using std::chrono::system_clock;
 
 
 ThreadGpsEmulator::ThreadGpsEmulator(SettingsGpsEmulator *settings,
+                                     const std::string &commandLineSerial,
                                      MessageConsumer *parent)
     : ThreadHandler(parent,
-                    new HandlerSerialPort(nullptr, settings->port()),
+                    new HandlerSerialPort(nullptr, (commandLineSerial.empty()) ? settings->port()
+                                                                               : commandLineSerial),
                     1000,
                     new PacketFactoryAsciiLines(),
                     "Thread.Gps.Emulator")

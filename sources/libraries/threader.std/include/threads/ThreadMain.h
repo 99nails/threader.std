@@ -1,10 +1,6 @@
 #pragma once
 
 #include "LogMessagesTemplates.h"
-#include "ListThreads.h"
-#include "MessageWriteToFile.h"
-#include "SignalHandler.h"
-#include "StdStringUtils.h"
 #include "ThreadBase.h"
 
 #ifdef linux
@@ -17,10 +13,10 @@ namespace Threader::Threads
 constexpr uint32_t TIMEOUT_BUILD_STATISTIC_MILLISECONDS = 10000;
 constexpr uint32_t TIMEOUT_BUILD_COMMON_STATISTIC_MILLISECONDS = 60000;
 
-class ThreadMainWithouSettings : public ThreadBase
+class ThreadMainWithoutSettings : public ThreadBase
 {
 public:
-    explicit ThreadMainWithouSettings(MessageConsumer *parent = nullptr,
+    explicit ThreadMainWithoutSettings(MessageConsumer *parent = nullptr,
                                       const std::string &applicationBinaryName = std::string(),
                                       const std::string &applicationFriendlyName = std::string(),
                                       const std::string &threadName = std::string());
@@ -52,7 +48,7 @@ private:
 };
 
 template <class SettingsSet>
-class ThreadMain : public ThreadMainWithouSettings
+class ThreadMain : public ThreadMainWithoutSettings
 {
 public:
     explicit ThreadMain(MessageConsumer *parent = nullptr,
@@ -60,7 +56,7 @@ public:
                         const std::string &applicationFriendlyName = std::string(),
                         const std::string &threadName = std::string(),
                         const std::string &iniFileName = std::string())
-        : ThreadMainWithouSettings(parent,
+        : ThreadMainWithoutSettings(parent,
                                    applicationBinaryName,
                                    applicationFriendlyName,
                                    threadName)
@@ -75,7 +71,7 @@ public:
 protected:
     void onThreadStarted() override
     {
-        ThreadMainWithouSettings::onThreadStarted();
+        ThreadMainWithoutSettings::onThreadStarted();
 
         auto appName = applicationFriendlyName();
         writeLog(Message20, appName.c_str(), _settings.fileName().c_str());

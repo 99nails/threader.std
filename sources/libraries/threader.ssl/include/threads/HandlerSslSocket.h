@@ -169,7 +169,7 @@ protected:
      * \param timeout - задержка при проверке состояния дескриптора
      * \return - дескриптор соединения (INVALID_DESCRIPTOR при ошибке)
      */
-    Descriptor openTcpClientSocket(const QString &ipAddress,
+    Descriptor openTcpClientSocket(const std::string &ipAddress,
                                    const uint16_t port,
                                    int &errorCode,
                                    const int &timeout = 0);

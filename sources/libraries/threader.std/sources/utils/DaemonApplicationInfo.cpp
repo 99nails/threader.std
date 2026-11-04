@@ -14,7 +14,6 @@ DaemonApplicationInfo::DaemonApplicationInfo()
 
 void DaemonApplicationInfo::setArguments(int argc, char *argv[])
 {
-    // _arguments.reserve(argc);
     for (int i = 0; i < argc; i++)
     {
         _arguments.push_back(argv[i]);
@@ -25,7 +24,7 @@ void DaemonApplicationInfo::setArguments(int argc, char *argv[])
     _binaryPath = FileUtils::extractFilePath(FileUtils::absolutePath(_commandLine.binaryFileName()));
 }
 
-const CommandLineParser &DaemonApplicationInfo::commandLine()
+CommandLineParser &DaemonApplicationInfo::commandLine()
 {
     return _commandLine;
 }

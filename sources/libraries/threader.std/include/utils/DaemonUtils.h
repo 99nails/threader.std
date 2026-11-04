@@ -13,6 +13,7 @@ class DaemonUtils
 public:
     static bool daemonRegister(const std::string &serviceName,
                                const std::string &binaryFileName,
+                               const std::string &execArguments,
                                const std::string &description,
                                std::string *resultString = nullptr);
 

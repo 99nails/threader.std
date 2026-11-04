@@ -6,7 +6,7 @@
 
 using namespace Threader::Threads;
 
-class ThreadMainSslServer : public ThreadMainWithouSettings
+class ThreadMainSslServer : public ThreadMainWithoutSettings
 {
 public:
     explicit ThreadMainSslServer(const std::string &applicationBinaryName,

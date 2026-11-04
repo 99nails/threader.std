@@ -9,23 +9,23 @@ int main(int argc, char *argv[])
     CommandLineParser parser(
         {
             CommandLineOption("Вывод протокола работы в терминал", "--console", "-c", false, false),
-            CommandLineOption("Установка уровня протоколирования [-1..9]", "--log-level", "-c", true, false),
+            CommandLineOption("Установка уровня протоколирования [-1..9]", "--log-level", "-l", true, false),
             CommandLineOption("Задание файла настроек", "--config", "-f", true, false),
         },
 
         {
-            CommandLineCommand("Регистрация службы", "install",
+            CommandLineCommand("Регистрация службы в systemd", "install",
                                {
                                    CommandLineOption("Идентификатор службы в systemd", "--name", "-n", true, false),
                                    CommandLineOption("Командная строка запуска службы", "--exec-start", "-e", true, false)
                                }),
-            CommandLineCommand("Снятие регистрации службы", "uninstall",
+            CommandLineCommand("Снятие регистрации службы systemd", "uninstall",
                                {
                                    CommandLineOption("Идентификатор службы в systemd", "--name", "-n", true, false)
                                }),
-            CommandLineCommand("Конфиграция узла", "configure",
+            CommandLineCommand("Запрос конфиграции узла", "configure",
                                {
-                                   CommandLineOption("Идентификатор группы", "--group", "-d", true, true),
+                                   CommandLineOption("Идентификатор группы", "--group", "-g", true, true),
                                    CommandLineOption("Короткое название", "--short-name", "-s", true, true)
                                }),
             CommandLineCommand("Подключение внешнего узла", "outer-connect",
