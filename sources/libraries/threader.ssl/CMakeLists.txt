@@ -48,6 +48,21 @@ set(LIBRARY_INSTALL_PATH "/usr/local/lib/threader.ssl/")
 set(HEADERS_INSTALL_PATH "/usr/local/include/threader.ssl")
 set(CONFIG_INSTALL_PATH  "/etc/ld.so.conf.d/")
 
+install(TARGETS ${PROJECT_NAME}
+    LIBRARY
+    DESTINATION ${LIBRARY_INSTALL_PATH}
+    PERMISSIONS
+    OWNER_READ OWNER_WRITE
+    GROUP_READ
+    WORLD_READ
+    COMPONENT ssl-lib
+)
+
+install(FILES ${ROOT_PROJECT_DIR}/install/threader-ssl.conf
+    DESTINATION ${CONFIG_INSTALL_PATH}
+    COMPONENT ssl-lib
+)
+
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
     DESTINATION ${HEADERS_INSTALL_PATH}
     FILE_PERMISSIONS
@@ -58,7 +73,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
     OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
-    COMPONENT std-dev
+    COMPONENT ssl-dev
     FILES_MATCHING
     PATTERN "*.h"
     PATTERN "*.hpp"

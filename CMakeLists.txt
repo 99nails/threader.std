@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 set(VER_MAJ 1)
-set(VER_MIN 0)
+set(VER_MIN 1)
 set(VER_PAT 0)
 set(VER_BLD 0)
 
@@ -69,11 +69,15 @@ add_custom_target(doc-files SOURCES
 add_custom_target(install-files SOURCES
     install/threader-qt.conf
     install/threader-std.conf
+    install/threader-ssl.conf
     install/threader.std/postinst
     install/threader.std/postrm
     install/threader.std/preinst
     install/threader.qt/postinst
     install/threader.qt/postrm
     install/threader.qt/preinst
+    install/threader.ssl/postinst
+    install/threader.ssl/postrm
+    install/threader.ssl/preinst
 #    bin/config/config.template.ini
     )
