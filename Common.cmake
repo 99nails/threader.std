@@ -21,7 +21,7 @@ set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_STRIP_FILES ON)
 
 set(CPACK_COMPONENT_STD-LIB_DESCRIPTION "Multithreaded applications framework library")
-set(CPACK_DEBIAN_STD-LIB_PACKAGE_DEPENDS "udev dbus-1 systemd")
+#set(CPACK_DEBIAN_STD-LIB_PACKAGE_DEPENDS "")
 set(CPACK_DEBIAN_STD-LIB_PACKAGE_CONTROL_EXTRA
     "${CMAKE_SOURCE_DIR}/install/threader.std/preinst"
     "${CMAKE_SOURCE_DIR}/install/threader.std/postinst"
@@ -29,10 +29,10 @@ set(CPACK_DEBIAN_STD-LIB_PACKAGE_CONTROL_EXTRA
     )
 
 set(CPACK_COMPONENT_STD-DEV_DESCRIPTION "Headers for multithreaded applications framework library")
-set(CPACK_DEBIAN_STD-DEV_PACKAGE_DEPENDS "libudev-dev, dbus-1-dev, systemd-dev, ${CPACK_PACKAGE_NAME}-std-lib")
+set(CPACK_DEBIAN_STD-DEV_PACKAGE_DEPENDS "libudev-dev, libdbus-1-dev, libsystemd-dev, ${CPACK_PACKAGE_NAME}-std-lib")
 
 set(CPACK_COMPONENT_QT-LIB_DESCRIPTION "Qt support for multithreaded applications framework library")
-set(CPACK_DEBIAN_QT-LIB_PACKAGE_DEPENDS "${CPACK_PACKAGE_NAME}-std-lib")
+set(CPACK_DEBIAN_QT-LIB_PACKAGE_DEPENDS "qt5-default | qtbase-5-dev, ${CPACK_PACKAGE_NAME}-std-lib")
 set(CPACK_DEBIAN_QT-LIB_PACKAGE_CONTROL_EXTRA
     "${CMAKE_SOURCE_DIR}/install/threader.qt/preinst"
     "${CMAKE_SOURCE_DIR}/install/threader.qt/postinst"
@@ -40,19 +40,19 @@ set(CPACK_DEBIAN_QT-LIB_PACKAGE_CONTROL_EXTRA
     )
 
 set(CPACK_COMPONENT_QT-DEV_DESCRIPTION "Headers for Qt support for multithreaded applications framework library")
-set(CPACK_DEBIAN_QT-DEV_PACKAGE_DEPENDS "${CPACK_PACKAGE_NAME}-qt-lib")
+set(CPACK_DEBIAN_QT-DEV_PACKAGE_DEPENDS "qtbase5-dev, ${CPACK_PACKAGE_NAME}-qt-lib")
 
 
 set(CPACK_COMPONENT_SSL-LIB_DESCRIPTION "SSL support for multithreaded applications framework library")
-set(CPACK_DEBIAN_SSL-LIB_PACKAGE_DEPENDS "${CPACK_PACKAGE_NAME}-std-lib libssl")
+set(CPACK_DEBIAN_SSL-LIB_PACKAGE_DEPENDS "${CPACK_PACKAGE_NAME}-std-lib")
 set(CPACK_DEBIAN_SSL-LIB_PACKAGE_CONTROL_EXTRA
     "${CMAKE_SOURCE_DIR}/install/threader.ssl/preinst"
     "${CMAKE_SOURCE_DIR}/install/threader.ssl/postinst"
     "${CMAKE_SOURCE_DIR}/install/threader.ssl/postrm"
     )
 
-set(SSL-DEV_DESCRIPTION "Headers for SSL support for multithreaded applications framework library")
-set(CPACK_DEBIAN_SSL-DEV_PACKAGE_DEPENDS "${CPACK_PACKAGE_NAME}-ssl-lib")
+set(CPACK_COMPONENT_SSL-DEV_DESCRIPTION "Headers for SSL support for multithreaded applications framework library")
+set(CPACK_DEBIAN_SSL-DEV_PACKAGE_DEPENDS "libssl-dev, ${CPACK_PACKAGE_NAME}-ssl-lib")
 
 include(CPack)
 include(GNUInstallDirs)
