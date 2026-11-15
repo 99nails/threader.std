@@ -320,7 +320,8 @@ endif()
 add_executable(example14-commandline
     example14-commandline/MainExample14-CommandLine.cpp
 )
-target_compile_features(example13-ssl-client PUBLIC cxx_std_17)
+
+target_compile_features(example14-commandline PUBLIC cxx_std_17)
 
 target_link_libraries(example14-commandline
     threader-std)

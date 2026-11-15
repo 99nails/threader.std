@@ -3,8 +3,16 @@ set(CPACK_DEB_COMPONENT_INSTALL ON)
 
 set(CPACK_COMPONENTS_ALL
     std-lib std-dev
-    qt-lib qt-dev
-    ssl-lib ssl-dev)
+    )
+
+if (QT_ENABLE)
+    list(APPEND CPACK_COMPONENTS_ALL qt-lib qt-dev)
+endif()
+
+if (SSL_ENABLE)
+    list(APPEND CPACK_COMPONENTS_ALL ssl-lib ssl-dev)
+endif()
+
 set(CPACK_GERATOR "DEB")
 
 set(CPACK_PACKAGE_VERSION_MAJOR ${VER_MAJ})
@@ -21,7 +29,7 @@ set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_STRIP_FILES ON)
 
 set(CPACK_COMPONENT_STD-LIB_DESCRIPTION "Multithreaded applications framework library")
-#set(CPACK_DEBIAN_STD-LIB_PACKAGE_DEPENDS "")
+set(CPACK_DEBIAN_STD-LIB_PACKAGE_DEPENDS "")
 set(CPACK_DEBIAN_STD-LIB_PACKAGE_CONTROL_EXTRA
     "${CMAKE_SOURCE_DIR}/install/threader.std/preinst"
     "${CMAKE_SOURCE_DIR}/install/threader.std/postinst"
@@ -31,28 +39,31 @@ set(CPACK_DEBIAN_STD-LIB_PACKAGE_CONTROL_EXTRA
 set(CPACK_COMPONENT_STD-DEV_DESCRIPTION "Headers for multithreaded applications framework library")
 set(CPACK_DEBIAN_STD-DEV_PACKAGE_DEPENDS "libudev-dev, libdbus-1-dev, libsystemd-dev, ${CPACK_PACKAGE_NAME}-std-lib")
 
-set(CPACK_COMPONENT_QT-LIB_DESCRIPTION "Qt support for multithreaded applications framework library")
-set(CPACK_DEBIAN_QT-LIB_PACKAGE_DEPENDS "qt5-default | qtbase-5-dev, ${CPACK_PACKAGE_NAME}-std-lib")
-set(CPACK_DEBIAN_QT-LIB_PACKAGE_CONTROL_EXTRA
-    "${CMAKE_SOURCE_DIR}/install/threader.qt/preinst"
-    "${CMAKE_SOURCE_DIR}/install/threader.qt/postinst"
-    "${CMAKE_SOURCE_DIR}/install/threader.qt/postrm"
-    )
+if (QT_ENABLE)
+    set(CPACK_COMPONENT_QT-LIB_DESCRIPTION "Qt support for multithreaded applications framework library")
+    set(CPACK_DEBIAN_QT-LIB_PACKAGE_DEPENDS "libqt5core5a | libqt5core5t64, ${CPACK_PACKAGE_NAME}-std-lib")
+    set(CPACK_DEBIAN_QT-LIB_PACKAGE_CONTROL_EXTRA
+        "${CMAKE_SOURCE_DIR}/install/threader.qt/preinst"
+        "${CMAKE_SOURCE_DIR}/install/threader.qt/postinst"
+        "${CMAKE_SOURCE_DIR}/install/threader.qt/postrm"
+        )
 
-set(CPACK_COMPONENT_QT-DEV_DESCRIPTION "Headers for Qt support for multithreaded applications framework library")
-set(CPACK_DEBIAN_QT-DEV_PACKAGE_DEPENDS "qtbase5-dev, ${CPACK_PACKAGE_NAME}-qt-lib")
+    set(CPACK_COMPONENT_QT-DEV_DESCRIPTION "Headers for Qt support for multithreaded applications framework library")
+    set(CPACK_DEBIAN_QT-DEV_PACKAGE_DEPENDS "qtbase5-dev, ${CPACK_PACKAGE_NAME}-qt-lib")
+endif()
 
+if (SSL_ENABLE)
+    set(CPACK_COMPONENT_SSL-LIB_DESCRIPTION "SSL support for multithreaded applications framework library")
+    set(CPACK_DEBIAN_SSL-LIB_PACKAGE_DEPENDS "${CPACK_PACKAGE_NAME}-std-lib, openssl")
+    set(CPACK_DEBIAN_SSL-LIB_PACKAGE_CONTROL_EXTRA
+        "${CMAKE_SOURCE_DIR}/install/threader.ssl/preinst"
+        "${CMAKE_SOURCE_DIR}/install/threader.ssl/postinst"
+        "${CMAKE_SOURCE_DIR}/install/threader.ssl/postrm"
+        )
 
-set(CPACK_COMPONENT_SSL-LIB_DESCRIPTION "SSL support for multithreaded applications framework library")
-set(CPACK_DEBIAN_SSL-LIB_PACKAGE_DEPENDS "${CPACK_PACKAGE_NAME}-std-lib")
-set(CPACK_DEBIAN_SSL-LIB_PACKAGE_CONTROL_EXTRA
-    "${CMAKE_SOURCE_DIR}/install/threader.ssl/preinst"
-    "${CMAKE_SOURCE_DIR}/install/threader.ssl/postinst"
-    "${CMAKE_SOURCE_DIR}/install/threader.ssl/postrm"
-    )
-
-set(CPACK_COMPONENT_SSL-DEV_DESCRIPTION "Headers for SSL support for multithreaded applications framework library")
-set(CPACK_DEBIAN_SSL-DEV_PACKAGE_DEPENDS "libssl-dev, ${CPACK_PACKAGE_NAME}-ssl-lib")
+    set(SSL-DEV_DESCRIPTION "Headers for SSL support for multithreaded applications framework library")
+    set(CPACK_DEBIAN_SSL-DEV_PACKAGE_DEPENDS "libssl-dev, ${CPACK_PACKAGE_NAME}-ssl-lib")
+endif()
 
 include(CPack)
 include(GNUInstallDirs)

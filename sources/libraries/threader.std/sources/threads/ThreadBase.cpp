@@ -48,6 +48,7 @@ ThreadBase::ThreadBase(MessageConsumer *parent,
     , _threadName(threadName)
     , _thisThreadId(0)
     , _aliveCheckedUtc(DateTimeUtils::msecsSinceEpochLocal())
+    , _pollerThread(nullptr)
     , _waitCount(0)
     , _nextDestroyTerminatedThreadsTickCount(
           DateTimeUtils::getNextTickCount(TIMEOUT_COLLECT_TERMINATED_THREADS_MILLISECONDS))
@@ -63,6 +64,8 @@ ThreadBase::~ThreadBase()
 {
     if (_mutexTimeout)
         delete _mutexTimeout;
+
+    writeLog(Message18, STRLOG(_threadName), _thisThreadId);
 }
 
 MessageConsumer *ThreadBase::parentThread() const
@@ -135,15 +138,9 @@ void ThreadBase::postEventChildThreadTerminated()
 
 void ThreadBase::initializeThread()
 {
-    if (ThreadsStaticticCollector::instance())
-        ThreadsStaticticCollector::instance()->registerThread(this);
-
-    _thisThreadId = 0;
-
-    _pollerThread.setSignalHandler(this);
-    _polling.registerPoller(&_pollerThread);
-
-    accumulateStatistic();
+    _pollerThread = new PollerThread(this);
+    _pollerThread->setSignalHandler(this);
+    _polling.registerPoller(_pollerThread);
 }
 
 void ThreadBase::finalizeThread()
@@ -183,16 +180,20 @@ void ThreadBase::runEventLoop()
 
 void ThreadBase::execute()
 {
-    initializeThread();
-
     _startedTickCount = DateTimeUtils::getTickCount();
     _startedUtc = DateTimeUtils::msecsSinceEpochLocal();
-
     _thisThreadId = threadId();
+
+    initializeThread();
 
     onThreadStarted();
 
     writeLog(Message13, STRLOG(threadName()), threadId());
+
+    if (ThreadsStaticticCollector::instance())
+        ThreadsStaticticCollector::instance()->registerThread(this);
+
+    accumulateStatistic();
 
     startChildThreads();
 
@@ -215,11 +216,11 @@ void ThreadBase::execute()
     writeLog(Message14, STRLOG(threadName()), threadId());
 }
 
-bool ThreadBase::accumulateStatistic()
+bool ThreadBase::accumulateStatistic(const bool rightNow)
 {
     auto nowTickCount = DateTimeUtils::getTickCount();
 
-    if (nowTickCount <= _nextAccumulateStatisticTickCount)
+    if (nowTickCount <= _nextAccumulateStatisticTickCount && !rightNow)
         return false;
 
     _nextAccumulateStatisticTickCount = nowTickCount + TIMEOUT_ACCUMULATE_STATISTIC_MILLISECONDS;
@@ -227,6 +228,9 @@ bool ThreadBase::accumulateStatistic()
     ThreadsStaticticCollector *list = ThreadsStaticticCollector::instance();
     if (!list)
         return false;
+
+    auto terminated = isThreadTerminated();
+    auto finished = isThreadFinished();
 
     list->accumulateStatistic(this,
                               _thisThreadId,
@@ -236,7 +240,8 @@ bool ThreadBase::accumulateStatistic()
                               nowTickCount,
                               polling()->waitCount(),
                               queue()->count(),
-                              isThreadTerminated()
+                              terminated,
+                              finished
                               );
     return true;
 }
@@ -246,9 +251,9 @@ int ThreadBase::childThreadCount()
     return _childThreadsList.size();
 }
 
-ThreadBase *ThreadBase::childThread(int index)
+const ListThreadBase &ThreadBase::childThreadList()
 {
-    return _childThreadsList.at(index);
+    return _childThreadsList;
 }
 
 ThreadBase *ThreadBase::registerAndStartChildThread(ThreadBase *thread,
@@ -287,15 +292,13 @@ void ThreadBase::startChildThreads() {}
 
 void ThreadBase::terminateChildThreads()
 {
-    for (int i = _childThreadsList.size() - 1; i >= 0; i--)
+    for (const auto &thread : _childThreadsList)
     {
-        auto thread = _childThreadsList[i];
         terminateChildThread(thread);
     }
 
-    for (int i = _childThreadsList.size() - 1; i >= 0; i--)
+    for (const auto &thread : _childThreadsList)
     {
-        auto thread = _childThreadsList[i];
         delete thread;
     }
 
@@ -313,11 +316,14 @@ void ThreadBase::destroyTerminatedChildThreads(bool rightNow)
         || _nextDestroyTerminatedThreadsTickCount <= DateTimeUtils::getTickCount())
     {
         auto iterator = _childThreadsList.begin();
+
         while (iterator != _childThreadsList.end())
         {
             if ((*iterator)->isThreadFinished())
             {
-                onDestroyTerminatedChildThread(*iterator);
+                ThreadBase* thread = *iterator;
+                onDestroyTerminatedChildThread(thread);
+                delete thread;
                 iterator = _childThreadsList.erase(iterator);
             }
             else
@@ -530,13 +536,14 @@ bool ThreadBase::stopThreadTimer(const std::string &timerName)
 {
     bool result = false;
 
-    for (size_t i = 0; i < _childThreadsList.size(); i++) {
-        auto thread = dynamic_cast<ThreadTimer *>(_childThreadsList.at(i));
-        if (!thread)
+    for (const auto &thread : _childThreadsList)
+    {
+        auto threadTimer = dynamic_cast<ThreadTimer*>(thread);
+        if (!threadTimer)
             continue;
 
-        if (thread->timerName() == timerName) {
-            thread->postTerminateEvent();
+        if (threadTimer->timerName() == timerName) {
+            threadTimer->postTerminateEvent();
             result = true;
         }
     }
@@ -547,12 +554,13 @@ int ThreadBase::stopAllTimers()
 {
     int result = 0;
 
-    for (size_t i = 0; i < _childThreadsList.size(); i++) {
-        auto thread = dynamic_cast<ThreadTimer *>(_childThreadsList.at(i));
-        if (!thread)
+    for (const auto &thread : _childThreadsList)
+    {
+        auto threadTimer = dynamic_cast<ThreadTimer*>(thread);
+        if (!threadTimer)
             continue;
 
-        thread->postTerminateEvent();
+        threadTimer->postTerminateEvent();
         result++;
     }
     return result;
@@ -560,26 +568,26 @@ int ThreadBase::stopAllTimers()
 
 void ThreadBase::signalEventWakeUp()
 {
-    if (this->isThreadFinished())
+    if (this->isThreadFinished() || !_pollerThread)
         return;
 
-    _pollerThread.sendSignalWakeUp();
+    _pollerThread->sendSignalWakeUp();
 }
 
 void ThreadBase::signalEventTerminate()
 {
-    if (isThreadFinished())
+    if (isThreadFinished() || !_pollerThread)
         return;
 
-    _pollerThread.sendSignalTerminate();
+    _pollerThread->sendSignalTerminate();
 }
 
 void ThreadBase::signalEventChildThreadTerminated()
 {
-    if (isThreadFinished())
+    if (isThreadFinished() || !_pollerThread)
         return;
 
-    _pollerThread.sendSignalTerminateChildThreads();
+    _pollerThread->sendSignalTerminateChildThreads();
 }
 
 uint32_t ThreadBase::timeout() const

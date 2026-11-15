@@ -253,12 +253,18 @@ bool FileUtils::isRegularFileExists(const std::string &fileName)
 
 std::string FileUtils::absolutePath(const std::string &relativePath)
 {
-    char result[PATH_MAX] = "";
 
 #ifdef linux
-    realpath(relativePath.c_str(), result);
+    auto resolved = realpath(relativePath.c_str(), nullptr);
+
+    if (resolved == nullptr)
+        return relativePath;
+
+    std::string result  = resolved;
+    free(resolved);
 #endif
 #ifdef WIN32
+    char result[PATH_MAX] = "";
     GetFullPathName(relativePath.c_str(),
                     PATH_MAX,
                     result,

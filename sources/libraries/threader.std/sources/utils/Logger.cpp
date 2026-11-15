@@ -33,6 +33,7 @@ Logger::Logger(bool doConsoleOutput,
     : _doConsoleOutput(doConsoleOutput)
     , _level(level)
     , _descriptor(INVALID_DESCRIPTOR)
+    , _currentLogFileDate(0)
     , _logDetails(logDetails)
 {
     auto slashIndex = pathToBin.rfind(FileUtils::DELIMITER);
@@ -174,14 +175,16 @@ bool Logger::flush()
     if (INVALID_DESCRIPTOR == _descriptor)
         return false;
 
-    for (auto iterator = _buffer.cbegin(); iterator != _buffer.cend(); iterator++)
+    for (const auto &s : _buffer)
     {
 #ifdef linux
-        ::write(_descriptor, iterator->c_str(), iterator->length());
+        size_t writtenCount = ::write(_descriptor, s.c_str(), s.length());
+        if (writtenCount != s.length())
+            return false;
 #endif
 #ifdef WIN32
         DWORD writtenCount;
-        WriteFile(_descriptor, iterator->c_str(), iterator->length(), &writtenCount, nullptr);
+        WriteFile(_descriptor, s.c_str(), s.length(), &writtenCount, nullptr);
 #endif
     }
     _buffer.clear();
@@ -192,7 +195,7 @@ bool Logger::flush()
 bool Logger::snapshot(const std::string &fileName,
                       const std::string &content)
 {
-    return FileUtils::fileReplaceContent(fileName, content);
+    return FileUtils::fileReplaceContent(_pathToLog + fileName, content);
 }
 
 bool Logger::append(const std::string &fileName,

@@ -10,6 +10,7 @@ class ThreadGps : public ThreadHandler
 {
 public:
     explicit ThreadGps(const SettingsGps::Ptr &settings,
+                       const std::string &commandLineSerial,
                        MessageConsumer *parent);
 
 protected:

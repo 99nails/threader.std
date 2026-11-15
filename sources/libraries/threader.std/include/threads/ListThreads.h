@@ -2,11 +2,6 @@
 
 #include "ThreadsCommon.h"
 #include "ThreadBase.h"
-// #include "../threader_global.h"
-
-// #include <QList>
-// #include <QHash>
-// #include <QMutex>
 
 #include <list>
 #include <map>
@@ -27,6 +22,7 @@ typedef struct ThreadStatistic
     uint64_t WaitMSecsCount;
     int QueueCount;
     bool Terminated;
+    bool Finished;
 } ThreadStatisticStruct;
 
 using ListStatistic = std::list<ThreadStatisticStruct>;
@@ -76,13 +72,18 @@ public:
                              const uint64_t &aliveTickCount,
                              const uint64_t &waitMSecsCount,
                              const int &queueCount,
-                             const bool terminated);
+                             const bool terminated,
+                             const bool finished);
 
     /**
      * @brief statistic - Получение списка со статистикой потоков
      * @return - Список со статистикой потоков
      */
     ListStatistic statistic();
+
+    void sendSnapshot();
+
+    static void setThreadStatisticFileName(const std::string &threadStatisticFileName);
 
 private:
 
@@ -93,6 +94,8 @@ private:
     HashThreadsStatistic _statistic;
 
     std::mutex *_mutex;
+
+    static std::string _threadStatisticFileName;
 };
 
 }}

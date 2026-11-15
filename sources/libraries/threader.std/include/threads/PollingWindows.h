@@ -43,6 +43,11 @@ public:
     explicit Polling(const std::string &threadName = std::string());
 
     /**
+     * @brief ~Polling - Деструктор
+     */
+    virtual ~Polling();
+
+    /**
      * @brief pollersCount - Получение количества зарегистрированных голосующих
      * @return - Количество зарегистрированных голосующих
      */

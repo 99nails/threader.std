@@ -49,9 +49,10 @@ void ThreadMainSslServer::doMessagePacket(const MessagePacket::Ptr &message)
 
     auto sslThreadfName = demangle(typeid(ThreadSslServerConnection).name());
 
-    for (int i = 0; i < childThreadCount(); i++)
+    const auto &threads = childThreadList();
+
+    for (const auto &thread : threads)
     {
-        auto thread = childThread(i);
         if (thread->thisThreadId() == message->threadId() || thread->threadClassName() != sslThreadfName)
             continue;
 

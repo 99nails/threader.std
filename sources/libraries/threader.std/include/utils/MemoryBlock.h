@@ -12,12 +12,12 @@ public:
     using Ptr = std::shared_ptr<MemoryBlock>;
 
 public:
-    MemoryBlock();
-    MemoryBlock(size_t capacity);
-    MemoryBlock(const void* data,
+    explicit MemoryBlock();
+    explicit MemoryBlock(size_t capacity);
+    explicit MemoryBlock(const void* data,
                 const size_t size);
 
-    MemoryBlock(MemoryBlock &other);
+    explicit MemoryBlock(MemoryBlock &other);
 
     virtual ~MemoryBlock();
 

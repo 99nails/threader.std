@@ -190,6 +190,7 @@ int DaemonApplication<ThreadMainType>::run()
     {
         DateTimeUtils::sleepMilliseconds(100);
     }
+    delete _threadMain;
 
     DaemonUtils::daemonSetRunning(_serviceName, false);
 
@@ -222,7 +223,10 @@ bool DaemonApplication<ThreadMainType>::initialize()
 
     auto line = MESSAGE_START_HINT;
 #endif
-    chdir(appInfo().binaryPath().c_str());
+    if (chdir(appInfo().binaryPath().c_str()) != 0)
+    {
+
+    }
 
     if (appInfo().commandLine().tokenCount() < 1)
     {

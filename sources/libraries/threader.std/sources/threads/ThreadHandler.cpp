@@ -41,12 +41,8 @@ ThreadHandler::ThreadHandler(MessageConsumer *parent,
 
 ThreadHandler::~ThreadHandler()
 {
-    if (_handler)
-    {
-        delete _handler;
-        _handler = nullptr;
-    }
-
+    _inputBuffer = nullptr;
+    _outputBuffer = nullptr;
     if (_packetFactory)
     {
         delete _packetFactory;

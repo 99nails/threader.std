@@ -1,6 +1,6 @@
 #include "ThreadMainGps.h"
 
-#include "Example05Common.h"
+// #include "Example05Common.h"
 #include "ThreadGpsEmulator.h"
 
 #include "DaemonApplicationInfo.h"
@@ -23,11 +23,11 @@ ThreadMainGps::ThreadMainGps(const std::string &applicationName,
 
 void ThreadMainGps::startChildThreads()
 {
-    std::string commandLineSeial;
-    appInfo().commandLine().hasParsedOption("-s", &commandLineSeial);
+    std::string commandLineSerial;
+    appInfo().commandLine().hasParsedOption("-s", &commandLineSerial);
 
     auto settingsGps = settings().get<SettingsGpsEmulator>();
     _threadGps = registerAndStartChildThread(new ThreadGpsEmulator(settingsGps.get(),
-                                                                   commandLineSeial,
+                                                                   commandLineSerial,
                                                                    this));
 }

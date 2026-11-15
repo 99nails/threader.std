@@ -1,10 +1,28 @@
 #include "ListThreads.h"
 
+#include "LogMessagesTemplates.h"
+#include "MessageWriteToFile.h"
+#include "SignalHandler.h"
+#include "StdStringUtils.h"
+
+#ifdef WIN32
+#include <psapi.h>
+#endif
+
+#ifdef linux
+#include <sys/resource.h>
+#endif
+
+
 namespace Threader {
 
 namespace Threads {
 
+using namespace Threader::Utils;
+
 ThreadsStaticticCollector *ThreadsStaticticCollector::_instance = nullptr;
+
+std::string ThreadsStaticticCollector::_threadStatisticFileName = "";
 
 ThreadsStaticticCollector::ThreadsStaticticCollector()
 {
@@ -74,7 +92,8 @@ bool ThreadsStaticticCollector::accumulateStatistic(ThreadBase *thread,
                                                     const uint64_t &aliveTickCount,
                                                     const uint64_t &waitMSecsCount,
                                                     const int &queueCount,
-                                                    const bool terminated)
+                                                    const bool terminated,
+                                                    const bool finished)
 {
     if (!thread)
         return false;
@@ -90,6 +109,7 @@ bool ThreadsStaticticCollector::accumulateStatistic(ThreadBase *thread,
     stat.WaitMSecsCount = waitMSecsCount;
     stat.QueueCount = queueCount;
     stat.Terminated = terminated;
+    stat.Finished = finished;
     _statistic[thread] = stat;
     return true;
 }
@@ -108,6 +128,80 @@ ListStatistic ThreadsStaticticCollector::statistic()
             result.push_back(_statistic[thread]);
     }
     return result;
+}
+
+void ThreadsStaticticCollector::sendSnapshot()
+{
+    if (!ThreadBase::logThread())
+        return;
+
+    auto statisticList = statistic();
+
+    std::string statisticString = "";
+
+    int memoryUsage = 0;
+#ifdef linux
+    rusage ru;
+    if (0 == getrusage(RUSAGE_SELF, &ru))
+    {
+        memoryUsage = ru.ru_maxrss;
+        statisticString = format("Memory usage: %d Kb\r\n", ru.ru_maxrss);
+    }
+#endif
+
+#ifdef WIN32
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+        memoryUsage = pmc.WorkingSetSize / 1024;
+        statisticString = format("Memory usage: %1 Kb\r\n", memoryUsage);
+    }
+#endif
+
+    int i = 0;
+    for (const auto &statistic: statisticList)
+    {
+        int64_t workingTotalMSecs = (statistic.AliveMsecsSinceEpoch - statistic.StartedMsecsSinceEpoch);
+        int64_t workingMSecs = workingTotalMSecs - statistic.WaitMSecsCount;
+
+        std::string alive = DateTimeUtils::msecsSinceEpochToStdString(statistic.AliveMsecsSinceEpoch,
+                                                                      true,
+                                                                      false);
+
+        statisticString += format("%d. (Id: %ld) %s %s (%lld/%lld) [%llu] Queue: %d",
+                                  ++i,
+                                  statistic.ThreadId,
+                                  statistic.ThreadName.c_str(),
+                                  alive.c_str(),
+                                  workingMSecs,
+                                  workingTotalMSecs,
+                                  statistic.AliveTickCount,
+                                  statistic.QueueCount) +
+                ((statistic.Terminated) ? " Terminated" : "") +
+                ((statistic.Finished) ? " Finished" : "") +
+                "\r\n";
+
+    }
+
+#ifdef linux
+    setThreadInfo(statisticString);
+#endif
+
+    statisticString += "{EOF}" + std::string(DateTimeUtils::msecsSinceEpochLocal() % 8, ' ');
+
+    ThreadBase *logThreadInstance = ThreadBase::logThread();
+    if (logThreadInstance)
+    {
+        logThreadInstance->postMessage1<MessageWriteToFile>(_threadStatisticFileName,
+                                                            statisticString,
+                                                            MessageWriteToFile::WriteMode::Truncate);
+    }
+
+    ThreadBase::writeLog(Message15, i, memoryUsage);
+}
+
+void ThreadsStaticticCollector::setThreadStatisticFileName(const std::string &threadStatisticFileName)
+{
+    _threadStatisticFileName = threadStatisticFileName;
 }
 
 }}

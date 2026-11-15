@@ -1,5 +1,6 @@
 #include "ThreadMainTimeServer.h"
 
+#include "DaemonApplicationInfo.h"
 #include "Example05Common.h"
 #include "ThreadGps.h"
 #include "ThreadListenConnections.h"
@@ -21,11 +22,16 @@ ThreadMainTimeServer::ThreadMainTimeServer(const std::string &applicationName,
 
 void ThreadMainTimeServer::startChildThreads()
 {
+    std::string commandLineSerial;
+    appInfo().commandLine().hasParsedOption("-s", &commandLineSerial);
+
     _threadListen = registerAndStartChildThread(
                 new ThreadListenConnections(this,
                                             settings().get<SettingsTimeServer>()));
 
-    _threadGps = registerAndStartChildThread(new ThreadGps(settings().get<SettingsGps>(), this));
+    _threadGps = registerAndStartChildThread(new ThreadGps(settings().get<SettingsGps>(),
+                                                           commandLineSerial,
+                                                           this));
 }
 
 void ThreadMainTimeServer::onDestroyTerminatedChildThread(ThreadBase *thread)

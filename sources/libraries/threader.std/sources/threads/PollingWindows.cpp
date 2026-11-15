@@ -54,6 +54,15 @@ Polling::Polling(const std::string &threadName)
 {
 }
 
+Polling::~Polling()
+{
+    for (auto poller : _pollers)
+    {
+        delete poller;
+    }
+    _pollers.clear();
+}
+
 int Polling::pollersCount()
 {
     return _pollers.size();

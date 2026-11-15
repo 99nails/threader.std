@@ -42,7 +42,7 @@ PacketBase::Ptr PacketFactoryAsciiLines::tryExtractPacket(MemoryBlock::Ptr &data
     if (!data || data->size() == 0)
         return nullptr;
 
-    auto dataString = std::string((char*)data->data());
+    auto dataString = std::string((char*)data->data(), data->size());
     auto position = dataString.find(_lineTerminator);
     if (std::string::npos == position || position >= dataString.length())
         return nullptr;

@@ -1076,7 +1076,7 @@ std::string SystemDUtils::find_unit_path(sd_bus *bus, const std::string &name)
         return "";
     }
 
-    while ((r = sd_bus_message_read(reply, "(ssssso)", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)) > 0)
+    while (sd_bus_message_read(reply, "(ssssso)", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) > 0)
     {
         // Нам нужен только последний элемент — object_path
         const char *path = nullptr;
@@ -1184,39 +1184,23 @@ static UnitInfo find_unit(sd_bus *bus, const std::string &name)
 bool SystemDUtils::getServiceState(const std::string &unit,
                                    SystemDServiceState &state)
 {
-    state = {};
-
     sd_bus *bus = nullptr;
     bool result = sd_bus_open_system(&bus) >= 0;
-    std::string path;
 
-    if (!result)
+    if (result)
     {
-        sd_bus_unref(bus);
-        return result;
+        std::string path;
+        result = getUnitPath(bus, state.unit, state.path);
+
+        if (result)
+        {
+            result = getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "ActiveState", state.activeState);
+            result &= getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "SubState", state.subState);
+            result &= getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "Description", state.description);
+            result &= getPropertyString(bus, path.c_str(), INTERFACE_SERVICE, "StatusText", state.statusText);
+            result &= getPropertyUInt32(bus, path.c_str(), INTERFACE_SERVICE, "MainPID", state.mainPID);
+        }
     }
-
-//    auto info = find_unit(bus, unit);
-
-//    if (path.empty()) {
-//        sd_bus_unref(bus);
-//        return 1;
-//    }
-
-    result = getUnitPath(bus, unit, path);
-    if (!result)
-        goto finalization;
-
-    state.unit = unit;
-    state.path = path;
-
-    result = getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "ActiveState", state.activeState);
-    result &= getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "SubState", state.subState);
-    result &= getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "Description", state.description);
-    result &= getPropertyString(bus, path.c_str(), INTERFACE_SERVICE, "StatusText", state.statusText);
-    result &= getPropertyUInt32(bus, path.c_str(), INTERFACE_SERVICE, "MainPID", state.mainPID);
-
-finalization:
     sd_bus_unref(bus);
 
     return result;

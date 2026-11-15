@@ -23,24 +23,6 @@ PacketFactoryBase *ThreadConnections::factory() const
 ConnectionBase* ThreadConnections::registerConnectionHandler(HandlerBase *handler)
 {
     auto result = new ConnectionBase(this, handler, 10000, _factory);
-    /*
-    result->moveToThread(this);
-    connect(result, &ConnectionBase::signalOnConnectionStateChanged,
-            this, &ThreadConnections::slotOnConnectionStateChanged, Qt::DirectConnection);
-    connect(result, &ConnectionBase::signalOnError,
-            this, &ThreadConnections::slotOnError, Qt::DirectConnection);
-
-    connect(result, &ConnectionBase::signalOnReadData,
-            this, &ThreadConnections::slotOnReadData, Qt::DirectConnection);
-    connect(result, &ConnectionBase::signalOnWriteData,
-            this, &ThreadConnections::slotOnWriteData, Qt::DirectConnection);
-
-    connect(result, &ConnectionBase::signalOnPacketReceived,
-            this, &ThreadConnections::slotOnPacketReceived, Qt::DirectConnection);
-    connect(result, &ConnectionBase::signalOnPacketSent,
-            this, &ThreadConnections::slotOnPacketSent, Qt::DirectConnection);
-
-    */
     _connections.push_back(result);
     return result;
 }
