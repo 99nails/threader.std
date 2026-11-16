@@ -66,6 +66,9 @@ MESSAGE_TEMPLATE(16, 0, MessageType::Warning,
 MESSAGE_TEMPLATE(17, 0, MessageType::Warning,
                  "Служба [%s] уже запущена или была завершена ранее с критической ошибкой. Возможно некорректное выполнение приложения!")
 
+MESSAGE_TEMPLATE(18, 0, Debug,
+                 "Уничтожен поток [%s]: %d")
+
 
 MESSAGE_TEMPLATE(20, 0, MessageType::Message,
                  "Чтение настроек службы [%s] из файла [%s]")

@@ -27,6 +27,8 @@ ThreadMainQt::ThreadMainQt(MessageConsumer *parent,
 {
     if (_applicationFriendlyName.empty())
         _applicationFriendlyName = threadName;
+
+    ThreadsStaticticCollector::setThreadStatisticFileName(_threadStatisticFileName);
 }
 
 const std::string &ThreadMainQt::applicationFriendlyName() const
@@ -42,6 +44,8 @@ const std::string &ThreadMainQt::applicationBinaryName() const
 void ThreadMainQt::onThreadStarted()
 {
     writeLog(Message10, _applicationFriendlyName.c_str());
+
+    snapshotThreads(true);
 }
 
 void ThreadMainQt::onThreadFinishing()
@@ -52,6 +56,8 @@ void ThreadMainQt::onThreadFinishing()
 void ThreadMainQt::onThreadFinished()
 {
     writeLog(Message12, _applicationFriendlyName.c_str());
+
+    snapshotThreads(true);
 }
 
 void ThreadMainQt::onIdle()
@@ -72,75 +78,7 @@ void ThreadMainQt::snapshotThreads(bool rightNow)
     if (!listThreads)
         return;
 
-    if (!logThread())
-        return;
-
-    auto statisticList = listThreads->statistic();
-
-    std::string statisticString = "";
-
-    int memoryUsage = 0;
-#ifdef linux
-    rusage ru;
-    if (0 == getrusage(RUSAGE_SELF, &ru))
-    {
-        memoryUsage = ru.ru_maxrss;
-        statisticString = format("Memory usage: %d Kb\r\n", ru.ru_maxrss);
-    }
-#endif
-
-#ifdef WIN32
-    PROCESS_MEMORY_COUNTERS pmc;
-    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-        memoryUsage = pmc.WorkingSetSize / 1024;
-        statisticString = format("Memory usage: %1 Kb\r\n", memoryUsage);
-    }
-#endif
-
-    int i = 0;
-    for (auto iterator = statisticList.cbegin(); iterator != statisticList.cend(); iterator++)
-    {
-        ThreadStatisticStruct statistic = *iterator;
-        int64_t workingTotalMSecs = (statistic.AliveMsecsSinceEpoch - statistic.StartedMsecsSinceEpoch);
-        int64_t workingMSecs = workingTotalMSecs - statistic.WaitMSecsCount;
-
-        std::string alive = DateTimeUtils::msecsSinceEpochToStdString(statistic.AliveMsecsSinceEpoch,
-                                                                      true,
-                                                                      false);
-
-        statisticString += format("%d. (Id: %ld) %s %s (%lld/%lld) [%llu] Queue: %d",
-                                  ++i,
-                                  statistic.ThreadId,
-                                  statistic.ThreadName.c_str(),
-                                  alive.c_str(),
-                                  workingMSecs,
-                                  workingTotalMSecs,
-                                  statistic.AliveTickCount,
-                                  statistic.QueueCount) +
-                           ((statistic.Terminated) ? " Terminated" : "") + "\r\n";
-
-    }
-
-#ifdef linux
-    setThreadInfo(statisticString);
-#endif
-
-    statisticString += "{EOF}" + std::string(DateTimeUtils::msecsSinceEpochLocal() % 8, ' ');
-
-    ThreadBase *logThreadInstance = logThread();
-    if (logThreadInstance)
-    {
-        logThreadInstance->postMessage1<MessageWriteToFile>(_threadStatisticFileName,
-                                                            statisticString,
-                                                            MessageWriteToFile::WriteMode::Truncate);
-    }
-
-    if (rightNow || _nextBuildCommonStatisticTickCount <= tickCount)
-    {
-        writeLog(Message15, i, memoryUsage);
-
-        _nextBuildCommonStatisticTickCount = DateTimeUtils::getNextTickCount(TIMEOUT_BUILD_COMMON_STATISTIC_MILLISECONDS);
-    }
+    listThreads->sendSnapshot();
 }
 
 }

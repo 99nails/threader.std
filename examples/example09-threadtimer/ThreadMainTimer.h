@@ -4,7 +4,7 @@
 
 using namespace Threader::Threads;
 
-class ThreadMainTimer : public ThreadMainWithouSettings
+class ThreadMainTimer : public ThreadMainWithoutSettings
 {
 public:
     static constexpr char TIMER_NAME_LONG[] = "Timer.Long";

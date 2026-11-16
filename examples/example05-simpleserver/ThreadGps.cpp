@@ -7,7 +7,7 @@
 
 #include "StdStringUtils.h"
 
-#include <time.h>
+// #include <time.h>
 #include <ctime>
 #include <chrono>
 
@@ -17,9 +17,11 @@ using std::chrono::system_clock;
 
 
 ThreadGps::ThreadGps(const SettingsGps::Ptr &settings,
+                     const std::string &commandLineSerial,
                      MessageConsumer *parent)
     : ThreadHandler(parent,
-                    new HandlerSerialPort(nullptr, (settings) ? settings->port() : DEFAULT_GPS_PORT),
+                    new HandlerSerialPort(nullptr, (commandLineSerial.empty()) ? settings->port()
+                                                                               : commandLineSerial),
                     1000,
                     new PacketFactoryAsciiLines(),
                     "Thread.Gps")

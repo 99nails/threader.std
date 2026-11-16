@@ -46,8 +46,10 @@ bool PollerFileNotify::initialize()
                                          _path.c_str(),
                                          _mask);
 
-    if (_descriptorWatch == INVALID_DESCRIPTOR) {
+    if (_descriptorWatch == INVALID_DESCRIPTOR)
+    {
         close(_descriptorNotifier);
+        _descriptorNotifier = INVALID_DESCRIPTOR;
         return false;
     }
 
@@ -58,8 +60,17 @@ bool PollerFileNotify::initialize()
 
 void PollerFileNotify::finalize()
 {
-    inotify_rm_watch(_descriptorNotifier, _descriptorWatch);
-    close(_descriptorNotifier);
+    if (_descriptorWatch != INVALID_DESCRIPTOR)
+    {
+        inotify_rm_watch(_descriptorNotifier, _descriptorWatch);
+        _descriptorWatch = INVALID_DESCRIPTOR;
+    }
+
+    if (_descriptorNotifier != INVALID_DESCRIPTOR)
+    {
+        close(_descriptorNotifier);
+        _descriptorNotifier = INVALID_DESCRIPTOR;
+    }
 }
 
 bool PollerFileNotify::process(const pollfd &event)

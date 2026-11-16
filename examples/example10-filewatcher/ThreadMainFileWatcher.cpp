@@ -1,13 +1,12 @@
 #include "ThreadMainFileWatcher.h"
 
-#include "Logger.h"
 #include "ThreadFileWatcher.h"
 
 using namespace Threader::Utils;
 
 ThreadMainFileWatcher::ThreadMainFileWatcher(const std::string &applicationBinaryName,
                                  const std::string &applicationFriendlyName)
-    : ThreadMainWithouSettings(nullptr,
+    : ThreadMainWithoutSettings(nullptr,
                                applicationBinaryName,
                                applicationFriendlyName)
 {

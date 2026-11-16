@@ -19,7 +19,7 @@ MESSAGE_TEMPLATE(1004, 9, MessageType::Message,
 
 ThreadMainTimer::ThreadMainTimer(const std::string &applicationBinaryName,
                                  const std::string &applicationFriendlyName)
-    : ThreadMainWithouSettings(nullptr,
+    : ThreadMainWithoutSettings(nullptr,
                                applicationBinaryName,
                                applicationFriendlyName)
     , _timerLongSwitch(false)

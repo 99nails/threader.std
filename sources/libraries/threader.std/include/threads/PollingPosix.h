@@ -73,9 +73,6 @@ public:
 private:
     int _descriptor;
     short int _events;
-
-// signals:
-//     void signalOnPollEvent(const Threader::Threads::PollerBase *sender, const pollfd &event);
 };
 
 using  PollerList = std::list<PollerBase*>;
@@ -94,6 +91,11 @@ public:
     explicit Polling(const std::string &threadName = std::string());
 
     /**
+     * @brief ~Polling - Деструктор
+     */
+    virtual ~Polling();
+
+    /**
      * @brief pollersCount - Получение количества зарегистрированных голосующих
      * @return - Количество зарегистрированных голосующих
      */
@@ -105,7 +107,7 @@ public:
      * @return - Количество зарегистрированных голосующих
      */
     int registerPoller(PollerBase *poller);
-    
+
     /**
      * @brief unregisterPoller - Снятие регистрации голосующего
      * @param poller - Голосующий

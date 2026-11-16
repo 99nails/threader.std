@@ -24,14 +24,11 @@ protected:
                      const std::string &path,
                      const std::string &fileName) override;
 
-    PollerFileNotify *poller() const;
-
     const std::string &path() const;
 
     MaskType mask() const;
 
 private:
-    PollerFileNotify *_poller;
     std::string _path;
     MaskType _mask;
 };

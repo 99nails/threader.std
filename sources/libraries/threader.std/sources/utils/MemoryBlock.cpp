@@ -57,7 +57,22 @@ void MemoryBlock::setCapacity(size_t capacity)
         return;
     }
 
-    _data = realloc(_data, capacity);
+    void *newData;
+    if (!_data)
+    {
+        newData = calloc(1, capacity);
+    }
+    else
+    {
+        auto newData = realloc(_data, capacity);
+        if (newData == nullptr)
+        {
+            return;
+        }
+    }
+
+    _data = newData;
+
     if (capacity > _capacity)
     {
         auto from = (uint8_t*)_data + _capacity;
@@ -68,6 +83,7 @@ void MemoryBlock::setCapacity(size_t capacity)
         _size = capacity;
 
     _capacity = capacity;
+
 }
 
 size_t MemoryBlock::size() const

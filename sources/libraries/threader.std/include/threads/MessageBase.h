@@ -144,4 +144,3 @@ using MessageDouble = MessageValue<double>;
     explicit Message##NAME(const BASETYPE &value) \
     : MessageValueNamed<BASETYPE, NAMED_MESSAGE_NAME_##NAME>(value) {} \
 };
-

@@ -181,7 +181,6 @@ MemoryBlock::Ptr HandlerBase::readBytes()
         if (readCount)
         {
             result = std::make_shared<MemoryBlock>(data, readCount);
-            // result.push_back(data, readCount);
         }
         delete[] data;
     }

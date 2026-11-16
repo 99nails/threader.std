@@ -22,8 +22,6 @@ void ThreadQtEventLoop::startThread()
 
 void ThreadQtEventLoop::initializeThread()
 {
-    ThreadBase::initializeThread();
-
     _timerIdle = new QTimer();
     _timerIdle->moveToThread(this);
     _timerIdle->setInterval(static_cast<int>(timeout()));

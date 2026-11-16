@@ -4,7 +4,7 @@
 
 using namespace Threader::Threads;
 
-class ThreadMainUdpSender : public ThreadMainWithouSettings
+class ThreadMainUdpSender : public ThreadMainWithoutSettings
 {
 public:
     explicit ThreadMainUdpSender(const std::string &applicationBinaryName = std::string(),

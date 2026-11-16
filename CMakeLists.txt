@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
 set(VER_MAJ 1)
-set(VER_MIN 0)
-set(VER_PAT 0)
+set(VER_MIN 1)
+set(VER_PAT 1)
 set(VER_BLD 0)
 
 set(VERSION ${VER_MAJ}.${VER_MIN}.${VER_PAT})
@@ -21,7 +21,8 @@ set_target_properties(${TARGET} PROPERTIES
 set(OS_SUFFIX ${CMAKE_SYSTEM_NAME})
 string(TOLOWER ${OS_SUFFIX} OS_SUFFIX)
 
-option(QT_ENABLE "Using Qt" ON)
+option(QT_ENABLE "Build with Qt support" ON)
+option(SSL_ENABLE "Build with SSL support" ON)
 
 message("Target system name - [" ${OS_SUFFIX} "]")
 message("Version [" ${VERSION4} "]")
@@ -48,8 +49,12 @@ include_directories(${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/t
 
 add_subdirectory(sources/libraries/threader.std)
 
-if(QT_ENABLE)
+if (QT_ENABLE)
     add_subdirectory(sources/libraries/threader.qt)
+endif()
+
+if (SSL_ENABLE)
+    add_subdirectory(sources/libraries/threader.ssl)
 endif()
 
 add_subdirectory(examples)
@@ -61,14 +66,23 @@ add_custom_target(doc-files SOURCES
     TODO.md
     )
 
+add_custom_target(jenkins SOURCES
+    jenkins/dependencies.list
+    )
+
 add_custom_target(install-files SOURCES
     install/threader-qt.conf
     install/threader-std.conf
+    install/threader-ssl.conf
     install/threader.std/postinst
     install/threader.std/postrm
     install/threader.std/preinst
     install/threader.qt/postinst
     install/threader.qt/postrm
     install/threader.qt/preinst
+    install/threader.ssl/postinst
+    install/threader.ssl/postrm
+    install/threader.ssl/preinst
 #    bin/config/config.template.ini
     )
+

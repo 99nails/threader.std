@@ -44,7 +44,7 @@ set(THREADER_SOURCES
     include/threads/ThreadLogCleaner.h sources/threads/ThreadLogCleaner.cpp
     include/threads/ThreadMain.h sources/threads/ThreadMain.cpp
     include/threads/ThreadTimer.h sources/threads/ThreadTimer.cpp
-    include/utils/CommandLineParser.h
+    include/utils/CommandLineParser.h sources/utils/CommandLineParser.cpp
     include/utils/CrcUtils.h sources/utils/CrcUtils.cpp
     include/utils/DaemonApplication.h
     include/utils/DaemonApplicationInfo.h sources/utils/DaemonApplicationInfo.cpp

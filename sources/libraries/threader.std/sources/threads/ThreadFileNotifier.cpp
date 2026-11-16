@@ -10,7 +10,6 @@ ThreadFileNotifier::ThreadFileNotifier(MessageConsumer *parent,
                                        const std::string &path,
                                        const uint32_t mask)
     : ThreadBase(parent, "Thread.FileNotifier")
-    , _poller(nullptr)
     , _path(FileUtils::absolutePath(path))
     , _mask(mask)
 {
@@ -20,9 +19,9 @@ void ThreadFileNotifier::initializeThread()
 {
     ThreadBase::initializeThread();
 
-    _poller = new PollerFileNotify(this, _path, _mask);
-    _poller->initialize();
-    polling()->registerPoller(_poller);
+    auto poller = new PollerFileNotify(this, _path, _mask);
+    poller->initialize();
+    polling()->registerPoller(poller);
 }
 
 void ThreadFileNotifier::processFile(const std::string &action,
@@ -35,11 +34,6 @@ void ThreadFileNotifier::processFile(const std::string &action,
     (void)mask;
     (void)path;
     (void)fileName;
-}
-
-PollerFileNotify *ThreadFileNotifier::poller() const
-{
-    return _poller;
 }
 
 const std::string &ThreadFileNotifier::path() const

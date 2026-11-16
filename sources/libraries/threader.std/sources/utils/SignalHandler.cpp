@@ -11,8 +11,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-#include <iostream>
-
 #include "DateTimeUtils.h"
 #include "FileUtils.h"
 #include "StdStringUtils.h"
@@ -159,7 +157,8 @@ void handleDeathSignal(int signum)
                     content += demangleFunctionName(strings[j]) + "\r\n";
                 free(strings);
             }
-            write(file, content.c_str(), content.length());
+            size_t count = write(file, content.c_str(), content.length());
+            (void)count;
 
             close(file);
         }

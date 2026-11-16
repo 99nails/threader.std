@@ -10,6 +10,7 @@ class ThreadGpsEmulator : public ThreadHandler
 {
 public:
     explicit ThreadGpsEmulator(SettingsGpsEmulator *settings,
+                               const std::string &commandLineSerial,
                                MessageConsumer *parent);
 
 protected:
@@ -39,8 +40,9 @@ protected:
     void processMessage(const MessageBase::Ptr &message) override;
 
 private:
-    SettingsGpsEmulator *_settings;
+    void sendGpsData();
 
 private:
-    void sendGpsData();
+    SettingsGpsEmulator *_settings;
+
 };

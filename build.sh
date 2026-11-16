@@ -45,5 +45,7 @@ cpack -G DEB || terminate
 echo "Installing threader.........................................................................."
 sudo cmake --install . || terminate
 
+sudo ldconfig
+
 terminate
 

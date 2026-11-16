@@ -1076,7 +1076,7 @@ std::string SystemDUtils::find_unit_path(sd_bus *bus, const std::string &name)
         return "";
     }
 
-    while ((r = sd_bus_message_read(reply, "(ssssso)", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)) > 0)
+    while (sd_bus_message_read(reply, "(ssssso)", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) > 0)
     {
         // Нам нужен только последний элемент — object_path
         const char *path = nullptr;
@@ -1184,42 +1184,81 @@ static UnitInfo find_unit(sd_bus *bus, const std::string &name)
 bool SystemDUtils::getServiceState(const std::string &unit,
                                    SystemDServiceState &state)
 {
-    state = {};
-
     sd_bus *bus = nullptr;
     bool result = sd_bus_open_system(&bus) >= 0;
-    std::string path;
 
+    if (result)
+    {
+        std::string path;
+        result = getUnitPath(bus, state.unit, state.path);
+
+        if (result)
+        {
+            result = getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "ActiveState", state.activeState);
+            result &= getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "SubState", state.subState);
+            result &= getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "Description", state.description);
+            result &= getPropertyString(bus, path.c_str(), INTERFACE_SERVICE, "StatusText", state.statusText);
+            result &= getPropertyUInt32(bus, path.c_str(), INTERFACE_SERVICE, "MainPID", state.mainPID);
+        }
+    }
+    sd_bus_unref(bus);
+
+    return result;
+}
+
+bool SystemDUtils::controlUnit(const std::string &unit, UnitControlMethod method)
+{
+    // Подключаемся к системной шине D-Bus
+    sd_bus *bus = nullptr;
+    bool result = sd_bus_open_system(&bus) >= 0;
     if (!result)
     {
         sd_bus_unref(bus);
         return result;
     }
 
-//    auto info = find_unit(bus, unit);
+    // Преобразуем enum -> std::string
+    std::string strMethod;
+    if (method == UnitControlMethod::Start)
+        strMethod = "StartUnit";
+    else if (method == UnitControlMethod::Stop)
+        strMethod = "StopUnit";
+    else if (method == UnitControlMethod::Restart)
+        strMethod = "RestartUnit";
+    else
+        return false;
 
-//    if (path.empty()) {
-//        sd_bus_unref(bus);
-//        return 1;
-//    }
+    // Вызываем метод остановки сервиса
+    result = sd_bus_call_method(bus,
+                                "org.freedesktop.systemd1",         // сервис
+                                "/org/freedesktop/systemd1",        // путь
+                                "org.freedesktop.systemd1.Manager", // интерфейс
+                                strMethod.c_str(),                  // метод
+                                nullptr,                            // объект для ошибок
+                                nullptr,                            // ответ
+                                "ss",                               // типы аргументов (string, string)
+                                unit.c_str(),                       // имя службы
+                                "replace"                           // режим замены
+                                ) >= 0;
 
-    result = getUnitPath(bus, unit, path);
-    if (!result)
-        goto finalization;
-
-    state.unit = unit;
-    state.path = path;
-
-    result = getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "ActiveState", state.activeState);
-    result &= getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "SubState", state.subState);
-    result &= getPropertyString(bus, path.c_str(), INTERFACE_UNIT, "Description", state.description);
-    result &= getPropertyString(bus, path.c_str(), INTERFACE_SERVICE, "StatusText", state.statusText);
-    result &= getPropertyUInt32(bus, path.c_str(), INTERFACE_SERVICE, "MainPID", state.mainPID);
-
-finalization:
+    // Очистка и завершение
     sd_bus_unref(bus);
-
     return result;
+}
+
+bool SystemDUtils::startUnit(const std::string &unit)
+{
+    return controlUnit(unit, UnitControlMethod::Start);
+}
+
+bool SystemDUtils::stopUnit(const std::string &unit)
+{
+    return controlUnit(unit, UnitControlMethod::Stop);
+}
+
+bool SystemDUtils::restartUnit(const std::string &unit)
+{
+    return controlUnit(unit, UnitControlMethod::Restart);
 }
 
 bool SystemDUtils::controlUnit(const std::string &unit, UnitControlMethod method)

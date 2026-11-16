@@ -32,6 +32,8 @@ using ListThreadBase = std::list<ThreadBase *>;
 
 using VectorThreadBase = std::vector<ThreadBase *>;
 
+using ThreadBasePtr = ThreadBase*;
+
 /**
  * @brief ThreadBase - Базовый класс потока системы
  * Реализует функционал:
@@ -57,7 +59,7 @@ public:
     /**
      * @brief ~ThreadBase - Деструктор потока
      */
-    ~ThreadBase() override;
+    virtual ~ThreadBase();
 
     /***********************************************************************************************
      * ПУБЛИЧНЫЕ СВОЙСТВА
@@ -261,7 +263,7 @@ protected:
     /**
      * @brief accumulateStatistic - сбор статистики выполнения потоков
      */
-    virtual bool accumulateStatistic();
+    virtual bool accumulateStatistic(const bool rightNow = false);
 
     /**
      * @brief threadName - Получение имени потока
@@ -283,14 +285,13 @@ protected:
      * @brief childthreadsCount - Получение количества подчиненных потоков
      * @return - Количество подчиненных потоков
      */
-    int childthreadsCount();
+    int childThreadCount();
 
     /**
-     * @brief childThread - Получение подчиненного потока по индексу
-     * @param index - Номер подчиненного потока
-     * @return - Запрашиваемый поток
+     * @brief childThread - Получение списка подчиненных потоков
+     * @return - Список подчиненных потоков
      */
-    ThreadBase *childThread(int index);
+    const ListThreadBase &childThreadList();
 
     /**
      * @brief registerAndStartChildThread - Регистрация и запуск подчиненного потока
@@ -479,12 +480,12 @@ private:
     /**
      * @brief _pollerThread - Голосующий на входяший пайп сообщений
      */
-    PollerThread _pollerThread;
+    PollerThread *_pollerThread;
 
     /**
      * @brief _childThreadsList - Список подчиненных потоков
      */
-    VectorThreadBase _childThreadsList;
+    ListThreadBase _childThreadsList;
 
     /**
      * @brief _waitCount - Счетчик времени ожидания событий. Характеризует загруженность потока

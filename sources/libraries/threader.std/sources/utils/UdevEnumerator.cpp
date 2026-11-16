@@ -137,6 +137,9 @@ void UdevEnumerator::enumerate(UdevEnumerationCallback &handler)
                                       propertyVector);
             if (!handler(deviceInfo))
                 break;
+
+            if (device)
+                udev_device_unref(device);
         }
         // освобождение нумератора
         udev_enumerate_unref(enumerator);
@@ -198,6 +201,9 @@ void UdevEnumerator::collectSubsystemNames()
                     }
                 }
             }
+
+            if (device)
+                udev_device_unref(device);
         }
 
         // освобождение нумератора
