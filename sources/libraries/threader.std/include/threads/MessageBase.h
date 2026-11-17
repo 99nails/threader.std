@@ -2,7 +2,6 @@
 
 #include "ThreadsCommon.h"
 
-#include <ctime>
 #include <list>
 #include <memory>
 #include <stdint.h>
