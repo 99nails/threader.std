@@ -57,22 +57,7 @@ void MemoryBlock::setCapacity(size_t capacity)
         return;
     }
 
-    void *newData;
-    if (!_data)
-    {
-        newData = calloc(1, capacity);
-    }
-    else
-    {
-        auto newData = realloc(_data, capacity);
-        if (newData == nullptr)
-        {
-            return;
-        }
-    }
-
-    _data = newData;
-
+    _data = realloc(_data, capacity);
     if (capacity > _capacity)
     {
         auto from = (uint8_t*)_data + _capacity;

@@ -21,7 +21,6 @@ ThreadMainWithoutSettings::ThreadMainWithoutSettings(MessageConsumer *parent,
     , _applicationBinaryName(applicationBinaryName)
     , _applicationFriendlyName(applicationFriendlyName)
     , _nextBuildStatisticTickCount(0)
-    , _nextBuildCommonStatisticTickCount(0)
     , _threadStatisticFileName(applicationBinaryName + ".threads")
 {
     if (_applicationFriendlyName.empty())

@@ -20,9 +20,7 @@ ThreadMainQt::ThreadMainQt(MessageConsumer *parent,
                         (threadName.empty()) ? "Thread.Main" : threadName)
     , _applicationBinaryName(applicationBinaryName)
     , _applicationFriendlyName(applicationFriendlyName)
-    , _nextBuildStatisticTickCount(
-          DateTimeUtils::getNextTickCount(TIMEOUT_BUILD_STATISTIC_MILLISECONDS))
-    , _nextBuildCommonStatisticTickCount(0)
+    , _nextBuildStatisticTickCount(0)
     , _threadStatisticFileName(applicationBinaryName + ".Threads")
 {
     if (_applicationFriendlyName.empty())

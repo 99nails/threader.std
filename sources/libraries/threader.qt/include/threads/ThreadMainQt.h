@@ -39,7 +39,6 @@ private:
     std::string _applicationBinaryName;
     std::string _applicationFriendlyName;
     uint64_t _nextBuildStatisticTickCount;
-    uint64_t _nextBuildCommonStatisticTickCount;
     std::string _threadStatisticFileName;
 };
 
