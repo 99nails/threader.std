@@ -321,14 +321,6 @@ static std::string extractStringFromVariant(DBusMessage *reply, DBusError *error
         return 0;
         // break;
     }
-
-    //    if (DBUS_TYPE_STRING != type) {
-    //        dbus_set_error_const(error, "variant_should_be_double", "This variant reply message must have double content");
-    //        return 0;
-    //    }
-
-    //    dbus_message_iter_get_basic(&sub, &str);
-    //    return std::string(str);
 }
 
 bool DBusMethodWrapper::extractStringFromVariantResult(std::string &result)
@@ -346,10 +338,10 @@ bool DBusMethodWrapper::extractStringFromVariantResult(std::string &result)
 
 DBusMethodStartUnit::DBusMethodStartUnit(DBusConnectionWrapper *connection)
     :DBusMethodWrapper(connection,
-                       BUS_NAME_SYSTEMD,
-                       OBJECT_PATH_SYSTEMD,
-                       INTERFACE_NAME_SYSTEMD_MANAGER,
-                       FUNCTION_NAME_START_UNIT)
+                        BUS_NAME_SYSTEMD,
+                        OBJECT_PATH_SYSTEMD,
+                        INTERFACE_NAME_SYSTEMD_MANAGER,
+                        FUNCTION_NAME_START_UNIT)
 {
 }
 
@@ -384,10 +376,10 @@ char *DBusMethodStartUnit::result() const
 
 DBusMethodStopUnit::DBusMethodStopUnit(DBusConnectionWrapper *connection)
     :DBusMethodWrapper(connection,
-                       BUS_NAME_SYSTEMD,
-                       OBJECT_PATH_SYSTEMD,
-                       INTERFACE_NAME_SYSTEMD_MANAGER,
-                       FUNCTION_NAME_STOP_UNIT)
+                        BUS_NAME_SYSTEMD,
+                        OBJECT_PATH_SYSTEMD,
+                        INTERFACE_NAME_SYSTEMD_MANAGER,
+                        FUNCTION_NAME_STOP_UNIT)
 {
 }
 
@@ -470,12 +462,12 @@ DBusMethodGetDeviceByIpIface::DBusMethodGetDeviceByIpIface(DBusConnectionWrapper
 bool DBusMethodGetDeviceByIpIface::execute(const char *iface)
 {
     if(appendArgs(DBUS_TYPE_STRING, &iface,
-                  DBUS_TYPE_INVALID))
+                   DBUS_TYPE_INVALID))
     {
         auto res = DBusMethodWrapper::execute();
         if(res)
             if(getArgs(DBUS_TYPE_OBJECT_PATH, &_result,
-                       DBUS_TYPE_INVALID))
+                        DBUS_TYPE_INVALID))
                 return res;
     }
 
@@ -548,14 +540,14 @@ DBusMethodActivateConnection::DBusMethodActivateConnection(DBusConnectionWrapper
 bool DBusMethodActivateConnection::execute(const char *networkConnection, const char *device, const char *specific)
 {
     if(appendArgs(DBUS_TYPE_OBJECT_PATH, &networkConnection,
-                  DBUS_TYPE_OBJECT_PATH, &device,
-                  DBUS_TYPE_OBJECT_PATH, &specific,
-                  DBUS_TYPE_INVALID))
+                   DBUS_TYPE_OBJECT_PATH, &device,
+                   DBUS_TYPE_OBJECT_PATH, &specific,
+                   DBUS_TYPE_INVALID))
     {
         auto res = DBusMethodWrapper::execute();
         if(res)
             if(getArgs(DBUS_TYPE_OBJECT_PATH, &_result,
-                       DBUS_TYPE_INVALID))
+                        DBUS_TYPE_INVALID))
                 return res;
     }
 
@@ -583,7 +575,7 @@ DBusMethodDeactivateConnection::DBusMethodDeactivateConnection(DBusConnectionWra
 bool DBusMethodDeactivateConnection::execute(const char *activeConnection)
 {
     if(appendArgs(DBUS_TYPE_STRING, &activeConnection,
-                  DBUS_TYPE_INVALID))
+                   DBUS_TYPE_INVALID))
     {
         auto result = DBusMethodWrapper::execute();
         if(result)
@@ -610,7 +602,7 @@ bool DBusMethodReloadNetworkManager::execute(const uint32_t flags)
     bool result(false);
 
     if(appendArgs(DBUS_TYPE_UINT32, &flags,
-                  DBUS_TYPE_INVALID))
+                   DBUS_TYPE_INVALID))
         result = DBusMethodWrapper::execute();
 
     return result;
@@ -1050,16 +1042,16 @@ std::string SystemDUtils::find_unit_path(sd_bus *bus, const std::string &name)
     // ListUnits принимает фильтр (prefix) и возвращает массив структур:
     // [ (name, description, load_state, active_state, sub_state, object_path) ]
     int r = sd_bus_call_method(
-                bus,
-                "org.freedesktop.systemd1",
-                "/org/freedesktop/systemd1",
-                "org.freedesktop.systemd1.Manager",
-                "ListUnits",
-                &error,
-                &reply,
-                "s",
-                name.c_str()  // префикс: ищем по имени (лучше "sshd.service", а не просто "sshd")
-                );
+        bus,
+        "org.freedesktop.systemd1",
+        "/org/freedesktop/systemd1",
+        "org.freedesktop.systemd1.Manager",
+        "ListUnits",
+        &error,
+        &reply,
+        "s",
+        name.c_str()  // префикс: ищем по имени (лучше "sshd.service", а не просто "sshd")
+        );
 
     if (r < 0) {
         std::cerr << "ListUnits failed: " << (error.message ? error.message : strerror(-r)) << "\n";
@@ -1123,7 +1115,7 @@ static UnitInfo find_unit(sd_bus *bus, const std::string &name)
         &error,
         &reply,
         ""          // ← пустая сигнатура, никаких аргументов
-    );
+        );
 
     if (r < 0) {
         std::cerr << "ListUnits: " << (error.message ? error.message : strerror(-r)) << "\n";
@@ -1155,8 +1147,8 @@ static UnitInfo find_unit(sd_bus *bus, const std::string &name)
         const char *obj_path   = nullptr;
 
         r = sd_bus_message_read(reply, "ssssssouso",
-            &unit_name, &desc, &load, &active, &sub,
-            &following, &obj_path, nullptr, nullptr, nullptr);
+                                &unit_name, &desc, &load, &active, &sub,
+                                &following, &obj_path, nullptr, nullptr, nullptr);
 
         if (r < 0)
             break;
@@ -1208,6 +1200,10 @@ bool SystemDUtils::getServiceState(const std::string &unit,
 
 bool SystemDUtils::controlUnit(const std::string &unit, UnitControlMethod method)
 {
+    static const std::string methodName[UnitControlMethod::Maximum] = {
+        "StartUnit", "StopUnit", "RestartUnit"
+    };
+
     // Подключаемся к системной шине D-Bus
     sd_bus *bus = nullptr;
     bool result = sd_bus_open_system(&bus) >= 0;
@@ -1217,23 +1213,12 @@ bool SystemDUtils::controlUnit(const std::string &unit, UnitControlMethod method
         return result;
     }
 
-    // Преобразуем enum -> std::string
-    std::string strMethod;
-    if (method == UnitControlMethod::Start)
-        strMethod = "StartUnit";
-    else if (method == UnitControlMethod::Stop)
-        strMethod = "StopUnit";
-    else if (method == UnitControlMethod::Restart)
-        strMethod = "RestartUnit";
-    else
-        return false;
-
     // Вызываем метод остановки сервиса
     result = sd_bus_call_method(bus,
                                 "org.freedesktop.systemd1",         // сервис
                                 "/org/freedesktop/systemd1",        // путь
                                 "org.freedesktop.systemd1.Manager", // интерфейс
-                                strMethod.c_str(),                  // метод
+                                methodName[method].c_str(),         // метод
                                 nullptr,                            // объект для ошибок
                                 nullptr,                            // ответ
                                 "ss",                               // типы аргументов (string, string)
@@ -1261,58 +1246,4 @@ bool SystemDUtils::restartUnit(const std::string &unit)
     return controlUnit(unit, UnitControlMethod::Restart);
 }
 
-bool SystemDUtils::controlUnit(const std::string &unit, UnitControlMethod method)
-{
-    // Подключаемся к системной шине D-Bus
-    sd_bus *bus = nullptr;
-    bool result = sd_bus_open_system(&bus) >= 0;
-    if (!result)
-    {
-        sd_bus_unref(bus);
-        return result;
-    }
-
-    // Преобразуем enum -> std::string
-    std::string strMethod;
-    if (method == UnitControlMethod::Start)
-        strMethod = "StartUnit";
-    else if (method == UnitControlMethod::Stop)
-        strMethod = "StopUnit";
-    else if (method == UnitControlMethod::Restart)
-        strMethod = "RestartUnit";
-    else
-        return false;
-
-    // Вызываем метод остановки сервиса
-    result = sd_bus_call_method(bus,
-                                "org.freedesktop.systemd1",         // сервис
-                                "/org/freedesktop/systemd1",        // путь
-                                "org.freedesktop.systemd1.Manager", // интерфейс
-                                strMethod.c_str(),                  // метод
-                                nullptr,                            // объект для ошибок
-                                nullptr,                            // ответ
-                                "ss",                               // типы аргументов (string, string)
-                                unit.c_str(),                       // имя службы
-                                "replace"                           // режим замены
-                                ) >= 0;
-
-    // Очистка и завершение
-    sd_bus_unref(bus);
-    return result;
-}
-
-bool SystemDUtils::startUnit(const std::string &unit)
-{
-    return controlUnit(unit, UnitControlMethod::Start);
-}
-
-bool SystemDUtils::stopUnit(const std::string &unit)
-{
-    return controlUnit(unit, UnitControlMethod::Stop);
-}
-
-bool SystemDUtils::restartUnit(const std::string &unit)
-{
-    return controlUnit(unit, UnitControlMethod::Restart);
-}
 }

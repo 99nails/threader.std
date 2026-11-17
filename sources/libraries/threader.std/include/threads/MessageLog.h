@@ -6,9 +6,8 @@
 
 #include <cstring>
 
-namespace Threader {
-
-namespace Threads {
+namespace Threader::Threads
+{
 
 using namespace Threader::Utils;
 
@@ -53,5 +52,4 @@ protected:
 
 using VectorMessagesLog = std::vector<MessageLog::Ptr>;
 
-} // namespace Threads
-} // namespace Threader
+}

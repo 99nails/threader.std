@@ -6,9 +6,8 @@
 #include "DateTimeUtils.h"
 #include "StdStringUtils.h"
 
-namespace Threader {
-
-namespace Threads {
+namespace Threader::Threads
+{
 
 using namespace Threader::Utils;
 
@@ -141,4 +140,4 @@ std::string MessageLog::toString(int messageFlags)
     return result;
 }
 
-}}
+}

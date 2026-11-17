@@ -1,10 +1,7 @@
 #include "MessageBinary.h"
 
-#include <memory>
-
-namespace Threader {
-
-namespace Threads {
+namespace Threader::Threads
+{
 
 const std::string MessageBinary::MESSAGE_NAME = "Message.Binary";
 
@@ -35,5 +32,4 @@ void MessageBinary::setData(MemoryBlock::Ptr data)
     _data = data;
 }
 
-} // namespace Threads
-} // namespace Threader
+}

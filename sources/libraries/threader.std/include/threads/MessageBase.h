@@ -8,9 +8,8 @@
 #include <string>
 #include <vector>
 
-namespace Threader {
-
-namespace Threads {
+namespace Threader::Threads
+{
 
 class MessageBase
 {
@@ -19,7 +18,7 @@ public:
 
 public:
     explicit MessageBase(const std::string &name);
-    explicit MessageBase(const char name[] = "");
+    explicit MessageBase(const char *name = "");
     virtual ~MessageBase() = default;
 
     virtual std::string toString();
@@ -132,8 +131,7 @@ using MessageFloat = MessageValue<float>;
 
 using MessageDouble = MessageValue<double>;
 
-} // namespace Threads
-} // namespace Threader
+}
 
 #define DECLARE_MESSAGE_NAMED(NAME, NAME_STRING, BASETYPE) \
     inline const char NAMED_MESSAGE_NAME_##NAME[] = NAME_STRING; \

@@ -3,9 +3,8 @@
 #include "MessageBase.h"
 #include "MemoryBlock.h"
 
-namespace Threader {
-
-namespace Threads {
+namespace Threader::Threads
+{
 
 using namespace Threader::Utils;
 
@@ -31,4 +30,4 @@ private:
     MemoryBlock::Ptr _data;
 };
 
-}}
+}

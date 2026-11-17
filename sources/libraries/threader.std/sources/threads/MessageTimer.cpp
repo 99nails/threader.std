@@ -1,8 +1,7 @@
 #include "MessageTimer.h"
 
-namespace Threader {
-
-namespace Threads {
+namespace Threader::Threads
+{
 
 MessageTimer::MessageTimer(const std::string &name, const uint64_t &shotCount)
     : MessageBase(name), _shotCount(shotCount)
@@ -16,5 +15,4 @@ MessageTimerSetTimeout::MessageTimerSetTimeout(const std::string &name, const in
 {
 }
 
-} // namespace Threads
-} // namespace Threader
+}

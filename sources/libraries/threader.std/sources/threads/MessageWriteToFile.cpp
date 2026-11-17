@@ -1,6 +1,7 @@
 #include "MessageWriteToFile.h"
 
-namespace Threader::Threads {
+namespace Threader::Threads
+{
 
 const std::string MessageWriteToFile::MESSAGE_NAME = "Message.Write.To.File";
 
