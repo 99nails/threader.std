@@ -1,5 +1,7 @@
 #include "IniFile.h"
 
+#include "FileUtils.h"
+
 #include <regex>
 #include <iostream>
 #include <fstream>
@@ -10,6 +12,7 @@ IniLineBase::IniLineBase(const CommentList &commentList,
     : _content(std::string())
     , _lineType(lineType)
     , _commentList(commentList)
+    , _section(nullptr)
 {
 }
 
@@ -51,7 +54,19 @@ CommentList IniLineBase::commentList() const
     return _commentList;
 }
 
-/**************************************************************************************************/
+IniLineSection *IniLineBase::section() const
+{
+    return _section;
+}
+
+void IniLineBase::setSection(IniLineSection *section)
+{
+    _section = section;
+}
+
+/***************************************************************************************************
+* IniLineComment
+***************************************************************************************************/
 
 IniLineComment::IniLineComment()
     : IniLineBase({},
@@ -78,9 +93,12 @@ std::string IniLineComment::toString()
     return ";" + comment();
 }
 
-/**************************************************************************************************/
+/***************************************************************************************************
+* IniLineParameter
+***************************************************************************************************/
 
-IniLineParameter::IniLineParameter(const CommentList &commentList)
+IniLineParameter::IniLineParameter(const CommentList &commentList,
+                                   const IniLineSectionPtr &section)
     : IniLineBase(commentList,
                   LineType::Parameter)
     , _name(std::string())
@@ -119,12 +137,27 @@ std::string IniLineParameter::toString()
     return _name + "=" +_value;
 }
 
-/**************************************************************************************************/
+void IniLineParameter::setSection(IniLineSection *section)
+{
+    for (const auto &comment : commentList())
+        comment->setSection(section);
+    IniLineBase::setSection(section);
+}
+
+/***************************************************************************************************
+* IniLineSection
+***************************************************************************************************/
 
 IniLineSection::IniLineSection(const CommentList &commentList)
     : IniLineBase(commentList,
                   LineType::Section)
+    , _name(std::string())
+    , _parameterHash({})
+    , _parameterList({})
 {
+    for (const auto &comment : commentList)
+        comment->setSection(this);
+    setSection(this);
 }
 
 void IniLineSection::clear()
@@ -155,13 +188,14 @@ std::string IniLineSection::toString()
     return "[" + _name + "]";
 }
 
-void IniLineSection::append(IniLineParameter *parameter)
+void IniLineSection::append(IniLineParameter::Ptr parameter)
 {
+    parameter->setSection(this);
     _parameterHash[parameter->name()] = parameter;
     _parameterList.push_back(parameter);
 }
 
-IniLineParameter *IniLineSection::parameterByName(const std::string &parameterName)
+IniLineParameter::Ptr IniLineSection::parameterByName(const std::string &parameterName)
 {
     if (_parameterHash.count(parameterName))
         return _parameterHash[parameterName];
@@ -174,7 +208,7 @@ int IniLineSection::parameterCount() const
     return _parameterList.size();
 }
 
-IniLineParameter *IniLineSection::parameterByIndex(const int index) const
+IniLineParameter::Ptr IniLineSection::parameterByIndex(const int index) const
 {
     if (index < 0 || index >= _parameterList.size())
         return nullptr;
@@ -184,7 +218,19 @@ IniLineParameter *IniLineSection::parameterByIndex(const int index) const
     return *iterator;
 }
 
-/**************************************************************************************************/
+void IniLineSection::parameterDelete(const std::string &parameterName)
+{
+    auto parameter = parameterByName(parameterName);
+    if (!parameter)
+        return;
+
+    _parameterHash.erase(parameterName);
+    _parameterList.remove(parameter);
+}
+
+/***************************************************************************************************
+* IniFile
+***************************************************************************************************/
 
 IniFile::IniFile()
     : _fileName{std::string()}
@@ -234,12 +280,10 @@ bool IniFile::fileSave(const std::string &fileName)
     if (!fileName.empty())
         _fileName = fileName;
 
-    std::ofstream file(fileName);
+    std::ofstream file(_fileName);
 
     if (!file.is_open())
-    {
         return false;
-    }
 
     for (const auto &line : _content)
         file << line << std::endl;
@@ -250,18 +294,8 @@ bool IniFile::fileSave(const std::string &fileName)
 
 void IniFile::clear()
 {
-    for (auto &line : _lines)
-    {
-        if (line)
-        {
-            delete line;
-            line = nullptr;
-        }
-    }
-
     _sectionHash.clear();
     _sectionList.clear();
-
     _lines.clear();
 }
 
@@ -370,13 +404,80 @@ StdStringList IniFile::comments(const std::string &sectionName,
     return result;
 }
 
-void IniFile::setValue(const std::string &sectionName,
+bool IniFile::setValue(const std::string &sectionName,
                        const std::string &parameterName,
                        const std::string &value)
 {
-    if (!_sectionHash.count(sectionName))
-        return;
+    if (parameterName.empty())
+        return false;
 
+    auto section = _sectionHash[sectionName];
+    if (!section)
+    {
+        section = std::make_shared<IniLineSection>(CommentList());
+        section->parse("[" + sectionName + "]");
+        _sectionHash[sectionName] = section;
+        _sectionList.push_back(section);
+        _lines.push_back(section);
+    }
+
+    auto parameter = section->parameterByName(parameterName);
+    if (!parameter)
+    {
+        parameter = std::make_shared<IniLineParameter>(CommentList(), section);
+        parameter->parse(parameterName + "=");
+        section->append(parameter);
+
+        bool sectionFound = false;
+        auto position = _lines.end();
+        std::string currentSectionName;
+
+        for (auto it = _lines.begin(); it != _lines.end(); it++)
+        {
+            auto line = *it;
+            currentSectionName = (line->section()) ? line->section()->name() : std::string();
+
+            if (!sectionFound)
+            {
+                if (currentSectionName == section->name())
+                    sectionFound = true;
+            }
+            else
+            {
+                if (currentSectionName != section->name())
+                {
+                    position = it;
+                    break;
+                }
+            }
+        }
+
+        if (position == _lines.end())
+        {
+            if (sectionFound)
+                _lines.push_back(parameter);
+            else
+                return false;
+        }
+        else
+            _lines.insert(position, parameter);
+    }
+
+    parameter->setValue(value);
+
+    return true;
+}
+
+const IniLineVector IniFile::lines()
+{
+    IniLineVector result(_lines.size());
+    std::copy(_lines.begin(), _lines.end(), result.begin());
+    return result;
+}
+
+void IniFile::sectionParameterDelete(const std::string &sectionName,
+                                     const std::string &parameterName)
+{
     auto section = _sectionHash[sectionName];
     if (!section)
         return;
@@ -385,8 +486,37 @@ void IniFile::setValue(const std::string &sectionName,
     if (!parameter)
         return;
 
-    parameter->setValue(value);
+    for (const auto &comment : parameter->commentList())
+        _lines.remove(comment);
 
+    _lines.remove(parameter);
+    section->parameterDelete(parameterName);
+}
+
+void IniFile::sectionDelete(const std::string &sectionName)
+{
+    if (sectionName.empty())
+        return;
+
+    auto section = _sectionHash[sectionName];
+    if (!section)
+        return;
+
+    auto it = _lines.begin();
+    while (it != _lines.end())
+    {
+        auto line = *it;
+        const auto currentSectionName = (line->section()) ? line->section()->name() : "";
+        if (currentSectionName == sectionName)
+        {
+            it = _lines.erase(it);
+        }
+        else
+            it++;
+
+    }
+    _sectionHash.erase(sectionName);
+    _sectionList.remove(section);
 }
 
 void IniFile::applyChangesToContent()
@@ -407,27 +537,27 @@ void IniFile::parseContent()
     static const std::regex regExpSection("^\\[[A-z\\d](\\w|\\.|\\d)*\\]\\s*$");
     static const std::regex regExpParameter("^[A-z\\d](\\w|\\.|\\d)*\\=.*$");
 
-    IniLineSection *currentSection = nullptr;
+    IniLineSection::Ptr currentSection = nullptr;
 
-    std::list<IniLineComment*> commentList;
+    std::list<IniLineComment::Ptr> commentList;
 
     // for (int i = 0; i < _content.size(); i++)
     for (const auto &contentLine : _content)
     {
-        IniLineBase *line = nullptr;
+        IniLineBase::Ptr line = nullptr;
 
-        std::cmatch m;
-        if (std::regex_match(contentLine.c_str(), m, regExpComment))
+        std::cmatch match;
+        if (std::regex_match(contentLine.c_str(), match, regExpComment))
         {
-            auto comment = new IniLineComment();
+            auto comment = std::make_shared<IniLineComment>();
             line = comment;
             line->parse(contentLine);
 
             commentList.push_back(comment);
         }
-        else if (std::regex_match(contentLine.c_str(), m, regExpSection))
+        else if (std::regex_match(contentLine.c_str(), match, regExpSection))
         {
-            currentSection = new IniLineSection(commentList);
+            currentSection = std::make_shared<IniLineSection>(commentList);
 
             line = currentSection;
             line->parse(contentLine);
@@ -435,9 +565,17 @@ void IniFile::parseContent()
             _sectionHash[currentSection->name()] = currentSection;
             _sectionList.push_back(currentSection);
         }
-        else if (std::regex_match(contentLine.c_str(), m, regExpParameter))
+        else if (std::regex_match(contentLine.c_str(), match, regExpParameter))
         {
-            auto currenParameter = new IniLineParameter(commentList);
+            if (!currentSection)
+            {
+                currentSection = std::make_shared<IniLineSection>(std::list<IniLineComment::Ptr>());
+                _sectionHash[currentSection->name()] = currentSection;
+                _sectionList.push_back(currentSection);
+            }
+
+            auto currenParameter = std::make_shared<IniLineParameter>(commentList,
+                                                                      currentSection);
 
             line = currenParameter;
             line->parse(contentLine);
@@ -447,7 +585,7 @@ void IniFile::parseContent()
         }
         else
         {
-            line = new IniLineBase({});
+            line = std::make_shared<IniLineBase>(std::list<IniLineComment::Ptr>());
             line->parse(contentLine);
         }
 

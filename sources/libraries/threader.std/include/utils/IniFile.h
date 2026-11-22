@@ -3,6 +3,7 @@
 #include "StdStringUtils.h"
 
 #include <map>
+#include <memory>
 #include <list>
 #include <string>
 
@@ -16,11 +17,18 @@ enum LineType {
 };
 
 class IniLineComment;
+using IniLineCommentPtr = std::shared_ptr<IniLineComment>;
+using CommentList = std::list<IniLineCommentPtr>;
 
-using CommentList = std::list<IniLineComment*>;
+class IniLineSection;
+using IniLineSectionPtr = std::shared_ptr<IniLineSection>;
+
 
 class IniLineBase
 {
+public:
+    using Ptr = std::shared_ptr<IniLineBase>;
+
 public:
     explicit IniLineBase(const CommentList &commentList,
                          const LineType lineType = LineType::UnknownLineType);
@@ -40,17 +48,26 @@ public:
 
     CommentList commentList() const;
 
+    IniLineSection *section() const;
+    virtual void setSection(IniLineSection *section);
+
 private:
     std::string _content;
     LineType _lineType;
     CommentList _commentList;
+    IniLineSection *_section;
 };
 
-using IniLineList = std::list<IniLineBase*>;
+using IniLineList = std::list<IniLineBase::Ptr>;
+
+using IniLineVector = std::vector<IniLineBase::Ptr>;
 
 
 class IniLineComment: public IniLineBase
 {
+public:
+    using Ptr = std::shared_ptr<IniLineComment>;
+
 public:
     explicit IniLineComment();
 
@@ -68,7 +85,11 @@ private:
 class IniLineParameter: public IniLineBase
 {
 public:
-    explicit IniLineParameter(const CommentList &commentList);
+    using Ptr = std::shared_ptr<IniLineParameter>;
+
+public:
+    explicit IniLineParameter(const CommentList &commentList,
+                              const IniLineSectionPtr &section);
 
     bool parse(const std::string &line = std::string()) override;
 
@@ -80,17 +101,21 @@ public:
 
     std::string toString() override;
 
+    void setSection(IniLineSection *section) override;
 private:
     std::string _name;
     std::string _value;
 };
 
-using IniLineParameterHash = std::map<std::string, IniLineParameter*>;
+using IniLineParameterHash = std::map<std::string, IniLineParameter::Ptr>;
 
-using IniLineParameterList = std::list<IniLineParameter*>;
+using IniLineParameterList = std::list<IniLineParameter::Ptr>;
 
 class IniLineSection: public IniLineBase
 {
+public:
+    using Ptr = std::shared_ptr<IniLineSection>;
+
 public:
     explicit IniLineSection(const CommentList &commentList);
 
@@ -102,13 +127,15 @@ public:
 
     std::string toString() override;
 
-    void append(IniLineParameter* parameter);
+    void append(IniLineParameter::Ptr parameter);
 
-    IniLineParameter* parameterByName(const std::string &parameterName);
+    IniLineParameter::Ptr parameterByName(const std::string &parameterName);
 
     int parameterCount() const;
 
-    IniLineParameter* parameterByIndex(const int index) const;
+    IniLineParameter::Ptr parameterByIndex(const int index) const;
+
+    void parameterDelete(const std::string &parameterName);
 
 private:
     std::string _name;
@@ -117,12 +144,15 @@ private:
     IniLineParameterList _parameterList;
 };
 
-using IniLineSectionHash = std::map<std::string, IniLineSection*>;
+using IniLineSectionHash = std::map<std::string, IniLineSection::Ptr>;
 
-using IniLineSectionList = std::list<IniLineSection*>;
+using IniLineSectionList = std::list<IniLineSection::Ptr>;
 
 class IniFile
 {
+public:
+    using Ptr = std::shared_ptr<IniFile>;
+
 public:
     explicit IniFile();
     virtual ~IniFile();
@@ -170,9 +200,16 @@ public:
     StdStringList comments(const std::string &sectionName,
                            const std::string &parameterName);
 
-    void setValue(const std::string &sectionName,
+    bool setValue(const std::string &sectionName,
                   const std::string &parameterName,
                   const std::string &value);
+
+    const IniLineVector lines();
+
+    void sectionParameterDelete(const std::string &sectionName,
+                                const std::string &parameterName);
+
+    void sectionDelete(const std::string &sectionName);
 
 private:
     void applyChangesToContent();

@@ -50,10 +50,12 @@ include_directories(${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/t
 add_subdirectory(sources/libraries/threader.std)
 
 if (QT_ENABLE)
+    message("Build with Qt support")
     add_subdirectory(sources/libraries/threader.qt)
 endif()
 
 if (SSL_ENABLE)
+    message("Build with SSL support")
     add_subdirectory(sources/libraries/threader.ssl)
 endif()
 

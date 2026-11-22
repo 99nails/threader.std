@@ -324,3 +324,24 @@ target_compile_features(example14-commandline PUBLIC cxx_std_17)
 target_link_libraries(example14-commandline
     threader-std)
 
+
+#example15-inifile
+add_executable(example15-inifile
+    example15-inifile/MainExample15-IniFile.cpp
+    example15-inifile/MainWindowIniFile.h example15-inifile/MainWindowIniFile.cpp
+    example15-inifile/MainWindowIniFile.ui
+    example15-inifile/ModelIniFile.h example15-inifile/ModelIniFile.cpp
+)
+
+target_include_directories(example15-inifile PUBLIC
+    ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/threads
+    ${CMAKE_SOURCE_DIR}/sources/libraries/threader.std/include/utils
+)
+
+target_compile_features(example15-inifile PUBLIC cxx_std_17)
+
+target_link_libraries(example15-inifile PRIVATE
+    threader-std
+    Qt5::Core
+    Qt5::Widgets
+)
