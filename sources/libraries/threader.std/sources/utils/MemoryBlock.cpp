@@ -41,7 +41,7 @@ MemoryBlock::MemoryBlock(MemoryBlock &other)
 
 MemoryBlock::~MemoryBlock()
 {
-    clear();
+    clear(true);
 }
 
 size_t MemoryBlock::capacity() const

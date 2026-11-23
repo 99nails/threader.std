@@ -155,7 +155,11 @@ void UdevEnumerator::initializeContext()
 
 void UdevEnumerator::releaseContext()
 {
-    udev_unref(_context);
+    if (_context != nullptr)
+    {
+        udev_unref(_context);
+        _context = nullptr;
+    }
 }
 
 void UdevEnumerator::collectSubsystemNames()

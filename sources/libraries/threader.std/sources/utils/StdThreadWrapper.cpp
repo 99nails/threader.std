@@ -51,7 +51,6 @@ void StdThreadWrapper::startThread()
         return;
 
     auto threadFunction = [this](){
-        setIsRunning(true);
 
         execute();
 
@@ -60,6 +59,8 @@ void StdThreadWrapper::startThread()
 
     _thread = new std::thread(threadFunction);
     _thread->detach();
+
+    setIsRunning(true);
 }
 
 void StdThreadWrapper::terminateThread()

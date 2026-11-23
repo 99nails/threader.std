@@ -64,6 +64,7 @@ add_subdirectory(examples)
 include(Common.cmake)
 
 add_custom_target(doc-files SOURCES
+    KNOWN_BUGS.md
     README.md
     TODO.md
     )
@@ -87,4 +88,12 @@ add_custom_target(install-files SOURCES
     install/threader.ssl/preinst
 #    bin/config/config.template.ini
     )
+
+option(TESTS_ENABLE "Build unit tests" OFF)
+
+if(TESTS_ENABLE)
+    message("Build with tests support")
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 

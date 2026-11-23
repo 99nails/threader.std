@@ -1,7 +1,5 @@
 #include "IniFile.h"
 
-#include "FileUtils.h"
-
 #include <regex>
 #include <iostream>
 #include <fstream>
@@ -541,7 +539,6 @@ void IniFile::parseContent()
 
     std::list<IniLineComment::Ptr> commentList;
 
-    // for (int i = 0; i < _content.size(); i++)
     for (const auto &contentLine : _content)
     {
         IniLineBase::Ptr line = nullptr;

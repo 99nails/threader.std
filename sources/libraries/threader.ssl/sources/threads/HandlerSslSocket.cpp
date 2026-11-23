@@ -69,14 +69,6 @@ LuV07YZafuosoKnufUwean0=
 -----END PRIVATE KEY-----
 )STRING";
 
-SSL_CTX* HandlerSslSocket::_SSLClientContext = nullptr;
-SSL_CTX* HandlerSslSocket::_SSLServerContext = nullptr;
-
-int HandlerSslSocket::_clientContextRefCount = 0;
-int HandlerSslSocket::_serverContextRefCount = 0;
-
-bool HandlerSslSocket::_useExtrenalCerts(false);
-
 HandlerSslSocket::HandlerSslSocket(HandlerDataConsumer *consumer,
                                    const std::string &host,
                                    const uint16_t &port,
@@ -86,27 +78,25 @@ HandlerSslSocket::HandlerSslSocket(HandlerDataConsumer *consumer,
                                    const std::string &primaryKeyFilename,
                                    const bool useExternalCertificates)
     : HandlerTcpSocket(consumer, host, port, descriptor)
-    , _SSLInstance(nullptr)
+
+    , _sslContext(nullptr)
+    , _sslInstance(nullptr)
+
+    , _verifyCertificate(verifyCertificate)
+    , _useExtrenalCertificates(useExternalCertificates)
     , _certificateFilename(certificateFilename)
     , _privateKeyFilename(primaryKeyFilename)
 #ifdef WIN32
     , _acceptInProcess(false)
-    , _acceptCounter(0)
 #endif
+    , _acceptCounter(0)
 {
-    _useExtrenalCerts = useExternalCertificates;
-    _verifyCertificate = verifyCertificate;
-    _certificateFilename = certificateFilename;
+    sslInitialize();
 
     if (INVALID_DESCRIPTOR == this->descriptor())
         setConnectionState(ConnectionState::Disconnected);
     else
         setConnectionState(ConnectionState::Connecting);
-
-    if (TcpSocketType::Client == socketType())
-        ++_clientContextRefCount;
-    else
-        ++_serverContextRefCount;
 }
 
 HandlerSslSocket::~HandlerSslSocket()
@@ -114,25 +104,7 @@ HandlerSslSocket::~HandlerSslSocket()
     if (ConnectionState::Disconnected != connectionState())
         close();
 
-    if (_SSLInstance)
-        SSL_free(_SSLInstance);
-
-    if (TcpSocketType::Server == socketType())
-    {
-        if (0 == --_serverContextRefCount)
-        {
-            SSL_CTX_free(getServerContext());
-            _SSLServerContext = nullptr;
-        }
-    }
-    else
-    {
-        if (0 == --_clientContextRefCount)
-        {
-            SSL_CTX_free(getClientContext());
-            _SSLClientContext = nullptr;
-        }
-    }
+    sslFinalize();
 }
 
 #ifdef WIN32
@@ -362,8 +334,8 @@ Descriptor HandlerSslSocket::openTcpClientSocket(const std::string &ipAddress,
             return INVALID_DESCRIPTOR;
         }
 
-        SSL_CTX_load_verify_locations(getClientContext(), _certificateFilename.c_str(), nullptr);
-        SSL_CTX_set_verify(getClientContext(), SSL_VERIFY_NONE, nullptr);
+        SSL_CTX_load_verify_locations(_sslContext, _certificateFilename.c_str(), nullptr);
+        SSL_CTX_set_verify(_sslContext, SSL_VERIFY_PEER, nullptr);
     }
 
     auto lRet = connect();
@@ -458,8 +430,7 @@ bool HandlerSslSocket::process(const pollfd &event)
 {
     auto d = descriptor();
 
-    if (ConnectionState::Disconnected == connectionState()
-        || INVALID_DESCRIPTOR == d)
+    if (ConnectionState::Disconnected == connectionState() || INVALID_DESCRIPTOR == d)
         return false;
 
     if (event.fd != d)
@@ -470,6 +441,37 @@ bool HandlerSslSocket::process(const pollfd &event)
     if (event.revents & (POLLERR | POLLNVAL))
     {
         doError(SocketUtils::lastError());
+        return false;
+    }
+
+    // шаг TLS-хендшейка сервера: пришли данные от клиента (ClientHello
+    // или очередные раунды обмена ключами)
+    if (connectionState() == ConnectionState::Connecting &&
+        socketType() == TcpSocketType::Server &&
+        (event.revents & POLLIN))
+    {
+        int ret = accept();
+        if (ret == 1)
+        {
+            setConnectionState(ConnectionState::Connected);
+            return true;
+        }
+
+        auto sslError = SSL_get_error(_sslInstance, ret);
+        if (sslError == SSL_ERROR_WANT_READ || sslError == SSL_ERROR_WANT_WRITE)
+        {
+            // хендшейк не завершён: клиент ещё шлёт данные, ждём следующий
+            // POLLIN. Лимит попыток — защита от зацикливания/атаки
+            // «вечно недокрученный хендшейк» (референс: processAccept)
+            if (++_acceptCounter > PROCESS_ACCEPT_COUT)
+            {
+                doError(ETIMEDOUT);
+                return false;
+            }
+            return true;
+        }
+
+        doError(sslError);  // реальная ошибка TLS — рвём соединение
         return false;
     }
 
@@ -511,7 +513,7 @@ bool HandlerSslSocket::process(const pollfd &event)
                             return false;
                         }
 
-                        if (!SSLInstance())
+                        if (!_sslInstance)
                         {
                             doError(SocketUtils::lastError());
                             return false;
@@ -531,11 +533,11 @@ bool HandlerSslSocket::process(const pollfd &event)
                                 return false;
                             }
                             //                            SSL_CTX_load_verify_file(getClientContext(), _caCertificateFileName.c_str());
-                            SSL_CTX_load_verify_locations(getClientContext(),
+                            SSL_CTX_load_verify_locations(_sslContext,
                                                           _certificateFilename.c_str(),
                                                           nullptr);
 
-                            SSL_CTX_set_verify(getClientContext(), SSL_VERIFY_NONE, nullptr);
+                            SSL_CTX_set_verify(_sslContext, SSL_VERIFY_PEER, nullptr);
                         }
 
                         if (!connect())
@@ -552,7 +554,7 @@ bool HandlerSslSocket::process(const pollfd &event)
 
                         if (_verifyCertificate)
                         {
-                            auto verificationResult = SSL_get_verify_result(SSLInstance());
+                            auto verificationResult = SSL_get_verify_result(_sslInstance);
                             std::string verStr(X509_verify_cert_error_string(verificationResult));
 
                             if (verificationResult != X509_V_OK)
@@ -589,62 +591,52 @@ bool HandlerSslSocket::process(const pollfd &event)
 
 void HandlerSslSocket::assign(pollfd &event)
 {
-    auto cs = connectionState();
-    /*
-     * In Server mode we get here after accept(). Create instance (context creating
-     * routine is included in createInstance() as it is implemented as single-tone),
-     * do other SSL-related stuff, and perfrorm TLS-handshake.
-     *
-     */
-    if ((socketType() == TcpSocketType::Server) && (cs == ConnectionState::Connecting))
+    auto connectionStateLocal = connectionState();
+    if ((socketType() == TcpSocketType::Server) &&
+        (connectionStateLocal == ConnectionState::Connecting))
     {
-        if (SocketUtils::setBlockingMode(descriptor(), true))
+        // BUG-11: блокирующий SSL_accept здесь больше не выполняется.
+        // Хендшейк становится асинхронным: шаг выполняет process()
+        // по событию POLLIN, WANT_READ/WANT_WRITE — норма ожидания.
+        if (!_sslInstance || !setInstanceDescriptor())
         {
-            if (SSLInstance())
-            {
-                if (setInstanceDescriptor())
-                {
-                    if (accept())
-                        setConnectionState(ConnectionState::Connected);
-                    else
-                    {
-                        // TODO: Close client socket and return error here?
-                        doError(SocketUtils::lastError());
-                    }
-                }
-                else
-                {
-                    // TODO: Close client socket and return error here?
-                    doError(SocketUtils::lastError());
-                }
-            }
-            else
-            {
-                // TODO: Close client socket and return error here?
-                doError(SocketUtils::lastError());
-            }
+            doError(SocketUtils::lastError());
+            setConnectionState(ConnectionState::Disconnected);
+        }
+        else if (!SocketUtils::setBlockingMode(descriptor(), false))
+        {
+            doError(SocketUtils::lastError());
+            setConnectionState(ConnectionState::Disconnected);
         }
         else
         {
-            // TODO: Close client socket and return error here?
-            doError(SocketUtils::lastError());
-        }
-
-        if (!SocketUtils::setBlockingMode(descriptor(), false))
-        {
-            doError(SocketUtils::lastError());
+            // первая попытка без ожидания: если ClientHello уже в буфере,
+            // хендшейк завершится прямо здесь; иначе WANT_READ — норма
+            int ret = accept();
+            if (ret == 1)
+                setConnectionState(ConnectionState::Connected);
+            else if (auto sslError = SSL_get_error(_sslInstance, ret);
+                     sslError != SSL_ERROR_WANT_READ &&
+                     sslError != SSL_ERROR_WANT_WRITE)
+            {
+                doError(sslError);
+                setConnectionState(ConnectionState::Disconnected);
+            }
         }
     }
 
-    // Если соединение в состоянии "отсоединён", то не добавляем этот дескриптор:
-    if (cs == ConnectionState::Disconnected)
+    if (connectionStateLocal == ConnectionState::Disconnected)
         return;
 
     event.fd = descriptor();
     event.revents = 0;
     event.events = POLLIN | POLLERR | POLLHUP | POLLNVAL | POLLRDHUP;
-    // Если состояние "в процессе соединения", добавляем событие POLLOUT:
-    if (needsToWrite() || ConnectionState::Connecting == cs)
+
+    // POLLOUT нужен только клиенту (ожидание завершения TCP-connect).
+    // Серверу в Connecting POLLOUT не даём: подключённый сокет всегда
+    // готов к записи — poll зациклится на 100% CPU.
+    if ((connectionStateLocal == ConnectionState::Connecting &&
+         socketType() == TcpSocketType::Client) || needsToWrite())
         event.events |= POLLOUT;
 }
 
@@ -652,31 +644,13 @@ void HandlerSslSocket::assign(pollfd &event)
 
 void HandlerSslSocket::close()
 {
-    if (_SSLInstance)
-        SSL_shutdown(_SSLInstance);
-
-    if (_SSLInstance)
-    {
-        SSL_free(_SSLInstance);
-        _SSLInstance = nullptr;
-    }
-
-    if (TcpSocketType::Client == socketType() && _SSLClientContext)
-    {
-        if (0 == --_clientContextRefCount)
-        {
-            SSL_CTX_free(getClientContext());
-            _SSLClientContext = nullptr;
-        }
-    }
-
     HandlerTcpSocket::close();
 }
 
 int HandlerSslSocket::read(void *data, int count)
 {
     if (ConnectionState::Connected == connectionState())
-        return int(::SSL_read(SSLInstance(), data, count));
+        return int(::SSL_read(_sslInstance, data, count));
 
     return 0;
 }
@@ -684,182 +658,40 @@ int HandlerSslSocket::read(void *data, int count)
 int HandlerSslSocket::write(const void *data, int count)
 {
     if (ConnectionState::Connected == connectionState())
-        return int(::SSL_write(SSLInstance(), data, count));
+        return int(::SSL_write(_sslInstance, data, count));
 
     return 0;
 }
 
 std::string HandlerSslSocket::getCipherVersion()
 {
-    return SSL_CIPHER_get_version(SSL_get_current_cipher(SSLInstance()));
+    return SSL_CIPHER_get_version(SSL_get_current_cipher(_sslInstance));
 }
 
 std::string HandlerSslSocket::getCipherName()
 {
-    return SSL_get_cipher_name(SSLInstance());
-}
-
-SSL_CTX *HandlerSslSocket::getClientContext()
-{
-    if (!_SSLClientContext)
-    {
-        SSL_library_init();
-
-        OpenSSL_add_all_algorithms();
-
-        SSL_load_error_strings();
-        ERR_load_crypto_strings();
-        // ERR_load_ERR_strings();
-        _SSLClientContext = SSL_CTX_new(TLS_client_method());
-
-    }
-    if (!_SSLClientContext)
-    {
-        // TODO: Deal with fatal error:
-        return nullptr;
-    }
-
-    return _SSLClientContext;
-}
-
-SSL_CTX *HandlerSslSocket::getServerContext()
-{
-    if (!_SSLServerContext)
-    {
-        /* SSL_library_init() always returns 1 - it's safe to discard return value. */
-        SSL_library_init();
-
-        /* Although the functions do not return error codes it is possible for them  to fail.
-         * This will only happen as a result of a memory allocation failure so this is not
-         * too much of a problem in practice. */
-        OpenSSL_add_all_algorithms();
-
-        /* ERR_load_crypto_strings(), SSL_load_error_strings() and ERR_free_strings() return no values. */
-        SSL_load_error_strings();
-        ERR_load_crypto_strings();
-        // ERR_load_ERR_strings();
-        _SSLServerContext = SSL_CTX_new(TLS_server_method());
-
-        if (_SSLServerContext)
-        {
-            // проверка существования файлов внешних сертификатов
-            if (_useExtrenalCerts)
-            {
-                _useExtrenalCerts = FileUtils::isRegularFileExists(_certificateFilename)
-                                    && FileUtils::isRegularFileExists(_privateKeyFilename);
-            }
-
-            // если использовать встроенные сертификаты
-            if (!_useExtrenalCerts)
-            {
-                // фрмирование файлов встроенных сертификатов
-                _certificateFilename = FileUtils::pathtoTemp() + "certifaceXXXX.pem";
-                _privateKeyFilename = FileUtils::pathtoTemp() + "primaryKeyXXXX.pem";
-
-                auto isWritten = FileUtils::fileReplaceContent(_certificateFilename, CERRTIFICATE)
-                                 && FileUtils::fileReplaceContent(_privateKeyFilename, PRIVATE_KEY);
-
-                if (!isWritten)
-                {
-                    FileUtils::fileDelete(_certificateFilename);
-                    FileUtils::fileDelete(_privateKeyFilename);
-                    return nullptr;
-                }
-            }
-
-            auto certificateResult = SSL_CTX_use_certificate_file(_SSLServerContext, _certificateFilename.c_str(), SSL_FILETYPE_PEM);
-            auto privateKeyResult = SSL_CTX_use_PrivateKey_file(_SSLServerContext, _privateKeyFilename.c_str(), SSL_FILETYPE_PEM);
-
-            if (!_useExtrenalCerts)
-            {
-                FileUtils::fileDelete(_certificateFilename);
-                FileUtils::fileDelete(_privateKeyFilename);
-            }
-
-            if (certificateResult != 1 || privateKeyResult != 1)
-                return nullptr;
-
-            // QString filePath;
-            // auto tempPath = QDir::tempPath() + "/";
-            // if(_useExtrenalCerts)
-            // {
-            //     filePath = QDir::toNativeSeparators("../certificates/cert.pem");
-            //     if(!QFile::exists(filePath))
-            //         return nullptr;
-            // }
-            // else
-            // {
-            //     filePath = QDir::toNativeSeparators(tempPath + "cert.pem");
-            //     QFile::copy(":/cert.pem",  filePath);
-            // }
-            // auto ret_val = SSL_CTX_use_certificate_file(_SSLServerContext, filePath.toLocal8Bit().constData(), SSL_FILETYPE_PEM);
-
-            // if(!_useExtrenalCerts)
-            //     QFile::remove(filePath);
-            // if(ret_val != 1)
-            //     return nullptr;
-
-            // if(_useExtrenalCerts)
-            // {
-            //     filePath = QDir::toNativeSeparators("../certificates/key.pem");
-            //     if(!QFile::exists(filePath))
-            //         return nullptr;
-            // }
-            // else
-            // {
-            //     filePath = QDir::toNativeSeparators(tempPath + "key.pem");
-            //     QFile::copy(":/key.pem",  filePath);
-            // }
-
-
-            // ret_val = SSL_CTX_use_PrivateKey_file(_SSLServerContext, filePath.toLocal8Bit().constData(), SSL_FILETYPE_PEM);
-            // if(!_useExtrenalCerts)
-            //     QFile::remove(filePath);
-            // if(ret_val != 1)
-            //     return nullptr;
-        }
-    }
-
-    if (!_SSLServerContext)
-        // TODO: Deal with fatal error:
-        return nullptr;
-
-    return _SSLServerContext;
-}
-
-bool HandlerSslSocket::createInstance()
-{
-    SSL_CTX *context;
-
-    if (TcpSocketType::Server == socketType())
-        context = getServerContext();
-    else
-        context = getClientContext();
-
-    _SSLInstance = SSL_new(context);
-
-    return nullptr != _SSLInstance;
+    return SSL_get_cipher_name(_sslInstance);
 }
 
 bool HandlerSslSocket::setInstanceDescriptor()
 {
 #ifdef linux
-    return 1 == SSL_set_fd(SSLInstance(), descriptor()) ? true : false;
+    return 1 == SSL_set_fd(_sslInstance, descriptor()) ? true : false;
 #endif
 #ifdef WIN32
-    return 1 == SSL_set_fd(SSLInstance(), int(SOCKET(descriptor()))) ? true : false;
+    return 1 == SSL_set_fd(_sslInstance, int(SOCKET(descriptor()))) ? true : false;
 #endif
     return false;
 }
 
 int HandlerSslSocket::connect()
 {
-    return SSL_connect(SSLInstance());
+    return SSL_connect(_sslInstance);
 }
 
 int HandlerSslSocket::accept()
 {
-    return SSL_accept(SSLInstance());
+    return SSL_accept(_sslInstance);
 }
 
 #ifdef linux
@@ -958,16 +790,120 @@ Descriptor HandlerSslSocket::openTcpClientSocket(const std::string &ipAddress, c
 
 #endif
 
-SSL *HandlerSslSocket::SSLInstance()
+void HandlerSslSocket::sslInitialize()
 {
-    if (!_SSLInstance)
-        if (!createInstance())
+    static bool initialized = false;
+    if (!initialized)
+    {
+        static std::once_flag once;
+        std::call_once(once, []() {
+            OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS
+                                 | OPENSSL_INIT_ADD_ALL_CIPHERS | OPENSSL_INIT_ADD_ALL_DIGESTS,
+                             nullptr);
+            OpenSSL_add_all_algorithms();
+            SSL_load_error_strings();
+            ERR_load_crypto_strings();
+        });
+        initialized = true;
+    }
+
+    switch (socketType())
+    {
+    case TcpSocketType::Server:
+    {
+        _sslContext = SSL_CTX_new(TLS_server_method());
+
+        if (!_sslContext)
+            break;
+
+        // проверка существования файлов внешних сертификатов
+        if (_useExtrenalCertificates)
         {
-            // TODO: Close client socket and return error here?
-            doError(SocketUtils::lastError());
+            _useExtrenalCertificates = FileUtils::isRegularFileExists(_certificateFilename)
+                                       && FileUtils::isRegularFileExists(_privateKeyFilename);
         }
 
-    return _SSLInstance;
+
+        // если использовать встроенные сертификаты
+        if (!_useExtrenalCertificates)
+        {
+            // формирование файлов встроенных сертификатов
+#ifdef linux
+            char certificateFileName[] = "/tmp/certificateXXXXXX";
+            mkstemp(certificateFileName);
+
+            char privateKeyFilename[] = "/tmp/privatekeyXXXXXX";
+            mkstemp(privateKeyFilename);
+#endif
+
+            _certificateFilename = certificateFileName;
+            _privateKeyFilename = privateKeyFilename;
+
+            auto isWritten = FileUtils::fileReplaceContent(_certificateFilename, CERRTIFICATE)
+                             && FileUtils::fileReplaceContent(_privateKeyFilename, PRIVATE_KEY);
+
+            if (!isWritten)
+            {
+                FileUtils::fileDelete(_certificateFilename);
+                FileUtils::fileDelete(_privateKeyFilename);
+                break;
+            }
+        }
+
+        auto certificateResult = SSL_CTX_use_certificate_file(_sslContext, _certificateFilename.c_str(), SSL_FILETYPE_PEM);
+        auto privateKeyResult = SSL_CTX_use_PrivateKey_file(_sslContext, _privateKeyFilename.c_str(), SSL_FILETYPE_PEM);
+
+        if (!_useExtrenalCertificates)
+        {
+            FileUtils::fileDelete(_certificateFilename);
+            FileUtils::fileDelete(_privateKeyFilename);
+        }
+
+        if (certificateResult != 1 || privateKeyResult != 1)
+            break;
+
+        break;
+    }
+    case TcpSocketType::Client:
+    {
+        _sslContext = SSL_CTX_new(TLS_client_method());
+        break;
+    }
+    }
+
+    _sslInstance = SSL_new(_sslContext);
+}
+
+void HandlerSslSocket::sslFinalize()
+{
+    if (_sslInstance)
+    {
+        SSL_shutdown(_sslInstance);
+        SSL_free(_sslInstance);
+        _sslInstance = nullptr;
+    }
+
+    if (_sslContext)
+    {
+        SSL_CTX_free(_sslContext);
+        _sslContext = nullptr;
+    }
+}
+
+SSL_CTX *HandlerSslSocket::sslContext() const
+{
+    return _sslContext;
+}
+
+bool HandlerSslSocket::useExtrenalCerts() const
+{
+    return _useExtrenalCertificates;
+}
+
+
+SSL *HandlerSslSocket::sslInstance()
+{
+    return _sslInstance;
 }
 
 }

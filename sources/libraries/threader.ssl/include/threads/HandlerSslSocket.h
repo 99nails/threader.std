@@ -3,6 +3,7 @@
 #include "HandlerTcpSocket.h"
 #include "ThreadsCommon.h"
 
+#include <mutex>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -101,32 +102,16 @@ public:
      */
     bool open() override;
 
+    bool useExtrenalCerts() const;
+
+    SSL_CTX *sslContext() const;
+
 protected:
     /*!
      * \brief SSLInstance - создать или получить структуру SSL для соединения
      * \return - указатель на структуру
      */
-    SSL* SSLInstance();
-
-    /*!
-     * \brief getClientContext - создать или получить SSL_CTX объект, содержащий
-     * конфигурацию и соответствующие данные клиентского SSL соединения
-     * \return - указатель на объект
-     */
-    static SSL_CTX* getClientContext();
-
-    /*!
-     * \brief getServerContext - создать или получить SSL_CTX объект, содержащий
-     * конфигурацию и соответствующие данные серверного SSL соединения
-     * \return - указатель на объект
-     */
-    /*static */SSL_CTX* getServerContext();
-
-    /*!
-     * \brief createInstance - создать структуру SSL и SSL_CTX объект (клиентский или серверный)
-     * \return - true при успешном завершении
-     */
-    bool createInstance();
+    SSL* sslInstance();
 
     /*!
      * \brief setInstanceDescriptor - установка дескриптора сокета в качестве средства ввода-вывода
@@ -139,7 +124,7 @@ protected:
      * \brief connect - запуск установки соединения TLS/SSL с сервером
      * \return - при успешном завершении возвращает 1.
      */
-    int  connect();
+    int connect();
 
     /*!
      * \brief accept - ожидание запуска клиентом установки TLS/SSL соединения
@@ -176,19 +161,22 @@ protected:
 #endif
 
 private:
-    SSL* _SSLInstance;
-    static SSL_CTX* _SSLClientContext;
-    static SSL_CTX* _SSLServerContext;
-    static int _clientContextRefCount;
-    static int _serverContextRefCount;
-    static bool _useExtrenalCerts;
+    void sslInitialize();
+    void sslFinalize();
+
+    // контекст сеанса работы с SSL
+    SSL_CTX* _sslContext;
+    // экземпляр соединения
+    SSL* _sslInstance;
+
     bool _verifyCertificate;
+    bool _useExtrenalCertificates;
     std::string _certificateFilename;
     std::string _privateKeyFilename;
 
+    int  _acceptCounter;
 #ifdef WIN32
     bool _acceptInProcess;
-    int  _acceptCounter;
 
     void processAccept();
     void doHandlerError(const int error = -1);
