@@ -830,10 +830,12 @@ void HandlerSslSocket::sslInitialize()
             // формирование файлов встроенных сертификатов
 #ifdef linux
             char certificateFileName[] = "/tmp/certificateXXXXXX";
-            mkstemp(certificateFileName);
+            auto r = mkstemp(certificateFileName);
+            (void)r;
 
             char privateKeyFilename[] = "/tmp/privatekeyXXXXXX";
-            mkstemp(privateKeyFilename);
+            r = mkstemp(privateKeyFilename);
+            (void)r;
 #endif
 
             _certificateFilename = certificateFileName;

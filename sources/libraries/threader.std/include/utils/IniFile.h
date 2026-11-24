@@ -6,6 +6,7 @@
 #include <memory>
 #include <list>
 #include <string>
+#include <vector>
 
 using namespace Threader::Utils;
 
@@ -31,7 +32,7 @@ public:
 
 public:
     explicit IniLineBase(const CommentList &commentList,
-                         const LineType lineType = LineType::UnknownLineType);
+                         const LineType lineType);
     virtual ~IniLineBase() = default;
 
     int position() const;
@@ -79,7 +80,7 @@ public:
 
 private:
     std::string _comment;
-
+    std::string _prefix;
 };
 
 class IniLineParameter: public IniLineBase
@@ -88,8 +89,7 @@ public:
     using Ptr = std::shared_ptr<IniLineParameter>;
 
 public:
-    explicit IniLineParameter(const CommentList &commentList,
-                              const IniLineSectionPtr &section);
+    explicit IniLineParameter(const CommentList &commentList);
 
     bool parse(const std::string &line = std::string()) override;
 
@@ -131,9 +131,9 @@ public:
 
     IniLineParameter::Ptr parameterByName(const std::string &parameterName);
 
-    int parameterCount() const;
+    size_t parameterCount() const;
 
-    IniLineParameter::Ptr parameterByIndex(const int index) const;
+    IniLineParameter::Ptr parameterByIndex(const size_t index) const;
 
     void parameterDelete(const std::string &parameterName);
 
@@ -168,14 +168,14 @@ public:
     StdStringList content();
     void setContent(const StdStringList &content);
 
-    int sectionCount();
+    size_t sectionCount();
 
-    std::string sectionNameByIndex(const int index) const;
+    std::string sectionNameByIndex(const size_t index) const;
 
-    int sectionParameterCountByName(const std::string &sectionName) const;
+    size_t sectionParameterCountByName(const std::string &sectionName) const;
 
     std::string sectionParameterNameByIndex(const std::string &sectionName,
-                                            const int index) const;
+                                            const size_t index) const;
 
     template <typename ValueType>
     ValueType value(const std::string &sectionName,
